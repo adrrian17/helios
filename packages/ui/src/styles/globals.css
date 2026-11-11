@@ -40,6 +40,12 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --state-ideas: oklch(0.65 0 0);
+  --state-backlog: oklch(0.55 0 0);
+  --state-started: oklch(0.72 0.16 75);
+  --state-completed: oklch(0.55 0.19 265);
+  --state-cancelled: oklch(0.6 0 0);
+  --priority-urgent: oklch(0.63 0.2 35);
 }
 
 .dark {
@@ -74,9 +80,21 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --state-ideas: oklch(0.6 0 0);
+  --state-backlog: oklch(0.7 0 0);
+  --state-started: oklch(0.8 0.15 80);
+  --state-completed: oklch(0.68 0.16 265);
+  --state-cancelled: oklch(0.55 0 0);
+  --priority-urgent: oklch(0.7 0.18 40);
 }
 
 @theme inline {
+  --color-state-ideas: var(--state-ideas);
+  --color-state-backlog: var(--state-backlog);
+  --color-state-started: var(--state-started);
+  --color-state-completed: var(--state-completed);
+  --color-state-cancelled: var(--state-cancelled);
+  --color-priority-urgent: var(--priority-urgent);
   --font-sans: 'Inter Variable', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);

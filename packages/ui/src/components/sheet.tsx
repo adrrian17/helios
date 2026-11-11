@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
-import { cn } from "cn"
+import { cn } from "@helios/ui/lib/utils"
 
 import { Button } from "@helios/ui/components/button"
 import { XIcon } from "lucide-react"
