@@ -127,9 +127,12 @@ const priorityGlyph = (priority: Priority) => {
 /** Priority glyph with its name for screen readers, since it often stands alone on a card. */
 export const PriorityIcon = ({
   priority,
+  labelled = true,
   className,
 }: {
   priority: Priority;
+  /** False when the caller places the spoken label itself, as cards do to lead with the Identifier. */
+  labelled?: boolean;
   className?: string;
 }) => (
   <>
@@ -146,7 +149,9 @@ export const PriorityIcon = ({
     >
       {priorityGlyph(priority)}
     </svg>
-    <span className="sr-only">Priority: {priorityLabels[priority]}</span>
+    {labelled ? (
+      <span className="sr-only">Priority: {priorityLabels[priority]}</span>
+    ) : null}
   </>
 );
 

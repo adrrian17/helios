@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { MemberAvatar, PriorityIcon, StateIcon } from "@/components/issue-meta";
+import { priorityLabels } from "@/utils/domain";
 import type { IssueRow, WorkflowState } from "@/utils/domain";
 
 const SORTABLE_MOTION =
@@ -45,7 +46,8 @@ export const IssueCardBody = ({
         className
       )}
     >
-      <div className="text-muted-foreground flex h-5 items-center gap-2 text-xs">
+      <div className="text-muted-foreground flex h-5 items-center gap-1.5 text-xs max-md:pr-10">
+        <PriorityIcon priority={issue.priority} labelled={false} />
         <span className="font-mono tabular-nums">{issue.identifier}</span>
         <span className="flex-1" />
         {issue.assignee === null ? (
@@ -65,30 +67,32 @@ export const IssueCardBody = ({
       <p className="line-clamp-3 text-sm leading-snug font-medium text-pretty break-words">
         {issue.title}
       </p>
-      <div className="flex flex-wrap items-center gap-1 max-md:pr-11">
-        <span className={cn(CHIP, "px-1")}>
-          <PriorityIcon priority={issue.priority} className="size-3" />
-        </span>
-        {issue.checklist.total > 0 ? (
-          <span className={cn(CHIP, checklistDone && "text-state-completed")}>
-            <ListChecksIcon className="size-3" aria-hidden="true" />
-            <span className="tabular-nums">
-              <span className="sr-only">Checklist </span>
-              {issue.checklist.done}/{issue.checklist.total}
+      <span className="sr-only">
+        Priority: {priorityLabels[issue.priority]}
+      </span>
+      {issue.checklist.total === 0 && issue.labels.length === 0 ? null : (
+        <div className="flex flex-wrap items-center gap-1">
+          {issue.checklist.total > 0 ? (
+            <span className={cn(CHIP, checklistDone && "text-state-completed")}>
+              <ListChecksIcon className="size-3" aria-hidden="true" />
+              <span className="tabular-nums">
+                <span className="sr-only">Checklist </span>
+                {issue.checklist.done}/{issue.checklist.total}
+              </span>
             </span>
-          </span>
-        ) : null}
-        {issue.labels.map((label) => (
-          <span key={label.id} className={cn(CHIP, "max-w-32")}>
-            <span
-              aria-hidden="true"
-              className="size-2 shrink-0 rounded-full bg-(--label-color)"
-              style={{ "--label-color": label.color }}
-            />
-            <span className="truncate">{label.name}</span>
-          </span>
-        ))}
-      </div>
+          ) : null}
+          {issue.labels.map((label) => (
+            <span key={label.id} className={cn(CHIP, "max-w-32")}>
+              <span
+                aria-hidden="true"
+                className="size-2 shrink-0 rounded-full bg-(--label-color)"
+                style={{ "--label-color": label.color }}
+              />
+              <span className="truncate">{label.name}</span>
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -110,7 +114,7 @@ const MoveToMenu = ({
           variant="muted"
           size="icon-sm"
           aria-label={`Move ${issue.identifier} to`}
-          className="absolute right-0.5 bottom-0.5 md:hidden"
+          className="absolute top-0.5 right-0.5 md:hidden"
         />
       }
     >

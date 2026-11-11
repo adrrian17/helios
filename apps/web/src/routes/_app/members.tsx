@@ -206,9 +206,11 @@ const Members = () => {
                   <span className="truncate">{member.displayName}</span>
                   {self ? <Badge variant="outline">You</Badge> : null}
                 </span>
-                <span className="text-muted-foreground truncate text-xs">
-                  {member.email}
-                </span>
+                {member.displayName === member.email ? null : (
+                  <span className="text-muted-foreground truncate text-xs">
+                    {member.email}
+                  </span>
+                )}
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {member.active ? null : (

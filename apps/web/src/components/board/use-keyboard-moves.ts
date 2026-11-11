@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { flushSync } from "react-dom";
 
 import {
   changedPlacement,
@@ -44,16 +45,14 @@ export const useKeyboardMoves = ({
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
-  // A card that changes column remounts, so focus follows it once React has rendered the move.
+  // A card that changes column remounts, so focus follows it right after the synchronous render.
   const refocus = (id: string) => {
-    requestAnimationFrame(() => {
-      const link = scroller.current?.querySelector<HTMLElement>(
-        `[data-issue-id="${id}"] a`
-      );
+    const link = scroller.current?.querySelector<HTMLElement>(
+      `[data-issue-id="${id}"] a`
+    );
 
-      link?.focus();
-      link?.scrollIntoView({ block: "nearest", inline: "nearest" });
-    });
+    link?.focus();
+    link?.scrollIntoView({ block: "nearest", inline: "nearest" });
   };
 
   const putDown = () => {
@@ -83,7 +82,9 @@ export const useKeyboardMoves = ({
 
     const next = moveIssue(current, issue.id, to, toIndex);
 
-    setWorking(next);
+    flushSync(() => {
+      setWorking(next);
+    });
     refocus(issue.id);
     setNote(`${issue.identifier} is ${describePosition(next, issue.id)}.`);
   };
@@ -113,7 +114,7 @@ export const useKeyboardMoves = ({
       step(issue, current, event.key);
     } else if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
-      putDown();
+      flushSync(putDown);
       refocus(issue.id);
       setNote(
         `Dropped ${issue.identifier} ${describePosition(current, issue.id)}.`

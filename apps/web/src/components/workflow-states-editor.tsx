@@ -251,30 +251,38 @@ const StateRow = ({
       ) : (
         <>
           <span className="min-w-0 flex-1 truncate text-sm">{state.name}</span>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Move ${state.name} up`}
-            disabled={above.length === 0 || move.isPending}
-            onClick={() => {
-              move.mutate({ id: state.id, afterId: above.at(-2)?.id ?? null });
-            }}
-          >
-            <ArrowUpIcon />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            aria-label={`Move ${state.name} down`}
-            disabled={below === undefined || move.isPending}
-            onClick={() => {
-              if (below !== undefined) {
-                move.mutate({ id: state.id, afterId: below.id });
-              }
-            }}
-          >
-            <ArrowDownIcon />
-          </Button>
+          {/* A lone state in its category has nowhere to move. */}
+          {above.length === 0 && below === undefined ? null : (
+            <>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Move ${state.name} up`}
+                disabled={above.length === 0 || move.isPending}
+                onClick={() => {
+                  move.mutate({
+                    id: state.id,
+                    afterId: above.at(-2)?.id ?? null,
+                  });
+                }}
+              >
+                <ArrowUpIcon />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={`Move ${state.name} down`}
+                disabled={below === undefined || move.isPending}
+                onClick={() => {
+                  if (below !== undefined) {
+                    move.mutate({ id: state.id, afterId: below.id });
+                  }
+                }}
+              >
+                <ArrowDownIcon />
+              </Button>
+            </>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger
               render={

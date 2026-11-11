@@ -69,13 +69,14 @@ const GeneralForm = ({ project }: { project: Project }) => {
         </Field>
         <Field>
           <FieldLabel htmlFor="project-prefix">Identifier prefix</FieldLabel>
-          <Input
-            id="project-prefix"
-            readOnly
-            aria-describedby="project-prefix-help"
-            className="w-28"
-            value={project.prefix}
-          />
+          <div className="max-w-28">
+            <Input
+              id="project-prefix"
+              readOnly
+              aria-describedby="project-prefix-help"
+              value={project.prefix}
+            />
+          </div>
           <FieldDescription id="project-prefix-help">
             Fixed after creation, so Identifiers like{" "}
             <span className="font-mono">{project.prefix}-1</span> people have
@@ -168,7 +169,12 @@ const SettingsRoute = () => {
 
   return (
     <SettingsPage>
-      <h2 className="sr-only">Project settings</h2>
+      <div className="flex flex-col gap-1">
+        <h2 className="text-xl font-semibold tracking-tight">Settings</h2>
+        <p className="text-muted-foreground text-sm">
+          Name, Workflow States and archiving for {project.name}.
+        </p>
+      </div>
       <SettingsSection title="General">
         <GeneralForm project={project} />
       </SettingsSection>
