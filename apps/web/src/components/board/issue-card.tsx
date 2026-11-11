@@ -11,13 +11,15 @@ import {
 } from "@helios/ui/components/dropdown-menu";
 import { cn } from "@helios/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import {
-  ArrowRightLeftIcon,
-  ListChecksIcon,
-  UserRoundIcon,
-} from "lucide-react";
+import { ArrowRightLeftIcon, ListChecksIcon } from "lucide-react";
 
-import { MemberAvatar, PriorityIcon, StateIcon } from "@/components/issue-meta";
+import {
+  LabelDot,
+  MemberAvatar,
+  PriorityIcon,
+  StateIcon,
+  UnassignedAvatar,
+} from "@/components/issue-meta";
 import { priorityLabels } from "@/utils/domain";
 import type { IssueRow, WorkflowState } from "@/utils/domain";
 
@@ -51,10 +53,10 @@ export const IssueCardBody = ({
         <span className="font-mono tabular-nums">{issue.identifier}</span>
         <span className="flex-1" />
         {issue.assignee === null ? (
-          <span className="grid size-5 place-items-center rounded-full border border-dashed">
-            <UserRoundIcon className="size-3" aria-hidden="true" />
+          <>
+            <UnassignedAvatar />
             <span className="sr-only">Unassigned</span>
-          </span>
+          </>
         ) : (
           <>
             <MemberAvatar member={issue.assignee} />
@@ -83,11 +85,7 @@ export const IssueCardBody = ({
           ) : null}
           {issue.labels.map((label) => (
             <span key={label.id} className={cn(CHIP, "max-w-32")}>
-              <span
-                aria-hidden="true"
-                className="size-2 shrink-0 rounded-full bg-(--label-color)"
-                style={{ "--label-color": label.color }}
-              />
+              <LabelDot color={label.color} />
               <span className="truncate">{label.name}</span>
             </span>
           ))}

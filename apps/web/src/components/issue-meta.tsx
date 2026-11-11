@@ -1,8 +1,10 @@
 import { Avatar, AvatarFallback } from "@helios/ui/components/avatar";
 import { cn } from "@helios/ui/lib/utils";
+import { UserRoundIcon } from "lucide-react";
 
 import { priorityLabels } from "@/utils/domain";
 import type { MemberSummary, Priority, StateCategory } from "@/utils/domain";
+import { formatDateTime, formatRelative } from "@/utils/format";
 
 const ICON = "size-3.5 shrink-0";
 const CIRCLE = { cx: 7, cy: 7, r: 6, fill: "none", strokeWidth: 1.5 } as const;
@@ -192,4 +194,48 @@ export const MemberAvatar = ({
       {initialsOf(member.displayName)}
     </AvatarFallback>
   </Avatar>
+);
+
+/** The empty-assignee placeholder, the same size as a `MemberAvatar`. */
+export const UnassignedAvatar = ({ className }: { className?: string }) => (
+  <span
+    aria-hidden="true"
+    className={cn(
+      "text-muted-foreground grid size-5 shrink-0 place-items-center rounded-full border border-dashed",
+      className
+    )}
+  >
+    <UserRoundIcon className="size-3" />
+  </span>
+);
+
+export const LabelDot = ({
+  color,
+  className,
+}: {
+  color: string;
+  className?: string;
+}) => (
+  <span
+    aria-hidden="true"
+    className={cn("size-2 shrink-0 rounded-full bg-(--label-color)", className)}
+    style={{ "--label-color": color }}
+  />
+);
+
+/** A relative time ("3 h ago") with the exact time on hover and for assistive tech. */
+export const RelativeTime = ({
+  date,
+  className,
+}: {
+  date: Date;
+  className?: string;
+}) => (
+  <time
+    dateTime={date.toISOString()}
+    title={formatDateTime(date)}
+    className={className}
+  >
+    {formatRelative(date)}
+  </time>
 );
