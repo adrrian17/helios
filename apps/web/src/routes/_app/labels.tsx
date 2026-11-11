@@ -156,7 +156,10 @@ const CreateLabelForm = ({ count }: { count: number }) => {
             value={name}
             onChange={(event) => {
               setName(event.target.value);
-              create.reset();
+
+              if (create.isError) {
+                create.reset();
+              }
             }}
           />
           {error === undefined ? null : <FieldError>{error}</FieldError>}
@@ -222,7 +225,10 @@ const RenameForm = ({
           value={name}
           onChange={(event) => {
             setDraft(event.target.value);
-            rename.reset();
+
+            if (rename.isError) {
+              rename.reset();
+            }
           }}
           onKeyDown={(event) => {
             if (event.key === "Escape") {

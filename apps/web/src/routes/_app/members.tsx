@@ -86,7 +86,11 @@ const InviteForm = () => {
             value={email}
             onChange={(event) => {
               setEmail(event.target.value);
-              invite.reset();
+
+              // Clears a shown error only; resetting a pending request would re-enable the button.
+              if (invite.isError) {
+                invite.reset();
+              }
             }}
           />
           <Button
