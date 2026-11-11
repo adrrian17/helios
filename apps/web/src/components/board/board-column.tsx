@@ -104,6 +104,7 @@ export const BoardColumnView = ({
   onMove,
   pickedId,
   onCardKeyDown,
+  filtered,
 }: {
   column: BoardColumn;
   projectId: string;
@@ -111,6 +112,7 @@ export const BoardColumnView = ({
   onMove: (issueId: string, stateId: string) => void;
   pickedId: string | null;
   onCardKeyDown: (issue: IssueRow, event: React.KeyboardEvent) => void;
+  filtered: boolean;
 }) => {
   const { state, issues } = column;
   const { setNodeRef, isOver } = useDroppable({ id: state.id });
@@ -177,7 +179,7 @@ export const BoardColumnView = ({
             ))}
             {issues.length === 0 && !composing ? (
               <li className="text-muted-foreground grid h-12 place-items-center rounded-lg border border-dashed text-xs">
-                No Issues
+                {filtered ? "No matching Issues" : "No Issues"}
               </li>
             ) : null}
           </ul>

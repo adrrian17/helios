@@ -339,6 +339,7 @@ export const Board = ({
               onMove={moveToState}
               pickedId={keyboard.pickedId}
               onCardKeyDown={keyboard.handleCardKeyDown}
+              filtered={Object.keys(input.filters).length > 0}
             />
           ))}
         </div>

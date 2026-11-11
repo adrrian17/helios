@@ -87,6 +87,8 @@ const SignInPage = () => {
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
+                  // Back after "Use a different email", so keyboard users keep their place.
+                  autoFocus
                   type="email"
                   autoComplete="email"
                   required

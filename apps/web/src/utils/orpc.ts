@@ -20,6 +20,7 @@ declare module "@tanstack/react-query" {
 
 const MAX_RETRIES = 2;
 const CLIENT_ERROR = { min: 400, max: 499 };
+const SERVER_ERROR_MIN = 500;
 
 /** A 4xx (signed out, forbidden, not found, invalid) won't fix itself, so show it at once. */
 const isClientError = (error: Error) =>
@@ -28,11 +29,19 @@ const isClientError = (error: Error) =>
   error.status <= CLIENT_ERROR.max;
 
 /** What to show for a failed request; fetch's own "Failed to fetch" means nothing to a Member. */
-export const describeError = (error: Error) =>
+export const describeError = (error: Error) => {
   // fetch rejects with a TypeError when the server cannot be reached at all.
-  error instanceof TypeError
-    ? "Helios can’t reach its server. Check your connection, then try again."
-    : error.message;
+  if (error instanceof TypeError) {
+    return "Helios can’t reach its server. Check your connection, then try again.";
+  }
+
+  // Server faults carry developer wording; the 4xx messages are written for Members.
+  if (error instanceof ORPCError && error.status >= SERVER_ERROR_MIN) {
+    return "Something went wrong on Helios’s side. Try again.";
+  }
+
+  return error.message;
+};
 
 const createQueryClient = (): QueryClient => {
   const client: QueryClient = new QueryClient({

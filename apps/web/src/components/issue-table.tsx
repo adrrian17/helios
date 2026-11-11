@@ -275,7 +275,12 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
     <td className={cn(CELL, "text-muted-foreground max-xl:hidden")}>
       {formatDate(issue.createdAt)}
     </td>
-    <td className={cn(CELL, "text-muted-foreground max-xl:hidden")}>
+    <td
+      className={cn(
+        CELL,
+        "text-muted-foreground whitespace-nowrap max-xl:hidden"
+      )}
+    >
       <RelativeTime date={issue.updatedAt} />
     </td>
   </tr>

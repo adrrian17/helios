@@ -210,6 +210,24 @@ test.describe("issue view", () => {
     await expect(title).toHaveValue("Typed offline");
 
     await page.unroute(`${API_URL}/rpc/issues/update`);
+
+    await page.route(`${API_URL}/rpc/issues/update`, async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: JSON.stringify({
+          json: {
+            defined: false,
+            code: "INTERNAL_SERVER_ERROR",
+            status: 500,
+            message: "Internal server error",
+          },
+        }),
+      });
+    });
+    await title.press("Enter");
+    await expect(page.getByText(/went wrong on Helios’s side/u)).toBeVisible();
+    await page.unroute(`${API_URL}/rpc/issues/update`);
     await title.press("Enter");
     await expect(page.getByRole("list", { name: ACTIVITY })).toContainText(
       "renamed the Issue from Slow network to Typed offline"
