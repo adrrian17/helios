@@ -29,7 +29,9 @@
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
     "@coderabbitai/config": "1.2.0",
+    "@helios/api": "workspace:*",
     "@helios/config": "workspace:*",
+    "@orpc/client": "catalog:",
     "@oxlint/plugins": "1.93.0",
     "@playwright/test": "1.65.0",
     "@shadcn/lint": "^0.2.5",

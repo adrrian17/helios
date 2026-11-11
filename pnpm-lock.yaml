@@ -253,9 +253,15 @@ importers:
       '@coderabbitai/config':
         specifier: 1.2.0
         version: 1.2.0
+      '@helios/api':
+        specifier: workspace:*
+        version: link:packages/api
       '@helios/config':
         specifier: workspace:*
         version: link:packages/config
+      '@orpc/client':
+        specifier: 'catalog:'
+        version: 1.16.2
       '@oxlint/plugins':
         specifier: 1.93.0
         version: 1.93.0

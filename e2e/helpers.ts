@@ -1,7 +1,11 @@
+import type { AppRouterClient } from "@helios/api/routers/index";
+import { createORPCClient } from "@orpc/client";
+import { RPCLink } from "@orpc/client/fetch";
 import { expect } from "@playwright/test";
 import type { APIRequestContext, Page } from "@playwright/test";
 
 export const API_URL = "https://api.helios.localhost";
+const WEB_URL = "https://helios.localhost";
 export const adminEmail = process.env.ADMIN_EMAIL ?? "";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -107,4 +111,66 @@ export const archiveProject = async (page: Page, prefix: string) => {
   await expect(
     page.getByRole("list", { name: "Archived Projects" })
   ).toContainText(prefix);
+};
+
+/**
+ * A typed API client acting as the page's signed-in Member, through the
+ * page's own cookies; for setup the journey under test does not cover.
+ */
+export const apiAs = (page: Page): AppRouterClient =>
+  createORPCClient(
+    new RPCLink({
+      url: `${API_URL}/rpc`,
+      headers: { origin: WEB_URL },
+      fetch: async (request) => {
+        const response = await page.request.fetch(request.url, {
+          method: request.method,
+          headers: Object.fromEntries(request.headers),
+          data: await request.text(),
+        });
+
+        return new Response(await response.body(), {
+          status: response.status(),
+          headers: response.headers(),
+        });
+      },
+    })
+  );
+
+/** Creates a Project through the API; `stateId` looks up its Workflow States by name. */
+export const seedProject = async (page: Page, prefix: string) => {
+  const api = apiAs(page);
+  const { id } = await api.projects.create({ name: `Seed ${prefix}`, prefix });
+  const { states } = await api.projects.get({ prefix });
+
+  const stateId = (name: string) => {
+    const state = states.find((entry) => entry.name === name);
+
+    if (state === undefined) {
+      throw new Error(`No Workflow State named ${name}`);
+    }
+
+    return state.id;
+  };
+
+  return { id, stateId };
+};
+
+/** How far the page is wider than the viewport; above zero means it scrolls sideways. */
+export const horizontalOverflow = async (page: Page) =>
+  await page.evaluate<number>(
+    "document.documentElement.scrollWidth - document.documentElement.clientWidth"
+  );
+
+/**
+ * Assigns an Issue to the signed-in Admin through the Issue view. The API
+ * route would hand back the Admin's email, which Varlock treats as a leak.
+ */
+export const assignToAdmin = async (page: Page, identifier: string) => {
+  await page.goto(`/issue/${identifier}`);
+  await page.getByRole("button", { name: "Assignee: Unassigned" }).click();
+  await page.getByRole("option", { name: adminEmail, exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: `Assignee: ${adminEmail}` })
+  ).toBeVisible();
 };
