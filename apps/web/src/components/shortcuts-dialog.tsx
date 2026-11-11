@@ -16,6 +16,45 @@ const byScope = Object.groupBy(
 
 const scopes = ["Anywhere", "Issue view"] as const;
 
+/** Keys on a focused Board card; the card handles them, so they are not in the registry. */
+const boardKeys = [
+  { label: "Pick up the focused Issue", keys: ["Space"] },
+  { label: "Move it within or across columns", keys: ["←", "↑", "↓", "→"] },
+  { label: "Drop it", keys: ["Space"] },
+  { label: "Put it back", keys: ["Esc"] },
+];
+
+const ShortcutRow = ({ label, keys }: { label: string; keys: string[] }) => (
+  <div className="flex items-center justify-between gap-4 py-2">
+    <dt>{label}</dt>
+    <dd>
+      <KbdGroup>
+        {keys.map((key) => (
+          <Kbd key={key}>{key}</Kbd>
+        ))}
+      </KbdGroup>
+    </dd>
+  </div>
+);
+
+const Section = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => (
+  <section aria-labelledby={`shortcuts-${title}`}>
+    <h3
+      id={`shortcuts-${title}`}
+      className="text-muted-foreground mb-1 text-xs font-medium"
+    >
+      {title}
+    </h3>
+    <dl className="divide-y">{children}</dl>
+  </section>
+);
+
 /** The `?` help: every shortcut from the registry, grouped by where it works. */
 export const ShortcutsDialog = ({
   open,
@@ -41,32 +80,21 @@ export const ShortcutsDialog = ({
       </DialogHeader>
       <div className="flex flex-col gap-4">
         {scopes.map((scope) => (
-          <section key={scope} aria-labelledby={`shortcuts-${scope}`}>
-            <h3
-              id={`shortcuts-${scope}`}
-              className="text-muted-foreground mb-1 text-xs font-medium"
-            >
-              {scope}
-            </h3>
-            <dl className="divide-y">
-              {byScope[scope]?.map(([name, shortcut]) => (
-                <div
-                  key={name}
-                  className="flex items-center justify-between gap-4 py-2"
-                >
-                  <dt>{shortcut.label}</dt>
-                  <dd>
-                    <KbdGroup>
-                      {keysOf(shortcut).map((key) => (
-                        <Kbd key={key}>{key}</Kbd>
-                      ))}
-                    </KbdGroup>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+          <Section key={scope} title={scope}>
+            {byScope[scope]?.map(([name, shortcut]) => (
+              <ShortcutRow
+                key={name}
+                label={shortcut.label}
+                keys={keysOf(shortcut)}
+              />
+            ))}
+          </Section>
         ))}
+        <Section title="Board">
+          {boardKeys.map((entry) => (
+            <ShortcutRow key={entry.label} {...entry} />
+          ))}
+        </Section>
       </div>
     </DialogContent>
   </Dialog>

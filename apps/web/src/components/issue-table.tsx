@@ -219,7 +219,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         <Link
           to="/issue/$identifier"
           params={{ identifier: issue.identifier }}
-          className="focus-visible:after:ring-ring/50 min-w-0 truncate font-medium outline-none after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-inset"
+          className="focus-visible:after:ring-ring min-w-0 truncate font-medium outline-none after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-inset"
         >
           {issue.title}
         </Link>

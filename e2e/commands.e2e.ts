@@ -159,6 +159,9 @@ test.describe("desktop keyboard", () => {
 
     const help = page.getByRole("dialog", { name: "Keyboard shortcuts" });
     await expect(help).toContainText("Change Workflow State");
+    await expect(help.getByRole("region", { name: "Board" })).toContainText(
+      "Pick up the focused Issue"
+    );
     await page.keyboard.press("Escape");
     await expect(help).toBeHidden();
   });

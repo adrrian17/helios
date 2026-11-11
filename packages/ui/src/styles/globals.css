@@ -25,7 +25,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
@@ -42,7 +42,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   --state-ideas: oklch(0.65 0 0);
   --state-backlog: oklch(0.55 0 0);
-  --state-started: oklch(0.72 0.16 75);
+  --state-started: oklch(0.64 0.15 70);
   --state-completed: oklch(0.55 0.19 265);
   --state-cancelled: oklch(0.6 0 0);
   --priority-urgent: oklch(0.63 0.2 35);

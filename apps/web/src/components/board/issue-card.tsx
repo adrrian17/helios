@@ -9,6 +9,11 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@helios/ui/components/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@helios/ui/components/tooltip";
 import { cn } from "@helios/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { ArrowRightLeftIcon, ListChecksIcon } from "lucide-react";
@@ -49,7 +54,14 @@ export const IssueCardBody = ({
       )}
     >
       <div className="text-muted-foreground flex h-5 items-center gap-1.5 text-xs max-md:pr-10">
-        <PriorityIcon priority={issue.priority} labelled={false} />
+        <Tooltip>
+          <TooltipTrigger render={<span className="flex" />}>
+            <PriorityIcon priority={issue.priority} labelled={false} />
+          </TooltipTrigger>
+          <TooltipContent>
+            Priority: {priorityLabels[issue.priority]}
+          </TooltipContent>
+        </Tooltip>
         <span className="font-mono tabular-nums">{issue.identifier}</span>
         <span className="flex-1" />
         {issue.assignee === null ? (
@@ -183,10 +195,9 @@ export const SortableIssueCard = ({
         params={{ identifier: issue.identifier }}
         {...dragAttributes}
         {...listeners}
-        aria-pressed={picked}
         onKeyDown={onKeyDown}
         className={cn(
-          "focus-visible:ring-ring/50 block touch-manipulation rounded-lg outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3",
+          "focus-visible:ring-ring block touch-manipulation rounded-lg outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3",
           isDragging && "opacity-40",
           picked && "ring-primary ring-offset-background ring-2 ring-offset-2"
         )}

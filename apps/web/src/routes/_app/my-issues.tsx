@@ -18,6 +18,7 @@ import {
 } from "@/components/issue-meta";
 import { PageHeader, PageTitle } from "@/components/page-header";
 import { ProjectMark } from "@/components/project-mark";
+import { priorityLabels } from "@/utils/domain";
 import type { IssueRow } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 
@@ -28,9 +29,13 @@ const MyIssueRow = ({ issue }: { issue: IssueRow }) => (
     <Link
       to="/issue/$identifier"
       params={{ identifier: issue.identifier }}
-      className="hover:bg-muted/50 focus-visible:ring-ring/50 flex h-10 items-center gap-3 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset max-md:h-12"
+      className="hover:bg-muted/50 focus-visible:ring-ring flex h-10 items-center gap-3 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset max-md:h-12"
     >
-      <PriorityIcon priority={issue.priority} />
+      <PriorityIcon priority={issue.priority} labelled={false} />
+      <span className="text-muted-foreground w-20 shrink-0 text-xs max-md:sr-only">
+        <span className="sr-only">Priority: </span>
+        {priorityLabels[issue.priority]}
+      </span>
       <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs tabular-nums md:w-20">
         {issue.identifier}
       </span>
