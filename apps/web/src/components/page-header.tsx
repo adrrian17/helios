@@ -1,6 +1,6 @@
 import { SidebarTrigger } from "@helios/ui/components/sidebar";
 
-import { SearchButton } from "@/components/commands";
+import { PhoneCommands } from "@/components/commands";
 
 /** The bar on top of every page; on phones it also holds the button that opens the sidebar drawer. */
 export const PageHeader = ({
@@ -14,7 +14,7 @@ export const PageHeader = ({
     <SidebarTrigger aria-label="Open navigation" className="md:hidden" />
     <div className="flex min-w-0 flex-1 items-center gap-2">{children}</div>
     <div className="flex shrink-0 items-center gap-1">
-      <SearchButton />
+      <PhoneCommands />
       {actions}
     </div>
   </header>

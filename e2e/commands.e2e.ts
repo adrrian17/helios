@@ -219,6 +219,49 @@ test.describe("phone commands", () => {
     await archiveProject(page, prefix);
   });
 
+  test("New Issue floats only over Issue lists and sits in the header elsewhere", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+
+    const issue = await apiAs(page).issues.create({
+      projectId: project.id,
+      title: "Header button here",
+    });
+
+    const height = page.viewportSize()?.height ?? 0;
+
+    const screens = {
+      [`/projects/${prefix}/board`]: "floating",
+      [`/projects/${prefix}/list`]: "floating",
+      [MY_ISSUES]: "floating",
+      [`/projects/${prefix}/settings`]: "header",
+      "/members": "header",
+      "/labels": "header",
+      "/projects/archived": "header",
+      [`/issue/${issue.identifier}`]: "header",
+    };
+
+    for (const [path, place] of Object.entries(screens)) {
+      // oxlint-disable-next-line eslint/no-await-in-loop -- each screen is a page visit.
+      await page.goto(path);
+      const button = page.getByRole("button", { name: "New Issue" });
+      // oxlint-disable-next-line eslint/no-await-in-loop -- see above.
+      await expect(button).toHaveCount(1);
+      // oxlint-disable-next-line eslint/no-await-in-loop -- see above.
+      const box = await button.boundingBox();
+      expect(
+        (box?.y ?? 0) > height / 2 ? "floating" : "header",
+        `New Issue on ${path}`
+      ).toBe(place);
+    }
+
+    await archiveProject(page, prefix);
+  });
+
   test("no main screen scrolls sideways at 360 and 390 pixels", async ({
     page,
     request,

@@ -1,5 +1,5 @@
 import { Button } from "@helios/ui/components/button";
-import { useParams } from "@tanstack/react-router";
+import { useLocation, useParams } from "@tanstack/react-router";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { createContext, use, useMemo, useState } from "react";
 
@@ -103,33 +103,63 @@ export const CommandsProvider = ({
   );
 };
 
-/** Search for the page header on phones, where there is no keyboard to press Cmd+K. */
-export const SearchButton = () => {
+/** Pages whose phone layout leaves room for the floating New Issue button. */
+const FAB_PAGE = /^\/(?:my-issues|projects\/[^/]+\/(?:board|list))$/u;
+
+const useFabPage = () =>
+  useLocation({ select: (location) => FAB_PAGE.test(location.pathname) });
+
+/**
+ * Search, and New Issue where there is no floating button, for the page
+ * header on phones, where there is no keyboard to press Cmd+K or C.
+ */
+export const PhoneCommands = () => {
   // Error and not-found pages can render outside the signed-in layout.
   const commands = use(CommandsContext);
+  const fabPage = useFabPage();
 
   if (commands === null) {
     return null;
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon-sm"
-      aria-label="Search"
-      className="md:hidden"
-      onClick={() => {
-        commands.openPalette();
-      }}
-    >
-      <SearchIcon />
-    </Button>
+    <>
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Search"
+        className="md:hidden"
+        onClick={() => {
+          commands.openPalette();
+        }}
+      >
+        <SearchIcon />
+      </Button>
+      {fabPage ? null : (
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="New Issue"
+          className="md:hidden"
+          onClick={() => {
+            commands.createIssue();
+          }}
+        >
+          <PlusIcon />
+        </Button>
+      )}
+    </>
   );
 };
 
-/** The phone's way to press C: a floating button in thumb reach. */
+/** The phone's way to press C on Issue lists: a floating button in thumb reach. */
 export const CreateIssueFab = () => {
   const { createIssue } = useCommands();
+  const fabPage = useFabPage();
+
+  if (!fabPage) {
+    return null;
+  }
 
   return (
     <Button
