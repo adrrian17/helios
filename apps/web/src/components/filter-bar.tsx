@@ -134,6 +134,7 @@ export const FilterBar = ({
           <Button
             variant="muted"
             size="sm"
+            className="max-md:min-w-11"
             onClick={() => {
               onChange({});
             }}

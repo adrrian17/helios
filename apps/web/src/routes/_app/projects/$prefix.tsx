@@ -64,7 +64,7 @@ const ProjectLayout = () => {
           ) : null
         }
       >
-        <ProjectMark project={project} className="size-5" />
+        <ProjectMark project={project} className="size-5 max-md:hidden" />
         <h1 className="min-w-0 truncate text-sm font-medium">{project.name}</h1>
         <Badge variant="outline" className="max-sm:hidden">
           <span className="font-mono">{project.prefix}</span>
