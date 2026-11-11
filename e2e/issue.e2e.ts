@@ -284,4 +284,55 @@ test.describe("phone issue view", () => {
 
     await archiveProject(page, prefix);
   });
+
+  test("a 120-character Workflow State name leaves Priority and assignee on screen and tappable at 360px", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+    const api = apiAs(page);
+
+    const { id: stateId } = await api.workflowStates.add({
+      projectId: project.id,
+      name: "Waiting on review ".repeat(7).slice(0, 120),
+      category: "started",
+    });
+
+    const issue = await api.issues.create({
+      projectId: project.id,
+      title: "Long state name",
+      stateId,
+    });
+
+    await page.setViewportSize({ width: 360, height: 780 });
+    await page.goto(`/issue/${issue.identifier}`);
+
+    await Promise.all(
+      [/^Priority:/u, /^Assignee:/u].map(async (name) => {
+        const chip = page.getByRole("button", { name });
+        await expect(chip, `${String(name)} is on screen`).toBeInViewport({
+          ratio: 1,
+        });
+        const box = await chip.boundingBox();
+
+        expect(
+          box?.width,
+          `${String(name)} is 44px wide`
+        ).toBeGreaterThanOrEqual(44);
+        expect(
+          box?.height,
+          `${String(name)} is 44px tall`
+        ).toBeGreaterThanOrEqual(44);
+      })
+    );
+
+    expect(
+      await horizontalOverflow(page),
+      "no horizontal page scroll"
+    ).toBeLessThanOrEqual(0);
+
+    await archiveProject(page, prefix);
+  });
 });

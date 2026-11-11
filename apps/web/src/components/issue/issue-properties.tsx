@@ -48,9 +48,7 @@ const Row = ({
 }) => (
   <div
     className={
-      chip
-        ? "flex min-w-0 shrink-0 last:shrink"
-        : "flex min-h-8 items-center gap-2"
+      chip ? "flex max-w-full min-w-0" : "flex min-h-8 items-center gap-2"
     }
   >
     <dt
@@ -299,10 +297,10 @@ export const IssueProperties = ({
   const { variant, width, opens, list } = chip
     ? ({
         variant: "outline",
-        // Chips shrink and truncate so all three stay on one row.
-        width: "min-w-0 max-w-full",
+        // A chip too long for the row truncates on a line of its own; the rest wrap below it.
+        width: "min-w-11 max-w-full shrink",
         opens: null,
-        list: "flex gap-1.5",
+        list: "flex flex-wrap gap-1.5",
       } as const)
     : ({
         variant: "property",
