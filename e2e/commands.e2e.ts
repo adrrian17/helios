@@ -321,14 +321,16 @@ test.describe("phone commands", () => {
   });
 });
 
-test("on a short screen the New Issue dialog scrolls to its button and keeps a dismissed title", async ({
+test("on a short screen the New Issue dialog scrolls to its button and keeps a dismissed title and Project", async ({
   page,
   request,
   isMobile,
 }) => {
   const prefix = uniquePrefix();
+  const otherPrefix = uniquePrefix();
   await signIn(page, request, adminEmail);
   await seedProject(page, prefix);
+  await seedProject(page, otherPrefix);
   await page.setViewportSize(
     isMobile ? { width: 390, height: 300 } : { width: 1280, height: 180 }
   );
@@ -345,20 +347,31 @@ test("on a short screen the New Issue dialog scrolls to its button and keeps a d
   };
 
   await open();
+  await dialog.getByLabel("Project").click();
+  await page.getByRole("option", { name: `Seed ${otherPrefix}` }).click();
   await dialog.getByLabel("Title").fill("Typed, then dismissed");
   await dialog.getByRole("button", { name: "Close" }).click();
   await expect(dialog).toBeHidden();
 
   await open();
   await expect(dialog.getByLabel("Title")).toHaveValue("Typed, then dismissed");
+  await expect(dialog.getByLabel("Project")).toContainText(
+    `Seed ${otherPrefix}`
+  );
   await dialog.getByRole("button", { name: "Create Issue" }).click();
   await expect(dialog).toBeHidden();
+  await expect(
+    page.getByText(new RegExp(`^${otherPrefix}-\\d+ created\\.$`, "u"))
+  ).toBeVisible();
 
   await open();
   await expect(dialog.getByLabel("Title")).toHaveValue("");
+  await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
+  await dialog.getByRole("button", { name: "Cancel" }).click();
 
   await page.setViewportSize(
     isMobile ? { width: 412, height: 839 } : { width: 1280, height: 720 }
   );
   await archiveProject(page, prefix);
+  await archiveProject(page, otherPrefix);
 });

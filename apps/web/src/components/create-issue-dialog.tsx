@@ -32,26 +32,36 @@ import { ProjectMark } from "@/components/project-mark";
 import type { ProjectSummary } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 
+interface Draft {
+  title: string;
+  projectId: string | null;
+}
+
+const EMPTY_DRAFT: Draft = { title: "", projectId: null };
+
 const CreateIssueForm = ({
   projects,
   prefix,
-  title,
-  onTitleChange,
+  draft,
+  onDraftChange,
   onDone,
 }: {
   projects: ProjectSummary[];
   prefix: string | undefined;
-  title: string;
-  onTitleChange: (title: string) => void;
+  draft: Draft;
+  onDraftChange: (draft: Draft) => void;
   onDone: () => void;
 }) => {
   const navigate = useNavigate();
+  const { title } = draft;
 
-  const [projectId, setProjectId] = useState(
-    () =>
-      (projects.find((project) => project.prefix === prefix) ?? projects[0])
-        ?.id ?? null
-  );
+  // The draft's Project while it still exists, else the current one.
+  const projectId =
+    (
+      projects.find((project) => project.id === draft.projectId) ??
+      projects.find((project) => project.prefix === prefix) ??
+      projects[0]
+    )?.id ?? null;
 
   const [submitted, setSubmitted] = useState(false);
   const titleInvalid = submitted && title.trim() === "";
@@ -94,7 +104,7 @@ const CreateIssueForm = ({
           { projectId, title: title.trim() },
           {
             onSuccess: ({ identifier }) => {
-              onTitleChange("");
+              onDraftChange(EMPTY_DRAFT);
               onDone();
               toast.success(`${identifier} created.`, {
                 action: {
@@ -120,7 +130,7 @@ const CreateIssueForm = ({
             value={projectId}
             onValueChange={(value) => {
               if (value !== null) {
-                setProjectId(value);
+                onDraftChange({ ...draft, projectId: value });
               }
             }}
           >
@@ -149,7 +159,7 @@ const CreateIssueForm = ({
             aria-invalid={titleInvalid || undefined}
             value={title}
             onChange={(event) => {
-              onTitleChange(event.target.value);
+              onDraftChange({ ...draft, title: event.target.value });
             }}
           />
           {titleInvalid ? (
@@ -181,15 +191,24 @@ export const CreateIssueDialog = ({
   onClose: () => void;
 }) => {
   const projects = useQuery(orpc.projects.list.queryOptions());
-  // Kept here, outside the form that unmounts on close, so a dismissed title comes back.
-  const [title, setTitle] = useState("");
+  // Kept here, outside the form that unmounts on close, so a dismissed draft comes back.
+  const [draft, setDraft] = useState(EMPTY_DRAFT);
+
+  const close = () => {
+    // A Project picked without a title is not a draft; the next open follows the current Project.
+    if (draft.title.trim() === "") {
+      setDraft(EMPTY_DRAFT);
+    }
+
+    onClose();
+  };
 
   return (
     <Dialog
       open={open}
       onOpenChange={(next) => {
         if (!next) {
-          onClose();
+          close();
         }
       }}
     >
@@ -206,9 +225,9 @@ export const CreateIssueDialog = ({
           <CreateIssueForm
             projects={projects.data}
             prefix={prefix}
-            title={title}
-            onTitleChange={setTitle}
-            onDone={onClose}
+            draft={draft}
+            onDraftChange={setDraft}
+            onDone={close}
           />
         )}
       </DialogContent>
