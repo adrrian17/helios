@@ -82,7 +82,7 @@ const ListPage = () => {
           {issues.length} {issues.length === 1 ? "Issue" : "Issues"}
         </span>
       </FilterBar>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto max-md:pb-20">
         {issues.length === 0 ? (
           <Empty>
             <EmptyHeader>

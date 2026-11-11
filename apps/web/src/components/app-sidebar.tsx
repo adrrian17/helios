@@ -1,3 +1,4 @@
+import { Kbd, KbdGroup } from "@helios/ui/components/kbd";
 import {
   Sidebar,
   SidebarContent,
@@ -20,15 +21,19 @@ import {
   ArchiveIcon,
   CircleUserRoundIcon,
   PlusIcon,
+  SearchIcon,
+  SquarePenIcon,
   TagIcon,
   UsersIcon,
 } from "lucide-react";
 import { useState } from "react";
 
+import { useCommands } from "@/components/commands";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
 import { ProjectMark } from "@/components/project-mark";
 import { UserMenu } from "@/components/user-menu";
 import { orpc } from "@/utils/orpc";
+import { keysOf, shortcuts } from "@/utils/shortcuts";
 import { useMe } from "@/utils/use-me";
 
 const SKELETON_ROWS = ["a", "b", "c"];
@@ -69,6 +74,40 @@ const NavLink = ({
       >
         {icon}
         <span>{label}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  );
+};
+
+/** A sidebar row that runs a command, with its shortcut shown on devices that have a keyboard. */
+const CommandButton = ({
+  icon,
+  label,
+  keys,
+  run,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  keys: string[];
+  run: () => void;
+}) => {
+  const { setOpenMobile } = useSidebar();
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        onClick={() => {
+          setOpenMobile(false);
+          run();
+        }}
+      >
+        {icon}
+        <span>{label}</span>
+        <KbdGroup className="ml-auto max-md:hidden" aria-hidden="true">
+          {keys.map((key) => (
+            <Kbd key={key}>{key}</Kbd>
+          ))}
+        </KbdGroup>
       </SidebarMenuButton>
     </SidebarMenuItem>
   );
@@ -124,6 +163,7 @@ export const AppSidebar = () => {
   const me = useMe();
   const isAdmin = me.role === "admin";
   const { setOpenMobile } = useSidebar();
+  const commands = useCommands();
   const [creating, setCreating] = useState(false);
 
   return (
@@ -148,6 +188,18 @@ export const AppSidebar = () => {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
+                <CommandButton
+                  icon={<SquarePenIcon />}
+                  label="New Issue"
+                  keys={keysOf(shortcuts.createIssue)}
+                  run={commands.createIssue}
+                />
+                <CommandButton
+                  icon={<SearchIcon />}
+                  label="Search"
+                  keys={keysOf(shortcuts.palette)}
+                  run={commands.openPalette}
+                />
                 <NavLink
                   to="/my-issues"
                   activePath="/my-issues"

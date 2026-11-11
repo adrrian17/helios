@@ -143,7 +143,7 @@ export const BoardColumnView = ({
       </header>
       <div
         ref={listRef}
-        className="min-h-0 flex-1 overflow-y-auto px-1.5 max-md:px-3 max-md:pt-3"
+        className="min-h-0 flex-1 overflow-y-auto px-1.5 max-md:px-3 max-md:pt-3 max-md:pb-24"
       >
         <SortableContext
           items={issues.map((issue) => issue.id)}

@@ -85,13 +85,13 @@ const MyIssuesList = () => {
         >
           <h2
             id={`group-${project.id}`}
-            className="bg-muted/40 flex h-9 items-center gap-2 border-b px-4 text-sm"
+            className="bg-muted/40 flex h-9 items-center gap-2 border-b px-4 text-sm max-md:h-12"
           >
             <ProjectMark project={project} />
             <Link
               to="/projects/$prefix"
               params={{ prefix: project.prefix }}
-              className="focus-visible:ring-ring/50 truncate rounded-sm font-medium outline-none hover:underline focus-visible:ring-2"
+              className="focus-visible:ring-ring/50 flex min-w-0 items-center self-stretch truncate rounded-sm font-medium outline-none hover:underline focus-visible:ring-2"
             >
               {project.name}
             </Link>
@@ -119,7 +119,7 @@ const MyIssuesPage = () => (
     <PageHeader>
       <PageTitle>My Issues</PageTitle>
     </PageHeader>
-    <main className="flex-1 overflow-y-auto">
+    <main className="flex-1 overflow-y-auto max-md:pb-20">
       <MyIssuesList />
     </main>
   </>

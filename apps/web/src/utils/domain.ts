@@ -5,6 +5,9 @@ type Outputs = InferClientOutputs<AppRouterClient>;
 
 export type Project = Outputs["projects"]["get"];
 
+/** A Project as the sidebar and the pickers list it, without its Workflow States. */
+export type ProjectSummary = Outputs["projects"]["list"][number];
+
 export type WorkflowState = Project["states"][number];
 
 export type BoardColumn = Outputs["issues"]["board"][number];

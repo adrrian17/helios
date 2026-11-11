@@ -29,6 +29,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ChevronsUpDownIcon,
+  KeyboardIcon,
   LogOutIcon,
   PaletteIcon,
   UserPenIcon,
@@ -37,6 +38,7 @@ import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useCommands } from "@/components/commands";
 import { MemberAvatar } from "@/components/issue-meta";
 import { authClient } from "@/utils/auth-client";
 import { orpc } from "@/utils/orpc";
@@ -124,6 +126,7 @@ export const UserMenu = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { theme = "dark", setTheme } = useTheme();
+  const { showShortcuts } = useCommands();
   const [editingName, setEditingName] = useState(false);
   const displayName = me.name.trim() === "" ? me.email : me.name;
 
@@ -187,6 +190,10 @@ export const UserMenu = () => {
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
+            <DropdownMenuItem className="max-md:hidden" onClick={showShortcuts}>
+              <KeyboardIcon />
+              Keyboard shortcuts
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>

@@ -42,6 +42,7 @@ import { PageHeader } from "@/components/page-header";
 import { ProjectMark } from "@/components/project-mark";
 import { NotFound } from "@/components/route-states";
 import { orpc } from "@/utils/orpc";
+import { useShortcut } from "@/utils/shortcuts";
 import { useMediaQuery } from "@/utils/use-media-query";
 
 const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
@@ -132,8 +133,18 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
 const IssuePage = () => {
   const issue = useIssue();
   const wide = useMediaQuery("(min-width: 64rem)");
-  // Which picker is open; kept here so a shortcut layer can open one by name.
+  // Which picker is open; kept here so S, P and A can open one by name.
   const [openPicker, setOpenPicker] = useState<IssuePicker | null>(null);
+
+  useShortcut("state", () => {
+    setOpenPicker("state");
+  });
+  useShortcut("priority", () => {
+    setOpenPicker("priority");
+  });
+  useShortcut("assignee", () => {
+    setOpenPicker("assignee");
+  });
 
   const { data: project } = useSuspenseQuery(
     orpc.projects.get.queryOptions({
@@ -168,7 +179,7 @@ const IssuePage = () => {
           <Link
             to="/projects/$prefix"
             params={{ prefix: project.prefix }}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:size-11 max-sm:justify-center"
           >
             <ProjectMark project={project} className="size-5" />
             <span className="truncate max-sm:sr-only">{project.name}</span>
@@ -186,7 +197,7 @@ const IssuePage = () => {
         </nav>
       </PageHeader>
       <div className="flex min-h-0 flex-1">
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="min-w-0 flex-1 overflow-y-auto max-md:pb-20">
           <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10">
             <IssueTitle />
             {wide ? null : (

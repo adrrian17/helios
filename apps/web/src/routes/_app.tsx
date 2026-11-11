@@ -3,13 +3,17 @@ import { ORPCError } from "@orpc/client";
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { CommandsProvider, CreateIssueFab } from "@/components/commands";
 
 const AppLayout = () => (
   <SidebarProvider>
-    <AppSidebar />
-    <SidebarInset className="h-svh min-w-0 overflow-hidden">
-      <Outlet />
-    </SidebarInset>
+    <CommandsProvider>
+      <AppSidebar />
+      <SidebarInset className="h-svh min-w-0 overflow-hidden">
+        <Outlet />
+      </SidebarInset>
+      <CreateIssueFab />
+    </CommandsProvider>
   </SidebarProvider>
 );
 
