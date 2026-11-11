@@ -45,7 +45,7 @@ Then, run the development server:
 pnpm run dev
 ```
 
-Open [https://helios.localhost](https://helios.localhost) (served through portless). The API runs at [https://api.helios.localhost](https://api.helios.localhost).
+Open [https://helios.localhost](https://helios.localhost) (served through portless). Press `?` in the app for keyboard shortcuts, or Cmd+K (Ctrl+K) for the command palette. The API runs at [https://api.helios.localhost](https://api.helios.localhost).
 
 ## Signing in locally
 
@@ -118,11 +118,23 @@ Deploys are staged and default to a personal `dev_<username>` stage. For product
 cd packages/infra && pnpm exec alchemy deploy --stage production
 ```
 
-### Production origins
+### First production deploy
 
-- Set `ADMIN_EMAIL` and `EMAIL_FROM` for production. Sending magic links needs the Workers Paid plan and an `EMAIL_FROM` domain onboarded to Cloudflare Email Service; the Worker sends through its `EMAIL` (`send_email`) binding.
-- There is no separate seed step. After the first deploy, request a link for `ADMIN_EMAIL` on the sign-in page: the request creates the Workspace and the first Admin, and later requests leave both untouched.
-- Required after the first deploy: set `CORS_ORIGIN` in the root `.env` to the exact deployed web origin, such as `https://app.example.com`, then deploy the server again.
+Helios ships the deploy configuration but nobody has run it; these steps need your Cloudflare account.
+
+1. Put the Cloudflare account on the **Workers Paid plan**. Cloudflare Email Service needs it to send magic links to arbitrary addresses.
+2. Onboard your sender domain to **Cloudflare Email Service** and verify it. `EMAIL_FROM` must be an address on that domain, such as `helios@example.com`.
+3. Log Alchemy in: `cd packages/infra && pnpm exec alchemy profile edit`.
+4. Set the production values in `.env.production` at the repo root (git-ignored), or as CI secrets:
+   - `ADMIN_EMAIL`: the first Admin's address.
+   - `EMAIL_FROM`: the verified sender from step 2.
+   - `BETTER_AUTH_SECRET`: 32 or more random characters, for example from `openssl rand -base64 32`.
+   - `CORS_ORIGIN`: any URL for now; step 6 sets the real one.
+5. Deploy: `cd packages/infra && pnpm exec alchemy deploy --stage production`. It prints the `web` and `server` URLs and applies the D1 migrations.
+6. Set `CORS_ORIGIN` to the exact `web` origin it printed, with no trailing slash, and deploy again.
+7. Open the web URL and request a sign-in link for `ADMIN_EMAIL`. That first request creates the Workspace and the first Admin; there is no separate seed step, and later requests leave both alone.
+
+The Worker sends mail through its `EMAIL` (`send_email`) binding. With `APP_ENV=production` the capture Mailer and the `/dev/magic-link` route do not exist.
 
 ## Git Hooks and Formatting
 
