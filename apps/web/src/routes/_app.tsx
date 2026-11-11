@@ -4,6 +4,7 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { CommandsProvider, CreateIssueFab } from "@/components/commands";
+import { RouteError } from "@/components/route-states";
 
 const AppLayout = () => (
   <SidebarProvider>
@@ -36,4 +37,5 @@ export const Route = createFileRoute("/_app")({
     }
   },
   component: AppLayout,
+  errorComponent: (props) => <RouteError {...props} bare />,
 });

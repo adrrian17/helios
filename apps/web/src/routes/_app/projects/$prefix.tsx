@@ -127,6 +127,8 @@ export const Route = createFileRoute("/_app/projects/$prefix")({
       throw error;
     }
   },
+  head: ({ match }) =>
+    match.status === "notFound" ? { meta: [{ title: "Not found" }] } : {},
   component: ProjectLayout,
   notFoundComponent: () => <NotFound what="Project" />,
 });

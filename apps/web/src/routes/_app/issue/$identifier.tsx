@@ -287,8 +287,15 @@ export const Route = createFileRoute("/_app/issue/$identifier")({
       throw error;
     }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: loaderData?.title ?? "Issue" }],
+  head: ({ match, loaderData }) => ({
+    meta: [
+      {
+        title:
+          match.status === "notFound"
+            ? "Not found"
+            : (loaderData?.title ?? "Issue"),
+      },
+    ],
   }),
   pendingComponent: IssueSkeleton,
   notFoundComponent: () => <NotFound what="Issue" />,

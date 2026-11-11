@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
 import {
+  API_URL,
   adminEmail,
   apiAs,
   archiveProject,
@@ -448,4 +449,36 @@ test("each page names itself in the document title", async ({
   }
 
   await archiveProject(page, prefix);
+});
+
+test("an unknown page, a missing Issue or Project and an unreachable API each show their own state", async ({
+  page,
+  request,
+}) => {
+  await signIn(page, request, adminEmail);
+
+  const missing = {
+    "/nope": "No such page",
+    "/issue/DEMO-999999": "No such Issue",
+    "/projects/NOPE/board": "No such Project",
+  };
+
+  for (const [path, heading] of Object.entries(missing)) {
+    // oxlint-disable-next-line eslint/no-await-in-loop -- each state is a page visit.
+    await page.goto(path);
+    // oxlint-disable-next-line eslint/no-await-in-loop -- each state is a page visit.
+    await expect(page.getByText(heading, { exact: true })).toBeVisible();
+    // oxlint-disable-next-line eslint/no-await-in-loop -- each state is a page visit.
+    await expect(page).toHaveTitle("Not found");
+  }
+
+  await page.route(`${API_URL}/**`, async (route) => {
+    await route.abort();
+  });
+  await page.goto("/my-issues");
+  // Network errors are retried twice with backoff before the error state shows.
+  await expect(
+    page.getByText("Something went wrong", { exact: true })
+  ).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
 });

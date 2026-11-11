@@ -6,6 +6,7 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 
+import { NotFound } from "@/components/route-states";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { orpc } from "@/utils/orpc";
 
@@ -35,10 +36,12 @@ const RootComponent = () => (
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
-  head: () => ({
+  notFoundComponent: () => <NotFound bare />,
+  head: ({ matches }) => ({
     meta: [
       {
-        title: "Helios",
+        // The root has no index route, so a path no route matches leaves it alone.
+        title: matches.length === 1 ? "Not found" : "Helios",
       },
       {
         name: "description",

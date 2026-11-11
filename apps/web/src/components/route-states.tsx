@@ -7,65 +7,91 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@helios/ui/components/empty";
+import { cn } from "@helios/ui/lib/utils";
 import { Link, useRouter } from "@tanstack/react-router";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { CircleAlertIcon, SearchXIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 
-export const RouteError = ({ error, reset }: ErrorComponentProps) => {
+/** `bare` drops the page header, whose sidebar button needs the signed-in shell, for states rendered outside it. */
+const StatePage = ({
+  bare,
+  children,
+}: {
+  bare: boolean;
+  children: React.ReactNode;
+}) => (
+  <>
+    {bare ? null : <PageHeader />}
+    <main
+      className={cn(
+        "grid place-items-center p-4",
+        bare ? "min-h-svh" : "flex-1 overflow-y-auto"
+      )}
+    >
+      {children}
+    </main>
+  </>
+);
+
+export const RouteError = ({
+  error,
+  reset,
+  bare = false,
+}: ErrorComponentProps & { bare?: boolean }) => {
   const router = useRouter();
 
   return (
-    <>
-      <PageHeader />
-      <main className="grid flex-1 place-items-center overflow-y-auto p-4">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <CircleAlertIcon />
-            </EmptyMedia>
-            <EmptyTitle>Something went wrong</EmptyTitle>
-            <EmptyDescription>
-              {error instanceof Error ? error.message : "Unexpected error."}
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button
-              onClick={() => {
-                reset();
-                void router.invalidate();
-              }}
-            >
-              Try again
-            </Button>
-          </EmptyContent>
-        </Empty>
-      </main>
-    </>
-  );
-};
-
-export const NotFound = ({ what = "page" }: { what?: string }) => (
-  <>
-    <PageHeader />
-    <main className="grid flex-1 place-items-center overflow-y-auto p-4">
+    <StatePage bare={bare}>
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <SearchXIcon />
+            <CircleAlertIcon />
           </EmptyMedia>
-          <EmptyTitle>No such {what}</EmptyTitle>
+          <EmptyTitle>Something went wrong</EmptyTitle>
           <EmptyDescription>
-            It may have been removed, or the link is mistyped.
+            {error instanceof Error ? error.message : "Unexpected error."}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button render={<Link to="/" />} nativeButton={false}>
-            Go home
+          <Button
+            onClick={() => {
+              reset();
+              void router.invalidate();
+            }}
+          >
+            Try again
           </Button>
         </EmptyContent>
       </Empty>
-    </main>
-  </>
+    </StatePage>
+  );
+};
+
+export const NotFound = ({
+  what = "page",
+  bare = false,
+}: {
+  what?: string;
+  bare?: boolean;
+}) => (
+  <StatePage bare={bare}>
+    <Empty>
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <SearchXIcon />
+        </EmptyMedia>
+        <EmptyTitle>No such {what}</EmptyTitle>
+        <EmptyDescription>
+          It may have been removed, or the link is mistyped.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <Button render={<Link to="/" />} nativeButton={false}>
+          Go home
+        </Button>
+      </EmptyContent>
+    </Empty>
+  </StatePage>
 );
