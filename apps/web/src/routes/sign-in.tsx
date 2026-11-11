@@ -104,5 +104,6 @@ const SignInPage = () => {
 
 export const Route = createFileRoute("/sign-in")({
   validateSearch: z.object({ error: z.string().optional() }),
+  head: () => ({ meta: [{ title: "Sign in" }] }),
   component: SignInPage,
 });

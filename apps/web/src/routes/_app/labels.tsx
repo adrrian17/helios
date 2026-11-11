@@ -423,6 +423,7 @@ export const Route = createFileRoute("/_app/labels")({
       staleTime: "static",
     });
   },
+  head: () => ({ meta: [{ title: "Labels" }] }),
   pendingComponent: LabelsSkeleton,
   component: LabelsPage,
 });

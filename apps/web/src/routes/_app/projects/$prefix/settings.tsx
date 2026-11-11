@@ -10,7 +10,7 @@ import {
 import { Input } from "@helios/ui/components/input";
 import { Spinner } from "@helios/ui/components/spinner";
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { ArchiveIcon, ArchiveRestoreIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -26,11 +26,14 @@ const GeneralForm = ({ project }: { project: Project }) => {
   // Null until edited, so a rename elsewhere shows through.
   const [draft, setDraft] = useState<string | null>(null);
   const name = draft ?? project.name;
+  const router = useRouter();
 
   const rename = useMutation({
     ...orpc.projects.rename.mutationOptions(),
     onSuccess: () => {
       setDraft(null);
+      // Loaders hold the Project name for the document title.
+      void router.invalidate();
       toast.success("Project renamed.");
     },
   });
@@ -197,5 +200,19 @@ export const Route = createFileRoute("/_app/projects/$prefix/settings")({
       throw redirect({ to: "/projects/$prefix/board", params });
     }
   },
+  loader: async ({
+    context: { orpc: api, queryClient },
+    params: { prefix },
+  }) => {
+    const project = await queryClient.query({
+      ...api.projects.get.queryOptions({ input: { prefix } }),
+      staleTime: "static",
+    });
+
+    return { projectName: project.name };
+  },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `Settings · ${loaderData?.projectName ?? "Project"}` }],
+  }),
   component: SettingsRoute,
 });

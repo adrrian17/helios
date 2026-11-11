@@ -157,6 +157,7 @@ export const Route = createFileRoute("/_app/my-issues")({
       staleTime: "static",
     });
   },
+  head: () => ({ meta: [{ title: "My Issues" }] }),
   pendingComponent: MyIssuesSkeleton,
   component: MyIssuesPage,
 });

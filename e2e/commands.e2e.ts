@@ -406,3 +406,31 @@ test("on a short screen the New Issue dialog scrolls to its button and keeps a d
   await archiveProject(page, prefix);
   await archiveProject(page, otherPrefix);
 });
+
+test("each page names itself in the document title", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/sign-in");
+  await expect(page).toHaveTitle("Sign in");
+
+  const prefix = uniquePrefix();
+  await signIn(page, request, adminEmail);
+  await seedProject(page, prefix);
+
+  const titles = {
+    [`/projects/${prefix}/board`]: `Seed ${prefix} · Board`,
+    [`/projects/${prefix}/settings`]: `Settings · Seed ${prefix}`,
+    [MY_ISSUES]: "My Issues",
+    "/projects/archived": "Archived Projects",
+  };
+
+  for (const [path, title] of Object.entries(titles)) {
+    // oxlint-disable-next-line eslint/no-await-in-loop -- each title is a page visit.
+    await page.goto(path);
+    // oxlint-disable-next-line eslint/no-await-in-loop -- each title is a page visit.
+    await expect(page).toHaveTitle(title);
+  }
+
+  await archiveProject(page, prefix);
+});

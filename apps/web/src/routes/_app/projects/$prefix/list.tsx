@@ -180,10 +180,15 @@ export const Route = createFileRoute("/_app/projects/$prefix/list")({
       }),
       staleTime: "static",
     });
+
+    return { projectName: project.name };
   },
   onEnter: ({ params }) => {
     rememberView(params.prefix, "list");
   },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.projectName ?? "Project"} · List` }],
+  }),
   pendingComponent: ListSkeleton,
   component: ListPage,
 });

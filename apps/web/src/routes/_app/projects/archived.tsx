@@ -121,6 +121,7 @@ export const Route = createFileRoute("/_app/projects/archived")({
       staleTime: "static",
     });
   },
+  head: () => ({ meta: [{ title: "Archived Projects" }] }),
   pendingComponent: ArchivedSkeleton,
   component: ArchivedPage,
 });

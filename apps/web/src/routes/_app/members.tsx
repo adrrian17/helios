@@ -396,6 +396,7 @@ export const Route = createFileRoute("/_app/members")({
       }),
     ]);
   },
+  head: () => ({ meta: [{ title: "Members" }] }),
   pendingComponent: MembersSkeleton,
   component: MembersPage,
 });

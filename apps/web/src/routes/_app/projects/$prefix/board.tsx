@@ -82,10 +82,15 @@ export const Route = createFileRoute("/_app/projects/$prefix/board")({
       }),
       staleTime: "static",
     });
+
+    return { projectName: project.name };
   },
   onEnter: ({ params }) => {
     rememberView(params.prefix, "board");
   },
+  head: ({ loaderData }) => ({
+    meta: [{ title: `${loaderData?.projectName ?? "Project"} · Board` }],
+  }),
   pendingComponent: BoardSkeleton,
   component: BoardPage,
 });
