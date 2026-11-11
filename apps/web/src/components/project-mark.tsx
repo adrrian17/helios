@@ -18,3 +18,16 @@ export const ProjectMark = ({
     {project.prefix.slice(0, 1)}
   </span>
 );
+
+/** Helios's own mark: a white H on the primary colour. */
+export const HeliosMark = ({ className }: { className?: string }) => (
+  <span
+    aria-hidden="true"
+    className={cn(
+      "bg-primary text-primary-foreground grid size-5 place-items-center rounded-sm text-xs font-bold",
+      className
+    )}
+  >
+    H
+  </span>
+);

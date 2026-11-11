@@ -30,7 +30,7 @@ import { useState } from "react";
 
 import { useCommands } from "@/components/commands";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
-import { ProjectMark } from "@/components/project-mark";
+import { HeliosMark, ProjectMark } from "@/components/project-mark";
 import { UserMenu } from "@/components/user-menu";
 import { orpc } from "@/utils/orpc";
 import { keysOf, shortcuts } from "@/utils/shortcuts";
@@ -175,12 +175,7 @@ export const AppSidebar = () => {
             to="/"
             className="flex h-8 items-center gap-2 rounded-md px-2 font-semibold tracking-tight max-md:h-11"
           >
-            <span
-              aria-hidden="true"
-              className="bg-primary text-primary-foreground grid size-5 place-items-center rounded-sm text-xs font-bold"
-            >
-              H
-            </span>
+            <HeliosMark />
             Helios
           </Link>
         </SidebarHeader>

@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import { HeliosMark } from "@/components/project-mark";
 import { authClient } from "@/utils/auth-client";
 
 const requestMagicLink = async (email: string) => {
@@ -40,7 +41,11 @@ const SignInPage = () => {
   });
 
   return (
-    <main className="grid min-h-svh place-items-center p-4">
+    <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
+      <p className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+        <HeliosMark className="size-7 rounded-md text-sm" />
+        Helios
+      </p>
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Sign in to Helios</CardTitle>
