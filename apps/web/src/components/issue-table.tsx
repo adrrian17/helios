@@ -1,7 +1,18 @@
+import { Button } from "@helios/ui/components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@helios/ui/components/dropdown-menu";
 import { cn } from "@helios/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
+  ArrowUpDownIcon,
   ArrowUpIcon,
   SignalIcon,
   UserRoundIcon,
@@ -18,6 +29,7 @@ import {
 } from "@/components/issue-meta";
 import { priorityLabels } from "@/utils/domain";
 import type { IssueRow } from "@/utils/domain";
+import { sortFields } from "@/utils/filters";
 import type { Sort, SortField } from "@/utils/filters";
 import { formatDate } from "@/utils/format";
 
@@ -34,7 +46,7 @@ const columns: {
 }[] = [
   { field: "identifier", label: "ID", className: "w-20 md:w-24" },
   { field: "title", label: "Title", className: "" },
-  { field: "state", label: "State", className: "w-36 max-md:hidden" },
+  { field: "state", label: "State", className: "w-32 max-md:hidden" },
   {
     field: "priority",
     label: "Priority",
@@ -47,8 +59,8 @@ const columns: {
     icon: UserRoundIcon,
     className: "w-11 lg:w-40",
   },
-  { field: "created", label: "Created", className: "w-28 max-xl:hidden" },
-  { field: "updated", label: "Updated", className: "w-28 max-xl:hidden" },
+  { field: "created", label: "Created", className: "w-26 max-xl:hidden" },
+  { field: "updated", label: "Updated", className: "w-24 max-xl:hidden" },
 ];
 
 const CELL = "px-2 first:pl-4 last:pr-4";
@@ -105,7 +117,88 @@ const SortHeader = ({
   );
 };
 
-const MAX_LABELS = 3;
+/** What the phone sort menu calls each field, since phones hide most column headers. */
+const sortNames: Record<SortField, string> = {
+  identifier: "Identifier",
+  title: "Title",
+  state: "Workflow State",
+  priority: "Priority",
+  assignee: "Assignee",
+  created: "Created",
+  updated: "Updated",
+};
+
+const directionNames = { asc: "Ascending", desc: "Descending" } as const;
+
+const directions = ["asc", "desc"] as const;
+
+const isField = (value: unknown): value is SortField =>
+  sortFields.some((field) => field === value);
+
+/** Every sort field and the direction, for phones where the List hides most headers. */
+export const SortMenu = ({
+  sort,
+  onChange,
+}: {
+  sort: Sort;
+  onChange: (sort: Sort) => void;
+}) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger
+      render={
+        <Button
+          variant="muted"
+          size="icon-sm"
+          className="md:hidden"
+          aria-label={`Sort: ${sortNames[sort.field]}, ${directionNames[sort.direction].toLowerCase()}`}
+        />
+      }
+    >
+      <ArrowUpDownIcon />
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="min-w-48">
+      <DropdownMenuRadioGroup
+        value={sort.field}
+        onValueChange={(field) => {
+          if (isField(field)) {
+            onChange({ ...sort, field });
+          }
+        }}
+      >
+        <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+        {sortFields.map((field) => (
+          <DropdownMenuRadioItem key={field} value={field}>
+            {sortNames[field]}
+          </DropdownMenuRadioItem>
+        ))}
+      </DropdownMenuRadioGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuRadioGroup
+        value={sort.direction}
+        onValueChange={(value) => {
+          const direction = directions.find((entry) => entry === value);
+
+          if (direction !== undefined) {
+            onChange({ ...sort, direction });
+          }
+        }}
+      >
+        <DropdownMenuLabel>Order</DropdownMenuLabel>
+        <DropdownMenuRadioItem value="asc">
+          <ArrowUpIcon />
+          Ascending
+        </DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="desc">
+          <ArrowDownIcon />
+          Descending
+        </DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
+
+// Two chips at most, so the title keeps the room.
+const MAX_LABELS = 2;
 
 const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
   <tr
@@ -134,7 +227,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
           {issue.labels.slice(0, MAX_LABELS).map((label) => (
             <span
               key={label.id}
-              className="text-muted-foreground inline-flex h-5 max-w-28 items-center gap-1 rounded-md border px-1.5 text-xs"
+              className="text-muted-foreground inline-flex h-5 max-w-24 items-center gap-1 rounded-md border px-1.5 text-xs"
             >
               <LabelDot color={label.color} />
               <span className="truncate">{label.name}</span>

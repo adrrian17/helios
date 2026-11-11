@@ -186,4 +186,39 @@ test.describe("phone list", () => {
 
     await archiveProject(page, prefix);
   });
+
+  test("the phone sort menu sorts by any field in either direction", async ({
+    page,
+    request,
+  }) => {
+    const [DONE, WAITING] = ["Finished first", "Waiting second"];
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+    const api = apiAs(page);
+    await api.issues.create({
+      projectId: project.id,
+      title: DONE,
+      stateId: project.stateId("Done"),
+    });
+    await api.issues.create({ projectId: project.id, title: WAITING });
+
+    await page.goto(`/projects/${prefix}/list`);
+    await expect(rows(page)).toHaveText(titles(DONE, WAITING));
+
+    await page.getByRole("button", { name: /^Sort: Identifier/u }).click();
+    await page.getByRole("menuitemradio", { name: "Workflow State" }).click();
+    await expect(page).toHaveURL(/sort=state/u);
+    await expect(rows(page)).toHaveText(titles(WAITING, DONE));
+
+    // The menu stays open, so the field and the order are chosen in one go.
+    await page.getByRole("menuitemradio", { name: "Descending" }).click();
+    await expect(rows(page)).toHaveText(titles(DONE, WAITING));
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("button", { name: "Sort: Workflow State, descending" })
+    ).toBeVisible();
+
+    await archiveProject(page, prefix);
+  });
 });

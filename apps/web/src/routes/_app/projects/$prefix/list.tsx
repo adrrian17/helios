@@ -14,7 +14,7 @@ import { FilterXIcon, ListIcon } from "lucide-react";
 import { z } from "zod";
 
 import { FilterBar } from "@/components/filter-bar";
-import { IssueTable } from "@/components/issue-table";
+import { IssueTable, SortMenu } from "@/components/issue-table";
 import { hasFilters, sortFields, toApiFilters } from "@/utils/filters";
 import type { Sort, SortField } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
@@ -60,6 +60,17 @@ const ListPage = () => {
 
   const filtered = hasFilters(search);
 
+  const setSort = (next: Sort) => {
+    void navigate({
+      search: (previous) => ({
+        ...previous,
+        sort: next.field,
+        dir: next.direction,
+      }),
+      replace: true,
+    });
+  };
+
   const clearFilters = () => {
     void navigate({
       search: ({ sort: field, dir }) => ({ sort: field, dir }),
@@ -81,6 +92,7 @@ const ListPage = () => {
         <span className="text-muted-foreground shrink-0 pl-2 text-xs tabular-nums">
           {issues.length} {issues.length === 1 ? "Issue" : "Issues"}
         </span>
+        <SortMenu sort={sort} onChange={setSort} />
       </FilterBar>
       <div className="min-h-0 flex-1 overflow-y-auto max-md:pb-20">
         {issues.length === 0 ? (
@@ -122,18 +134,12 @@ const ListPage = () => {
             issues={issues}
             sort={sort}
             onSort={(field) => {
-              const direction =
-                field === sort.field
-                  ? flipped[sort.direction]
-                  : firstDirection(field);
-
-              void navigate({
-                search: (previous) => ({
-                  ...previous,
-                  sort: field,
-                  dir: direction,
-                }),
-                replace: true,
+              setSort({
+                field,
+                direction:
+                  field === sort.field
+                    ? flipped[sort.direction]
+                    : firstDirection(field),
               });
             }}
           />
