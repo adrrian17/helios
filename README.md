@@ -45,7 +45,22 @@ Then, run the development server:
 pnpm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application. The API is running at [http://localhost:3000](http://localhost:3000).
+Open [https://helios.localhost](https://helios.localhost) (served through portless). The API runs at [https://api.helios.localhost](https://api.helios.localhost).
+
+## Signing in locally
+
+Helios signs Members in with magic links only. In development no email is sent:
+
+1. Open the sign-in page and enter `ADMIN_EMAIL` (`admin@helios.localhost` unless your `.env` overrides it). The first request seeds the Workspace and makes that address the first Admin.
+2. Copy the link from the server log (`magic_link_captured`), or fetch it from `https://api.helios.localhost/dev/magic-link?email=<address>`. That route exists only outside production.
+
+## Tests
+
+```bash
+pnpm test                              # API rules: oRPC in-process, fresh Miniflare D1 per test
+pnpm exec playwright install chromium  # once
+pnpm test:e2e                          # Playwright on desktop and phone; starts or reuses `pnpm dev`
+```
 
 ## UI Customization
 
@@ -75,7 +90,7 @@ If you want to add app-specific blocks instead of shared primitives, run the sha
 
 ## Environment Configuration
 
-Every env var is declared once in the root `.env.schema`. Apps and packages import the items they use with `@import(../../, pick=[...])` in their own `.env.schema`, and local values live in the root `.env`. Development needs no `.env`: the schema provides local defaults that apply only when `APP_ENV=development`, and `pnpm deploy` runs with `APP_ENV=production`, so production values must be set explicitly. In CI, pass `CORS_ORIGIN` and `BETTER_AUTH_SECRET` to the deploy job from repository secrets; process env overrides the schema. Varlock generates `src/env.ts` during installation; run `pnpm run env:generate` after changing a schema. Commit schemas, and keep secrets in ignored env files or your deployment platform.
+Every env var is declared once in the root `.env.schema`. Apps and packages import the items they use with `@import(../../, pick=[...])` in their own `.env.schema`, and local values live in the root `.env`. Development needs no `.env`: the schema provides local defaults that apply only when `APP_ENV=development`, and `pnpm deploy` runs with `APP_ENV=production`, so production values must be set explicitly. In CI, pass `CORS_ORIGIN`, `BETTER_AUTH_SECRET`, `ADMIN_EMAIL` and `EMAIL_FROM` to the deploy job from repository secrets; process env overrides the schema. Varlock generates `src/env.ts` during installation; run `pnpm run env:generate` after changing a schema. Commit schemas, and keep secrets in ignored env files or your deployment platform.
 
 Import the generated `ENV` accessor in application code. Shared database and auth packages receive configuration or initialized clients from the application. See [Varlock's monorepo guide](https://varlock.dev/guides/monorepos/).
 
@@ -105,6 +120,8 @@ cd packages/infra && pnpm exec alchemy deploy --stage production
 
 ### Production origins
 
+- Set `ADMIN_EMAIL` and `EMAIL_FROM` for production. Sending magic links needs the Workers Paid plan and an `EMAIL_FROM` domain onboarded to Cloudflare Email Service; the Worker sends through its `EMAIL` (`send_email`) binding.
+- There is no separate seed step. After the first deploy, request a link for `ADMIN_EMAIL` on the sign-in page: the request creates the Workspace and the first Admin, and later requests leave both untouched.
 - Required after the first deploy: set `CORS_ORIGIN` in the root `.env` to the exact deployed web origin, such as `https://app.example.com`, then deploy the server again.
 
 ## Git Hooks and Formatting
