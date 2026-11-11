@@ -92,7 +92,15 @@ const ItemRow = ({
     const text = editing?.trim() ?? "";
 
     if (text !== "" && text !== item.text) {
-      writes.update.mutate({ id: item.id, text });
+      writes.update.mutate(
+        { id: item.id, text },
+        {
+          // Reopen with the edit so a failed save doesn't lose it.
+          onError: () => {
+            setEditing((current) => current ?? text);
+          },
+        }
+      );
     }
 
     setEditing(null);

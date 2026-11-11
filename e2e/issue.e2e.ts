@@ -215,6 +215,22 @@ test.describe("issue view", () => {
       "renamed the Issue from Slow network to Typed offline"
     );
 
+    const newItem = page.getByLabel("New Checklist item");
+    await newItem.fill("Step one");
+    await newItem.press("Enter");
+    await expect(
+      page.getByRole("checkbox", { name: "Step one" })
+    ).toBeVisible();
+    await page.route(`${API_URL}/rpc/checklist/update`, async (route) => {
+      await route.abort();
+    });
+    const editStep = page.getByLabel("Edit Step one");
+    await page.getByRole("button", { name: "Step one", exact: true }).click();
+    await editStep.fill("Renamed offline");
+    await editStep.press("Enter");
+    await expect(editStep).toHaveValue("Renamed offline");
+    await page.unroute(`${API_URL}/rpc/checklist/update`);
+
     await archiveProject(page, prefix);
   });
 

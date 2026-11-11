@@ -122,11 +122,15 @@ const CreateLabelForm = ({ count }: { count: number }) => {
   const create = useMutation({
     ...orpc.labels.create.mutationOptions(),
     meta: { inlineError: true },
-    onSuccess: (label, { name: sent }) => {
+    onSuccess: (label, { name: sent, color: sentColor }) => {
       toast.success(`Label ${label.name} created.`);
       setName((current) => (current.trim() === sent ? "" : current));
-      setColor(
-        (labelColors[(count + 1) % labelColors.length] ?? labelColors[0]).value
+      // Advance the suggestion only if no other colour was picked meanwhile.
+      setColor((current) =>
+        current === sentColor
+          ? (labelColors[(count + 1) % labelColors.length] ?? labelColors[0])
+              .value
+          : current
       );
     },
   });
