@@ -1,91 +1,203 @@
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@helios/ui/components/dropdown-menu";
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
+  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
+  useSidebar,
 } from "@helios/ui/components/sidebar";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useRouterState } from "@tanstack/react-router";
+import type { LinkProps } from "@tanstack/react-router";
 import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
+  ArchiveIcon,
+  CircleUserRoundIcon,
+  PlusIcon,
+  TagIcon,
+  UsersIcon,
+} from "lucide-react";
+import { useState } from "react";
 
-import { authClient } from "@/utils/auth-client";
+import { CreateProjectDialog } from "@/components/create-project-dialog";
+import { ProjectMark } from "@/components/project-mark";
+import { UserMenu } from "@/components/user-menu";
 import { orpc } from "@/utils/orpc";
+import { useMe } from "@/utils/use-me";
 
-const UserMenu = () => {
-  const { data: me } = useSuspenseQuery(orpc.me.queryOptions());
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
+const SKELETON_ROWS = ["a", "b", "c"];
 
-  const signOut = useMutation({
-    mutationFn: async () => await authClient.signOut(),
-    onSuccess: async () => {
-      queryClient.clear();
-      await navigate({ to: "/sign-in" });
-    },
+/** A sidebar link that is highlighted on its own pages and closes the phone drawer when followed. */
+const NavLink = ({
+  icon,
+  label,
+  activePath,
+  ...link
+}: LinkProps & {
+  icon: React.ReactNode;
+  label: string;
+  activePath: string;
+}) => {
+  const { setOpenMobile } = useSidebar();
+
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
   });
 
+  const active =
+    pathname === activePath || pathname.startsWith(`${activePath}/`);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        isActive={active}
         render={
-          <SidebarMenuButton size="lg" aria-label="Account">
-            <span className="grid min-w-0 flex-1 text-left leading-tight">
-              <span className="truncate font-medium">
-                {me.name || me.email}
-              </span>
-              <span className="text-muted-foreground truncate text-xs">
-                {me.role === "admin" ? "Admin" : "Member"}
-              </span>
-            </span>
-            <ChevronsUpDownIcon />
-          </SidebarMenuButton>
+          <Link
+            {...link}
+            aria-current={active ? "page" : undefined}
+            onClick={() => {
+              setOpenMobile(false);
+            }}
+          />
         }
-      />
-      <DropdownMenuContent side="top" align="start">
-        <DropdownMenuItem
-          onClick={() => {
-            signOut.mutate();
-          }}
-        >
-          <LogOutIcon />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      >
+        {icon}
+        <span>{label}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 };
 
-export const AppSidebar = () => (
-  <Sidebar>
-    <SidebarHeader>
-      <span className="px-2 py-1.5 text-lg font-semibold">Helios</span>
-    </SidebarHeader>
-    <SidebarContent>
-      <SidebarGroup>
-        <SidebarGroupLabel>Projects</SidebarGroupLabel>
-      </SidebarGroup>
-    </SidebarContent>
-    <SidebarFooter>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <UserMenu />
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarFooter>
-  </Sidebar>
-);
+const ProjectsGroup = ({ onCreate }: { onCreate: (() => void) | null }) => {
+  const projects = useQuery(orpc.projects.list.queryOptions());
+
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+      {onCreate === null ? null : (
+        <SidebarGroupAction aria-label="New Project" onClick={onCreate}>
+          <PlusIcon />
+        </SidebarGroupAction>
+      )}
+      <SidebarGroupContent>
+        <SidebarMenu aria-label="Projects">
+          {projects.data === undefined
+            ? SKELETON_ROWS.map((row) => (
+                <SidebarMenuItem key={row}>
+                  <SidebarMenuSkeleton showIcon />
+                </SidebarMenuItem>
+              ))
+            : projects.data.map((project) => (
+                <NavLink
+                  key={project.id}
+                  to="/projects/$prefix"
+                  params={{ prefix: project.prefix }}
+                  activePath={`/projects/${project.prefix}`}
+                  icon={<ProjectMark project={project} />}
+                  label={project.name}
+                />
+              ))}
+          {projects.data?.length === 0 ? (
+            <li className="text-sidebar-foreground/60 px-2 py-1.5 text-xs">
+              No active Projects.
+            </li>
+          ) : null}
+          <NavLink
+            to="/projects/archived"
+            activePath="/projects/archived"
+            icon={<ArchiveIcon />}
+            label="Archived"
+          />
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+};
+
+export const AppSidebar = () => {
+  const me = useMe();
+  const isAdmin = me.role === "admin";
+  const { setOpenMobile } = useSidebar();
+  const [creating, setCreating] = useState(false);
+
+  return (
+    <>
+      <CreateProjectDialog open={creating} onOpenChange={setCreating} />
+      <Sidebar>
+        <SidebarHeader>
+          <Link
+            to="/"
+            className="flex h-8 items-center gap-2 rounded-md px-2 font-semibold tracking-tight max-md:h-11"
+          >
+            <span
+              aria-hidden="true"
+              className="bg-primary text-primary-foreground grid size-5 place-items-center rounded-sm text-xs font-bold"
+            >
+              H
+            </span>
+            Helios
+          </Link>
+        </SidebarHeader>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <NavLink
+                  to="/my-issues"
+                  activePath="/my-issues"
+                  icon={<CircleUserRoundIcon />}
+                  label="My Issues"
+                />
+                <NavLink
+                  to="/labels"
+                  activePath="/labels"
+                  icon={<TagIcon />}
+                  label="Labels"
+                />
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <ProjectsGroup
+            onCreate={
+              isAdmin
+                ? () => {
+                    // The dialog lives outside the drawer, so the drawer can close under it.
+                    setOpenMobile(false);
+                    setCreating(true);
+                  }
+                : null
+            }
+          />
+          {isAdmin ? (
+            <SidebarGroup>
+              <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <NavLink
+                    to="/members"
+                    activePath="/members"
+                    icon={<UsersIcon />}
+                    label="Members"
+                  />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : null}
+        </SidebarContent>
+        <SidebarFooter>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <UserMenu />
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarFooter>
+      </Sidebar>
+    </>
+  );
+};

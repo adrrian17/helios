@@ -12,6 +12,16 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppLabelsRouteImport } from './routes/_app/labels'
+import { Route as AppMembersRouteImport } from './routes/_app/members'
+import { Route as AppMyIssuesRouteImport } from './routes/_app/my-issues'
+import { Route as AppIssueIdentifierRouteImport } from './routes/_app/issue/$identifier'
+import { Route as AppProjectsPrefixRouteImport } from './routes/_app/projects/$prefix'
+import { Route as AppProjectsArchivedRouteImport } from './routes/_app/projects/archived'
+import { Route as AppProjectsPrefixIndexRouteImport } from './routes/_app/projects/$prefix/index'
+import { Route as AppProjectsPrefixBoardRouteImport } from './routes/_app/projects/$prefix/board'
+import { Route as AppProjectsPrefixListRouteImport } from './routes/_app/projects/$prefix/list'
+import { Route as AppProjectsPrefixSettingsRouteImport } from './routes/_app/projects/$prefix/settings'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -27,27 +37,144 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLabelsRoute = AppLabelsRouteImport.update({
+  id: '/labels',
+  path: '/labels',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMembersRoute = AppMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMyIssuesRoute = AppMyIssuesRouteImport.update({
+  id: '/my-issues',
+  path: '/my-issues',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppIssueIdentifierRoute = AppIssueIdentifierRouteImport.update({
+  id: '/issue/$identifier',
+  path: '/issue/$identifier',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsPrefixRoute = AppProjectsPrefixRouteImport.update({
+  id: '/projects/$prefix',
+  path: '/projects/$prefix',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsArchivedRoute = AppProjectsArchivedRouteImport.update({
+  id: '/projects/archived',
+  path: '/projects/archived',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProjectsPrefixIndexRoute = AppProjectsPrefixIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppProjectsPrefixRoute,
+} as any)
+const AppProjectsPrefixBoardRoute = AppProjectsPrefixBoardRouteImport.update({
+  id: '/board',
+  path: '/board',
+  getParentRoute: () => AppProjectsPrefixRoute,
+} as any)
+const AppProjectsPrefixListRoute = AppProjectsPrefixListRouteImport.update({
+  id: '/list',
+  path: '/list',
+  getParentRoute: () => AppProjectsPrefixRoute,
+} as any)
+const AppProjectsPrefixSettingsRoute =
+  AppProjectsPrefixSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AppProjectsPrefixRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/sign-in': typeof SignInRoute
+  '/labels': typeof AppLabelsRoute
+  '/members': typeof AppMembersRoute
+  '/my-issues': typeof AppMyIssuesRoute
+  '/issue/$identifier': typeof AppIssueIdentifierRoute
+  '/projects/$prefix': typeof AppProjectsPrefixRouteWithChildren
+  '/projects/archived': typeof AppProjectsArchivedRoute
+  '/projects/$prefix/board': typeof AppProjectsPrefixBoardRoute
+  '/projects/$prefix/list': typeof AppProjectsPrefixListRoute
+  '/projects/$prefix/settings': typeof AppProjectsPrefixSettingsRoute
+  '/projects/$prefix/': typeof AppProjectsPrefixIndexRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
+  '/labels': typeof AppLabelsRoute
+  '/members': typeof AppMembersRoute
+  '/my-issues': typeof AppMyIssuesRoute
   '/': typeof AppIndexRoute
+  '/issue/$identifier': typeof AppIssueIdentifierRoute
+  '/projects/archived': typeof AppProjectsArchivedRoute
+  '/projects/$prefix/board': typeof AppProjectsPrefixBoardRoute
+  '/projects/$prefix/list': typeof AppProjectsPrefixListRoute
+  '/projects/$prefix/settings': typeof AppProjectsPrefixSettingsRoute
+  '/projects/$prefix': typeof AppProjectsPrefixIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/_app/labels': typeof AppLabelsRoute
+  '/_app/members': typeof AppMembersRoute
+  '/_app/my-issues': typeof AppMyIssuesRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/issue/$identifier': typeof AppIssueIdentifierRoute
+  '/_app/projects/$prefix': typeof AppProjectsPrefixRouteWithChildren
+  '/_app/projects/archived': typeof AppProjectsArchivedRoute
+  '/_app/projects/$prefix/board': typeof AppProjectsPrefixBoardRoute
+  '/_app/projects/$prefix/list': typeof AppProjectsPrefixListRoute
+  '/_app/projects/$prefix/settings': typeof AppProjectsPrefixSettingsRoute
+  '/_app/projects/$prefix/': typeof AppProjectsPrefixIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in'
+  fullPaths:
+    | '/'
+    | '/sign-in'
+    | '/labels'
+    | '/members'
+    | '/my-issues'
+    | '/issue/$identifier'
+    | '/projects/$prefix'
+    | '/projects/archived'
+    | '/projects/$prefix/board'
+    | '/projects/$prefix/list'
+    | '/projects/$prefix/settings'
+    | '/projects/$prefix/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/sign-in' | '/'
-  id: '__root__' | '/_app' | '/sign-in' | '/_app/'
+  to:
+    | '/sign-in'
+    | '/labels'
+    | '/members'
+    | '/my-issues'
+    | '/'
+    | '/issue/$identifier'
+    | '/projects/archived'
+    | '/projects/$prefix/board'
+    | '/projects/$prefix/list'
+    | '/projects/$prefix/settings'
+    | '/projects/$prefix'
+  id:
+    | '__root__'
+    | '/_app'
+    | '/sign-in'
+    | '/_app/labels'
+    | '/_app/members'
+    | '/_app/my-issues'
+    | '/_app/'
+    | '/_app/issue/$identifier'
+    | '/_app/projects/$prefix'
+    | '/_app/projects/archived'
+    | '/_app/projects/$prefix/board'
+    | '/_app/projects/$prefix/list'
+    | '/_app/projects/$prefix/settings'
+    | '/_app/projects/$prefix/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,15 +205,114 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/labels': {
+      id: '/_app/labels'
+      path: '/labels'
+      fullPath: '/labels'
+      preLoaderRoute: typeof AppLabelsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/members': {
+      id: '/_app/members'
+      path: '/members'
+      fullPath: '/members'
+      preLoaderRoute: typeof AppMembersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/my-issues': {
+      id: '/_app/my-issues'
+      path: '/my-issues'
+      fullPath: '/my-issues'
+      preLoaderRoute: typeof AppMyIssuesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/issue/$identifier': {
+      id: '/_app/issue/$identifier'
+      path: '/issue/$identifier'
+      fullPath: '/issue/$identifier'
+      preLoaderRoute: typeof AppIssueIdentifierRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects/$prefix': {
+      id: '/_app/projects/$prefix'
+      path: '/projects/$prefix'
+      fullPath: '/projects/$prefix'
+      preLoaderRoute: typeof AppProjectsPrefixRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects/archived': {
+      id: '/_app/projects/archived'
+      path: '/projects/archived'
+      fullPath: '/projects/archived'
+      preLoaderRoute: typeof AppProjectsArchivedRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/projects/$prefix/': {
+      id: '/_app/projects/$prefix/'
+      path: '/'
+      fullPath: '/projects/$prefix/'
+      preLoaderRoute: typeof AppProjectsPrefixIndexRouteImport
+      parentRoute: typeof AppProjectsPrefixRoute
+    }
+    '/_app/projects/$prefix/board': {
+      id: '/_app/projects/$prefix/board'
+      path: '/board'
+      fullPath: '/projects/$prefix/board'
+      preLoaderRoute: typeof AppProjectsPrefixBoardRouteImport
+      parentRoute: typeof AppProjectsPrefixRoute
+    }
+    '/_app/projects/$prefix/list': {
+      id: '/_app/projects/$prefix/list'
+      path: '/list'
+      fullPath: '/projects/$prefix/list'
+      preLoaderRoute: typeof AppProjectsPrefixListRouteImport
+      parentRoute: typeof AppProjectsPrefixRoute
+    }
+    '/_app/projects/$prefix/settings': {
+      id: '/_app/projects/$prefix/settings'
+      path: '/settings'
+      fullPath: '/projects/$prefix/settings'
+      preLoaderRoute: typeof AppProjectsPrefixSettingsRouteImport
+      parentRoute: typeof AppProjectsPrefixRoute
+    }
   }
 }
 
+interface AppProjectsPrefixRouteChildren {
+  AppProjectsPrefixBoardRoute: typeof AppProjectsPrefixBoardRoute
+  AppProjectsPrefixListRoute: typeof AppProjectsPrefixListRoute
+  AppProjectsPrefixSettingsRoute: typeof AppProjectsPrefixSettingsRoute
+  AppProjectsPrefixIndexRoute: typeof AppProjectsPrefixIndexRoute
+}
+
+const AppProjectsPrefixRouteChildren: AppProjectsPrefixRouteChildren = {
+  AppProjectsPrefixBoardRoute: AppProjectsPrefixBoardRoute,
+  AppProjectsPrefixListRoute: AppProjectsPrefixListRoute,
+  AppProjectsPrefixSettingsRoute: AppProjectsPrefixSettingsRoute,
+  AppProjectsPrefixIndexRoute: AppProjectsPrefixIndexRoute,
+}
+
+const AppProjectsPrefixRouteWithChildren =
+  AppProjectsPrefixRoute._addFileChildren(AppProjectsPrefixRouteChildren)
+
 interface AppRouteChildren {
+  AppLabelsRoute: typeof AppLabelsRoute
+  AppMembersRoute: typeof AppMembersRoute
+  AppMyIssuesRoute: typeof AppMyIssuesRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppIssueIdentifierRoute: typeof AppIssueIdentifierRoute
+  AppProjectsPrefixRoute: typeof AppProjectsPrefixRouteWithChildren
+  AppProjectsArchivedRoute: typeof AppProjectsArchivedRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppLabelsRoute: AppLabelsRoute,
+  AppMembersRoute: AppMembersRoute,
+  AppMyIssuesRoute: AppMyIssuesRoute,
   AppIndexRoute: AppIndexRoute,
+  AppIssueIdentifierRoute: AppIssueIdentifierRoute,
+  AppProjectsPrefixRoute: AppProjectsPrefixRouteWithChildren,
+  AppProjectsArchivedRoute: AppProjectsArchivedRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
