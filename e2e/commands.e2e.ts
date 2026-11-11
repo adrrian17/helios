@@ -317,3 +317,45 @@ test.describe("phone commands", () => {
     await archiveProject(page, prefix);
   });
 });
+
+test("on a short screen the New Issue dialog scrolls to its button and keeps a dismissed title", async ({
+  page,
+  request,
+  isMobile,
+}) => {
+  const prefix = uniquePrefix();
+  await signIn(page, request, adminEmail);
+  await seedProject(page, prefix);
+  await page.setViewportSize(
+    isMobile ? { width: 390, height: 300 } : { width: 1280, height: 180 }
+  );
+  await page.goto(`/projects/${prefix}/list`);
+  await expect(page.getByRole("main")).toBeVisible();
+
+  const dialog = newIssueDialog(page);
+
+  const open = async () => {
+    await (isMobile
+      ? page.getByRole("button", { name: "New Issue" }).click()
+      : page.keyboard.press("c"));
+    await expect(dialog).toBeVisible();
+  };
+
+  await open();
+  await dialog.getByLabel("Title").fill("Typed, then dismissed");
+  await dialog.getByRole("button", { name: "Close" }).click();
+  await expect(dialog).toBeHidden();
+
+  await open();
+  await expect(dialog.getByLabel("Title")).toHaveValue("Typed, then dismissed");
+  await dialog.getByRole("button", { name: "Create Issue" }).click();
+  await expect(dialog).toBeHidden();
+
+  await open();
+  await expect(dialog.getByLabel("Title")).toHaveValue("");
+
+  await page.setViewportSize(
+    isMobile ? { width: 412, height: 839 } : { width: 1280, height: 720 }
+  );
+  await archiveProject(page, prefix);
+});
