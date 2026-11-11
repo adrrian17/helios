@@ -33,6 +33,58 @@ const openMyIssues = async (page: Page) => {
 test.describe("desktop keyboard", () => {
   test.skip(({ isMobile }) => isMobile, "Desktop keyboard.");
 
+  test("Enter never opens a result from an earlier palette search", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+    const api = apiAs(page);
+
+    const first = await api.issues.create({
+      projectId: project.id,
+      title: "First match",
+    });
+
+    const second = await api.issues.create({
+      projectId: project.id,
+      title: "Second match",
+    });
+
+    await openMyIssues(page);
+    await page.keyboard.press(OPEN_PALETTE);
+    const input = palette(page).getByRole("combobox");
+    await input.fill(first.identifier);
+    await expect(palette(page).getByRole("option").first()).toContainText(
+      first.identifier
+    );
+
+    // Hold the next search so Enter lands before its results.
+    const { promise: held, resolve: release } =
+      Promise.withResolvers<undefined>();
+
+    await page.route(SEARCH_RPC, async (route) => {
+      await held;
+      await route.continue();
+    });
+    await input.fill(second.identifier);
+    await page.keyboard.press("Enter");
+    await expect(page).not.toHaveURL(/\/issue\//u);
+
+    release(undefined);
+    await expect(palette(page).getByRole("option").first()).toContainText(
+      second.identifier
+    );
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(
+      new RegExp(`/issue/${second.identifier}$`, "u")
+    );
+
+    await page.unroute(SEARCH_RPC);
+    await archiveProject(page, prefix);
+  });
+
   test("Cmd+K opens an Issue by its Identifier and jumps to a Project", async ({
     page,
     request,

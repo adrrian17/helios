@@ -11,7 +11,7 @@ import {
 } from "@helios/ui/components/command";
 import { Kbd } from "@helios/ui/components/kbd";
 import { Spinner } from "@helios/ui/components/spinner";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   CircleAlertIcon,
@@ -61,7 +61,6 @@ const PaletteBody = ({
   const issues = useQuery({
     ...orpc.issues.search.queryOptions({ input: { query } }),
     enabled: query !== "",
-    placeholderData: keepPreviousData,
   });
 
   const current = projects.data?.find(
@@ -146,7 +145,9 @@ const PaletteBody = ({
     matchesWords(`${project.name} ${project.prefix}`, query)
   );
 
-  const foundIssues = query === "" ? [] : (issues.data ?? []);
+  // Only results for exactly what is typed, so Enter never opens a match for an earlier search.
+  const foundIssues = query === search.trim() ? (issues.data ?? []) : [];
+
   // A failed search must not read as "nothing matches".
   const searchFailed = query !== "" && issues.isError;
 
