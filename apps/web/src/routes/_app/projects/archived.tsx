@@ -43,7 +43,7 @@ const ArchivedList = () => {
 
   return (
     <SettingsSection
-      title={`Archived Projects · ${projects.length}`}
+      title={`${projects.length} ${projects.length === 1 ? "Project" : "Projects"}`}
       description={description}
     >
       {projects.length === 0 ? (
