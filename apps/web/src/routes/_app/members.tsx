@@ -40,8 +40,13 @@ import {
   SettingsSection,
 } from "@/components/settings-section";
 import { formatDate } from "@/utils/format";
-import { orpc } from "@/utils/orpc";
+import { describeError, orpc } from "@/utils/orpc";
 import { useMe } from "@/utils/use-me";
+
+const describeInviteError = (error: Error) =>
+  error instanceof ORPCError && error.code === "BAD_REQUEST"
+    ? "Enter a valid email address."
+    : describeError(error);
 
 const InviteForm = () => {
   const [email, setEmail] = useState("");
@@ -56,9 +61,7 @@ const InviteForm = () => {
   });
 
   const error =
-    invite.error instanceof ORPCError && invite.error.code === "BAD_REQUEST"
-      ? "Enter a valid email address."
-      : invite.error?.message;
+    invite.error === null ? undefined : describeInviteError(invite.error);
 
   return (
     <form

@@ -39,7 +39,7 @@ import { useState } from "react";
 import { StateIcon } from "@/components/issue-meta";
 import { categories } from "@/utils/domain";
 import type { Project, StateCategory, WorkflowState } from "@/utils/domain";
-import { orpc } from "@/utils/orpc";
+import { describeError, orpc } from "@/utils/orpc";
 
 const categoryHints: Record<StateCategory, string> = {
   ideas: "Not committed to; may never be done.",
@@ -183,7 +183,7 @@ const DeleteStateDialog = ({
             </Field>
             {remove.error === null ? null : (
               <p role="alert" className="text-destructive text-sm">
-                {remove.error.message}
+                {describeError(remove.error)}
               </p>
             )}
           </FieldGroup>

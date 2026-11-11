@@ -22,7 +22,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
 import { PREFIX_PATTERN, suggestPrefix } from "@/utils/domain";
-import { orpc } from "@/utils/orpc";
+import { describeError, orpc } from "@/utils/orpc";
 
 const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
   const navigate = useNavigate();
@@ -54,7 +54,7 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
 
   const otherError =
     create.error !== null && conflict === undefined
-      ? create.error.message
+      ? describeError(create.error)
       : undefined;
 
   return (

@@ -27,6 +27,13 @@ const isClientError = (error: Error) =>
   error.status >= CLIENT_ERROR.min &&
   error.status <= CLIENT_ERROR.max;
 
+/** What to show for a failed request; fetch's own "Failed to fetch" means nothing to a Member. */
+export const describeError = (error: Error) =>
+  // fetch rejects with a TypeError when the server cannot be reached at all.
+  error instanceof TypeError
+    ? "Helios can’t reach its server. Check your connection, then try again."
+    : error.message;
+
 const createQueryClient = (): QueryClient => {
   const client: QueryClient = new QueryClient({
     defaultOptions: {
@@ -39,7 +46,7 @@ const createQueryClient = (): QueryClient => {
     mutationCache: new MutationCache({
       onError: (error, _variables, _context, mutation) => {
         if (mutation.meta?.inlineError !== true) {
-          toast.error(error.message);
+          toast.error(describeError(error));
         }
       },
       onSuccess: async (_data, _variables, _context, mutation) => {
@@ -58,7 +65,7 @@ const createQueryClient = (): QueryClient => {
           return;
         }
 
-        toast.error(error.message, {
+        toast.error(describeError(error), {
           action: {
             label: "Retry",
             onClick: () => {

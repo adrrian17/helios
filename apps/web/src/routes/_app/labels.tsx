@@ -51,7 +51,7 @@ import {
 } from "@/components/settings-section";
 import { labelColors } from "@/utils/domain";
 import type { Label } from "@/utils/domain";
-import { orpc } from "@/utils/orpc";
+import { describeError, orpc } from "@/utils/orpc";
 
 const NAME_LIMIT = 120;
 
@@ -131,7 +131,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
     },
   });
 
-  const error = create.error?.message;
+  const error = create.error === null ? undefined : describeError(create.error);
 
   return (
     <form
@@ -242,7 +242,7 @@ const RenameForm = ({
       </div>
       {rename.error === null ? null : (
         <p role="alert" className="text-destructive text-sm">
-          {rename.error.message}
+          {describeError(rename.error)}
         </p>
       )}
     </form>
