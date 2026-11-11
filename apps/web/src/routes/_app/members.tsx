@@ -54,9 +54,9 @@ const InviteForm = () => {
   const invite = useMutation({
     ...orpc.workspace.invite.mutationOptions(),
     meta: { inlineError: true },
-    onSuccess: (invited) => {
+    onSuccess: (invited, { email: sent }) => {
       toast.success(`Invitation sent to ${invited.email}.`);
-      setEmail("");
+      setEmail((current) => (current.trim() === sent ? "" : current));
     },
   });
 

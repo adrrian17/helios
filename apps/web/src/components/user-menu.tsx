@@ -88,6 +88,8 @@ const DisplayNameDialog = ({
                 id="display-name"
                 autoComplete="name"
                 required
+                // The dialog closes on success, so nothing typed after Save may be lost.
+                readOnly={save.isPending}
                 maxLength={80}
                 placeholder={me.email}
                 value={name}

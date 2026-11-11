@@ -153,8 +153,8 @@ const CommentItem = ({
 
   const edit = useMutation({
     ...orpc.comments.edit.mutationOptions(),
-    onSuccess: () => {
-      setDraft(null);
+    onSuccess: (_data, { body }) => {
+      setDraft((current) => (current === body ? null : current));
     },
     onSettled: () => {
       sending.current = false;
@@ -286,8 +286,8 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
 
   const add = useMutation({
     ...orpc.comments.add.mutationOptions(),
-    onSuccess: () => {
-      setBody("");
+    onError: (_error, { body: sent }) => {
+      setBody((current) => (current === "" ? sent : current));
     },
     onSettled: () => {
       sending.current = false;
@@ -297,6 +297,8 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
   const submit = () => {
     if (!sending.current && body.trim() !== "") {
       sending.current = true;
+      // Cleared now, not on success: success lands after the refetch and would wipe text typed meanwhile.
+      setBody("");
       add.mutate({ issueId, body });
     }
   };

@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
+import type { Route } from "@playwright/test";
 
 import {
+  API_URL,
   adminEmail,
   apiAs,
   archiveProject,
@@ -13,6 +15,8 @@ import {
 
 const WRITE_TESTS = "Write tests";
 const IN_PROGRESS_STATE = "Workflow State: In Progress";
+const ACTIVITY = "Activity and Comments";
+const SEND = "ControlOrMeta+Enter";
 
 test.describe("issue view", () => {
   test.skip(({ isMobile }) => isMobile, "Desktop Issue view.");
@@ -82,7 +86,7 @@ test.describe("issue view", () => {
       page.getByRole("article", { name: /Comment by/u })
     ).toContainText(comment);
 
-    const activity = page.getByRole("list", { name: "Activity and Comments" });
+    const activity = page.getByRole("list", { name: ACTIVITY });
     await expect(activity).toContainText(
       "moved it from Backlog to In Progress"
     );
@@ -113,7 +117,7 @@ test.describe("issue view", () => {
     });
 
     await page.goto(`/issue/${first.identifier}`);
-    const activity = page.getByRole("list", { name: "Activity and Comments" });
+    const activity = page.getByRole("list", { name: ACTIVITY });
 
     const title = page.getByRole("textbox", { name: "Title" });
     await title.fill("New name");
@@ -138,8 +142,8 @@ test.describe("issue view", () => {
     const comment = page.getByRole("textbox", { name: "Comment", exact: true });
     const once = `Only once ${uniqueId()}`;
     await comment.fill(once);
-    await comment.press("ControlOrMeta+Enter");
-    await comment.press("ControlOrMeta+Enter");
+    await comment.press(SEND);
+    await comment.press(SEND);
     await expect(comment).toHaveValue("");
     await page.reload();
     await expect(
@@ -158,6 +162,58 @@ test.describe("issue view", () => {
       page.getByRole("heading", { name: "The other Issue" })
     ).toBeVisible();
     await expect(comment).toHaveValue("");
+
+    await archiveProject(page, prefix);
+  });
+
+  test("text typed while a Comment sends survives, and a failed title save keeps the typed title", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+
+    const issue = await apiAs(page).issues.create({
+      projectId: project.id,
+      title: "Slow network",
+    });
+
+    await page.goto(`/issue/${issue.identifier}`);
+
+    // Held until the next Comment is typed, so the first one is still sending.
+    const held: Route[] = [];
+    await page.route(`${API_URL}/rpc/comments/add`, (route) => {
+      held.push(route);
+    });
+
+    const comment = page.getByRole("textbox", { name: "Comment", exact: true });
+    const first = `Sent first ${uniqueId()}`;
+    await comment.fill(first);
+    await comment.press(SEND);
+    await expect.poll(() => held.length).toBe(1);
+    await comment.fill("Typed while the first one sends");
+    await held[0]?.continue();
+    await expect(
+      page.getByRole("article").filter({ hasText: first })
+    ).toBeVisible();
+    await expect(comment).toHaveValue("Typed while the first one sends");
+
+    await page.route(`${API_URL}/rpc/issues/update`, async (route) => {
+      await route.abort();
+    });
+
+    const title = page.getByRole("textbox", { name: "Title" });
+    await title.fill("Typed offline");
+    await title.press("Enter");
+    await expect(page.getByText(/can’t reach its server/u)).toBeVisible();
+    await expect(title).toHaveValue("Typed offline");
+
+    await page.unroute(`${API_URL}/rpc/issues/update`);
+    await title.press("Enter");
+    await expect(page.getByRole("list", { name: ACTIVITY })).toContainText(
+      "renamed the Issue from Slow network to Typed offline"
+    );
 
     await archiveProject(page, prefix);
   });

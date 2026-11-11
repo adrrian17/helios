@@ -27,8 +27,8 @@ export const IssueTitle = () => {
       update.mutate(
         { id: issue.id, title },
         {
-          onSettled: () => {
-            setDraft(null);
+          onSuccess: () => {
+            setDraft((current) => (current?.trim() === title ? null : current));
           },
         }
       );
@@ -72,8 +72,8 @@ export const IssueDescription = () => {
 
   const update = useMutation({
     ...orpc.issues.update.mutationOptions(),
-    onSuccess: () => {
-      setDraft(null);
+    onSuccess: (_data, { description }) => {
+      setDraft((current) => (current === description ? null : current));
     },
     onSettled: () => {
       saving.current = false;

@@ -122,9 +122,9 @@ const CreateLabelForm = ({ count }: { count: number }) => {
   const create = useMutation({
     ...orpc.labels.create.mutationOptions(),
     meta: { inlineError: true },
-    onSuccess: (label) => {
+    onSuccess: (label, { name: sent }) => {
       toast.success(`Label ${label.name} created.`);
-      setName("");
+      setName((current) => (current.trim() === sent ? "" : current));
       setColor(
         (labelColors[(count + 1) % labelColors.length] ?? labelColors[0]).value
       );
@@ -217,6 +217,8 @@ const RenameForm = ({
           maxLength={NAME_LIMIT}
           aria-invalid={rename.error === null ? undefined : true}
           className="min-w-0 flex-1"
+          // The form closes on success, so nothing typed after Save may be lost.
+          readOnly={rename.isPending}
           value={name}
           onChange={(event) => {
             setDraft(event.target.value);

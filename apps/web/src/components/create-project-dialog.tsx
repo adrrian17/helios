@@ -78,6 +78,8 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
             autoComplete="off"
             placeholder="Helios"
             aria-invalid={nameInvalid || undefined}
+            // The dialog closes on success, so nothing typed after Create may be lost.
+            readOnly={create.isPending}
             value={name}
             onChange={(event) => {
               setName(event.target.value);
@@ -103,6 +105,7 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
             placeholder="HEL"
             aria-invalid={prefixInvalid || conflict !== undefined || undefined}
             aria-describedby="project-prefix-help"
+            readOnly={create.isPending}
             value={prefix}
             onChange={(event) => {
               prefixEdited.current = true;

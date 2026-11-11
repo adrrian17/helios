@@ -194,12 +194,16 @@ const AddItem = ({ issueId }: { issueId: string }) => {
       onSubmit={(event) => {
         event.preventDefault();
 
-        if (text.trim() !== "" && !add.isPending) {
+        const submitted = text.trim();
+
+        if (submitted !== "" && !add.isPending) {
+          // Cleared now, not on success: success lands after the refetch and would wipe text typed meanwhile.
+          setText("");
           add.mutate(
-            { issueId, text: text.trim() },
+            { issueId, text: submitted },
             {
-              onSuccess: () => {
-                setText("");
+              onError: () => {
+                setText((current) => (current === "" ? submitted : current));
               },
             }
           );

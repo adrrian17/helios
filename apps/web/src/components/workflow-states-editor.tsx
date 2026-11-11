@@ -84,6 +84,8 @@ const StateNameForm = ({
         autoComplete="off"
         maxLength={120}
         className="min-w-0 flex-1"
+        // The form closes on success, so nothing typed after submitting may be lost.
+        readOnly={pending}
         value={name}
         onChange={(event) => {
           setName(event.target.value);

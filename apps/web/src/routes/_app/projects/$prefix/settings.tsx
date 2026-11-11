@@ -30,8 +30,8 @@ const GeneralForm = ({ project }: { project: Project }) => {
 
   const rename = useMutation({
     ...orpc.projects.rename.mutationOptions(),
-    onSuccess: () => {
-      setDraft(null);
+    onSuccess: (_data, { name: sent }) => {
+      setDraft((current) => (current?.trim() === sent ? null : current));
       // Loaders hold the Project name for the document title.
       void router.invalidate();
       toast.success("Project renamed.");

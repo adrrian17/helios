@@ -81,6 +81,8 @@ const SignInPage = () => {
                   autoComplete="email"
                   required
                   className="h-11"
+                  // Success swaps in a message naming this email, so it must not change meanwhile.
+                  readOnly={requestLink.isPending}
                   value={email}
                   onChange={(event) => {
                     setEmail(event.target.value);

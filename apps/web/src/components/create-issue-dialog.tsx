@@ -168,6 +168,8 @@ const CreateIssueForm = ({
             autoComplete="off"
             placeholder="What needs doing?"
             aria-invalid={titleInvalid || undefined}
+            // The dialog closes on success, so nothing typed after Create may be lost.
+            readOnly={create.isPending}
             value={title}
             onChange={(event) => {
               // Pin the shown Project too, so a dismissed draft does not follow navigation.
