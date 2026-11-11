@@ -19,12 +19,15 @@
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "^5.104.2",
     "@tanstack/react-router": "^1.170.44",
+    "better-auth": "catalog:",
+    "lucide-react": "catalog:",
     "next-themes": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "sonner": "catalog:",
     "varlock": "catalog:",
-    "vite-plugin-pwa": "^2.0.0"
+    "vite-plugin-pwa": "^2.0.0",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@tanstack/router-plugin": "^1.168.45",

@@ -1,5 +1,5 @@
 import type { AppRouterClient } from "@helios/api/routers/index";
-import { createORPCClient } from "@orpc/client";
+import { ORPCError, createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
@@ -11,6 +11,11 @@ const createQueryClient = () =>
   new QueryClient({
     queryCache: new QueryCache({
       onError: (error, query) => {
+        // Route guards handle a missing session by redirecting to sign-in.
+        if (error instanceof ORPCError && error.code === "UNAUTHORIZED") {
+          return;
+        }
+
         toast.error(`Error: ${error.message}`, {
           action: {
             label: "retry",
