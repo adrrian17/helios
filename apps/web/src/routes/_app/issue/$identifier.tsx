@@ -179,7 +179,7 @@ const IssuePage = () => {
           <Link
             to="/projects/$prefix"
             params={{ prefix: project.prefix }}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring/50 flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:size-11 max-sm:justify-center"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:size-11 max-sm:justify-center"
           >
             <ProjectMark project={project} className="size-5" />
             <span className="truncate max-sm:sr-only">{project.name}</span>

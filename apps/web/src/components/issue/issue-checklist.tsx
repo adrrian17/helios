@@ -135,7 +135,7 @@ const ItemRow = ({
         <button
           type="button"
           className={cn(
-            "focus-visible:ring-ring/50 min-w-0 flex-1 cursor-text truncate rounded-sm px-2 py-1 text-left text-sm outline-none focus-visible:ring-3 max-md:min-h-11",
+            "focus-visible:ring-ring min-w-0 flex-1 cursor-text truncate rounded-sm px-2 py-1 text-left text-sm outline-none focus-visible:ring-3 max-md:min-h-11",
             item.checked && "text-muted-foreground line-through"
           )}
           onClick={() => {

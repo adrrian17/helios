@@ -96,7 +96,7 @@ const MyIssuesList = () => {
             <Link
               to="/projects/$prefix"
               params={{ prefix: project.prefix }}
-              className="focus-visible:ring-ring/50 flex min-w-0 items-center self-stretch truncate rounded-sm font-medium outline-none hover:underline focus-visible:ring-2"
+              className="focus-visible:ring-ring flex min-w-0 items-center self-stretch truncate rounded-sm font-medium outline-none hover:underline focus-visible:ring-2"
             >
               {project.name}
             </Link>

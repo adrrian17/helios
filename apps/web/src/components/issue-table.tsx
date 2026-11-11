@@ -95,7 +95,7 @@ const SortHeader = ({
       <button
         type="button"
         className={cn(
-          "hover:text-foreground focus-visible:ring-ring/50 -mx-1 inline-flex h-7 max-w-full items-center gap-1 rounded-md px-1 text-xs outline-none focus-visible:ring-3 max-md:h-11 max-md:min-w-11",
+          "hover:text-foreground focus-visible:ring-ring -mx-1 inline-flex h-7 max-w-full items-center gap-1 rounded-md px-1 text-xs outline-none focus-visible:ring-3 max-md:h-11 max-md:min-w-11",
           Icon !== undefined && "max-md:mx-0 max-md:w-full max-md:px-2",
           active ? "text-foreground" : "text-muted-foreground"
         )}

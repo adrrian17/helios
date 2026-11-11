@@ -63,7 +63,7 @@ const ArchivedList = () => {
           <Link
             to="/projects/$prefix/board"
             params={{ prefix: project.prefix }}
-            className="focus-visible:ring-ring/50 flex min-w-0 flex-1 flex-col justify-center rounded-sm outline-none hover:underline focus-visible:ring-3 max-md:min-h-11"
+            className="focus-visible:ring-ring flex min-w-0 flex-1 flex-col justify-center rounded-sm outline-none hover:underline focus-visible:ring-3 max-md:min-h-11"
           >
             <span className="truncate text-sm font-medium">{project.name}</span>
             <span className="text-muted-foreground truncate text-xs">

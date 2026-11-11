@@ -80,7 +80,7 @@ const ColorSwatches = ({
         return (
           <label
             key={color.value}
-            className="hover:bg-muted has-focus-visible:ring-ring/50 grid size-7 cursor-pointer place-items-center rounded-md has-focus-visible:ring-3 max-md:size-11"
+            className="hover:bg-muted has-focus-visible:ring-ring grid size-7 cursor-pointer place-items-center rounded-md has-focus-visible:ring-3 max-md:size-11"
           >
             <input
               type="radio"
