@@ -52,7 +52,7 @@ if (capturedMail) {
   app.get("/dev/magic-link", (c) => {
     const url = mail.lastLinkTo(c.req.query("email") ?? "");
 
-    return url === undefined ? c.json({ url: null }, 404) : c.json({ url });
+    return url === undefined ? c.text("No link captured", 404) : c.text(url);
   });
 }
 
