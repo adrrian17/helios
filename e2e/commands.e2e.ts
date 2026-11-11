@@ -91,6 +91,37 @@ test.describe("desktop keyboard", () => {
     await archiveProject(page, prefix);
   });
 
+  test("the palette finds actions by any of their words", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    await seedProject(page, prefix);
+
+    await page.goto(`/projects/${prefix}/board`);
+    await expect(column(page, "Backlog")).toBeVisible();
+    await page.keyboard.press("ControlOrMeta+k");
+    await palette(page).getByRole("combobox").fill("go labels");
+    await expect(
+      palette(page).getByRole("option", { name: "Go to Labels" })
+    ).toBeVisible();
+
+    await palette(page).getByRole("combobox").fill("new issue");
+    await expect(
+      palette(page).getByRole("option", {
+        name: `New Issue in Seed ${prefix}…`,
+      })
+    ).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(newIssueDialog(page).getByLabel("Project")).toContainText(
+      `Seed ${prefix}`
+    );
+    await page.keyboard.press("Escape");
+
+    await archiveProject(page, prefix);
+  });
+
   test("S, P and A open the Issue view's pickers; keys typed in a field or over a dialog do nothing", async ({
     page,
     request,

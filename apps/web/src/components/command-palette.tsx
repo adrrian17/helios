@@ -33,6 +33,10 @@ import { useMediaQuery } from "@/utils/use-media-query";
 const includes = (text: string, search: string) =>
   text.toLowerCase().includes(search.toLowerCase());
 
+/** Every typed word appears somewhere, so "go labels" finds "Go to Labels". */
+const matchesWords = (text: string, search: string) =>
+  search.split(/\s+/u).every((word) => includes(text, word));
+
 const PaletteBody = ({
   onClose,
   currentPrefix,
@@ -71,6 +75,7 @@ const PaletteBody = ({
   const actions: {
     id: string;
     label: string;
+    keywords?: string;
     icon: LucideIcon;
     keys?: string[];
     run: () => void;
@@ -78,9 +83,8 @@ const PaletteBody = ({
     {
       id: "create",
       label:
-        current === undefined
-          ? "Create Issue…"
-          : `Create Issue in ${current.name}…`,
+        current === undefined ? "New Issue…" : `New Issue in ${current.name}…`,
+      keywords: "create add",
       icon: PlusIcon,
       keys: keysOf(shortcuts.createIssue),
       run: onCreateIssue,
@@ -124,6 +128,7 @@ const PaletteBody = ({
           {
             id: "shortcuts",
             label: "Keyboard shortcuts",
+            keywords: "help keys",
             icon: KeyboardIcon,
             keys: keysOf(shortcuts.help),
             run: onShowShortcuts,
@@ -133,7 +138,7 @@ const PaletteBody = ({
   ];
 
   const shownActions = actions.filter((action) =>
-    includes(action.label, query)
+    matchesWords(`${action.label} ${action.keywords ?? ""}`, query)
   );
 
   const shownProjects = (projects.data ?? []).filter(
