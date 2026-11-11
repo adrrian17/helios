@@ -8,6 +8,7 @@ import {
   Outlet,
   createFileRoute,
   notFound,
+  useLocation,
 } from "@tanstack/react-router";
 import { ArchiveIcon, KanbanIcon, ListIcon, SettingsIcon } from "lucide-react";
 
@@ -31,6 +32,11 @@ const ProjectLayout = () => {
   );
 
   const me = useMe();
+
+  // On phones the Settings header needs the room for the Project name.
+  const onSettings = useLocation({
+    select: (location) => location.pathname.endsWith("/settings"),
+  });
 
   return (
     <>
@@ -71,7 +77,10 @@ const ProjectLayout = () => {
         )}
         <nav
           aria-label="Project views"
-          className="ml-1 flex items-center gap-0.5 md:ml-3"
+          className={cn(
+            "ml-1 flex items-center gap-0.5 md:ml-3",
+            onSettings && "max-md:hidden"
+          )}
         >
           <Link
             to="/projects/$prefix/board"
