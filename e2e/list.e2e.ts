@@ -85,6 +85,8 @@ test.describe("desktop list", () => {
     );
 
     await page.getByRole("link", { name: "List" }).click();
+    // The Board's own filter bar stays up until the List has loaded; wait for the List's.
+    await expect(rows(page)).toHaveText(titles("Charlie", "Alpha", "Bravo"));
     await page.getByRole("button", { name: "Assignee filter" }).click();
     await page.getByRole("option", { name: "Unassigned" }).click();
     await page.keyboard.press("Escape");
