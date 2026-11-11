@@ -181,7 +181,7 @@ const IssuePage = () => {
             params={{ prefix: project.prefix }}
             className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:min-h-11"
           >
-            <ProjectMark project={project} className="size-5" />
+            <ProjectMark project={project} className="size-5 max-md:hidden" />
             <span className="truncate">{project.name}</span>
           </Link>
           <ChevronRightIcon

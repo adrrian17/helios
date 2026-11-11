@@ -224,7 +224,7 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
       <Row term="Created by">
         <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
           <MemberAvatar member={issue.creator} />
-          <span className="truncate">{issue.creator.displayName}</span>
+          <span className="min-w-0 break-all">{issue.creator.displayName}</span>
         </span>
       </Row>
       <Row term="Created">
