@@ -23,6 +23,8 @@ const RootComponent = () => (
       attribute="class"
       defaultTheme="dark"
       disableTransitionOnChange
+      // React never runs a script it renders on the client, and warns about it; index.html applies the theme before first paint instead.
+      scriptProps={{ type: "application/json" }}
       storageKey="vite-ui-theme"
     >
       <Outlet />
