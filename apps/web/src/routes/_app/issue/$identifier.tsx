@@ -146,6 +146,7 @@ const IssuePage = () => {
       states={project.states}
       openPicker={openPicker}
       onOpenPickerChange={setOpenPicker}
+      compact={!wide}
     />
   );
 

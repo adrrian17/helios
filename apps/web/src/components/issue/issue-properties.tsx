@@ -153,17 +153,53 @@ const LabelsField = ({
   );
 };
 
+/** Who created the Issue and when; one muted line in the narrow layout. */
+const IssueMetadata = ({ compact }: { compact: boolean }) => {
+  const issue = useIssue();
+
+  if (compact) {
+    return (
+      <div className="text-muted-foreground px-2.5 pt-1 text-xs text-pretty">
+        <dt className="sr-only">History</dt>
+        <dd>
+          Created by {issue.creator.displayName} on{" "}
+          {formatDate(issue.createdAt)} · Updated{" "}
+          <RelativeTime date={issue.updatedAt} />
+        </dd>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Row term="Created by">
+        <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
+          <MemberAvatar member={issue.creator} />
+          <span className="truncate">{issue.creator.displayName}</span>
+        </span>
+      </Row>
+      <Row term="Created">
+        <span className="px-2.5 text-sm">{formatDate(issue.createdAt)}</span>
+      </Row>
+      <Row term="Updated">
+        <RelativeTime date={issue.updatedAt} className="px-2.5 text-sm" />
+      </Row>
+    </>
+  );
+};
+
 /** Workflow State, Priority, assignee and Labels, each edited through a picker; plus who created it and when. */
 export const IssueProperties = ({
   states,
   openPicker,
   onOpenPickerChange,
-  className,
+  compact = false,
 }: {
   states: WorkflowState[];
   openPicker: IssuePicker | null;
   onOpenPickerChange: (picker: IssuePicker | null) => void;
-  className?: string;
+  /** Folds who created it and when into one line, for the narrow layout. */
+  compact?: boolean;
 }) => {
   const issue = useIssue();
   const members = useQuery(orpc.workspace.members.queryOptions());
@@ -195,7 +231,7 @@ export const IssueProperties = ({
   );
 
   return (
-    <dl className={cn("flex flex-col gap-1", className)}>
+    <dl className="flex flex-col gap-1">
       <Row term="Workflow State">
         <Picker
           label="Move to"
@@ -277,18 +313,7 @@ export const IssueProperties = ({
       <Row term="Labels">
         <LabelsField {...pickerProps("labels")} />
       </Row>
-      <Row term="Created by">
-        <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
-          <MemberAvatar member={issue.creator} />
-          <span className="truncate">{issue.creator.displayName}</span>
-        </span>
-      </Row>
-      <Row term="Created">
-        <span className="px-2.5 text-sm">{formatDate(issue.createdAt)}</span>
-      </Row>
-      <Row term="Updated">
-        <RelativeTime date={issue.updatedAt} className="px-2.5 text-sm" />
-      </Row>
+      <IssueMetadata compact={compact} />
     </dl>
   );
 };

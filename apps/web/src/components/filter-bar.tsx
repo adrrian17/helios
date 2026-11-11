@@ -137,7 +137,7 @@ export const FilterBar = ({
           }}
         >
           <XIcon data-icon="inline-start" />
-          Clear filters
+          <span className="max-md:sr-only">Clear filters</span>
         </Button>
       ) : null}
       <span className="flex-1" />
