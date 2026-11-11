@@ -193,7 +193,7 @@ const Members = () => {
           return (
             <li
               key={member.id}
-              className="flex items-center gap-3 px-4 py-2.5"
+              className="flex items-center gap-3 px-4 py-2.5 max-md:flex-wrap max-md:gap-y-1"
               data-member={member.email}
             >
               <span className={cn("shrink-0", !member.active && "opacity-50")}>
@@ -202,20 +202,23 @@ const Members = () => {
               <div className="flex min-w-0 flex-1 flex-col">
                 <span
                   className={cn(
-                    "flex items-center gap-1.5 text-sm font-medium",
+                    "flex items-center gap-1.5 text-sm font-medium max-md:flex-wrap",
                     !member.active && "text-muted-foreground"
                   )}
                 >
-                  <span className="truncate">{member.displayName}</span>
+                  <span className="truncate max-md:break-all max-md:whitespace-normal">
+                    {member.displayName}
+                  </span>
                   {self ? <Badge variant="outline">You</Badge> : null}
                 </span>
                 {member.displayName === member.email ? null : (
-                  <span className="text-muted-foreground truncate text-xs">
+                  <span className="text-muted-foreground truncate text-xs max-md:break-all max-md:whitespace-normal">
                     {member.email}
                   </span>
                 )}
               </div>
-              <div className="flex shrink-0 items-center gap-1.5">
+              {/* Phones give the name and email the full line; badges wrap below, under the text. */}
+              <div className="flex shrink-0 items-center gap-1.5 max-md:order-last max-md:w-full max-md:pl-11">
                 {member.active ? null : (
                   <Badge variant="destructive">Deactivated</Badge>
                 )}
