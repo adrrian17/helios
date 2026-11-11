@@ -20,12 +20,19 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      workbox: { globPatterns: ["**/*.{js,css,html,png,svg,ico}"] },
+      // Precache only the static build. Navigations get the cached index.html shell, which
+      // holds no Workspace data; API calls go to another origin with no runtime route, so
+      // they always hit the network and nothing signed-in is kept offline.
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,png,svg,ico}"],
+        runtimeCaching: [],
+      },
       manifest: {
-        name: "helios",
-        short_name: "helios",
-        description: "helios - PWA Application",
+        name: "Helios",
+        short_name: "Helios",
+        description: "Track the work of one small team.",
         theme_color: "#0c0c0c",
+        background_color: "#0c0c0c",
       },
       pwaAssets: { disabled: false, config: true },
       devOptions: { enabled: true },
