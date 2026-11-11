@@ -179,10 +179,10 @@ const IssuePage = () => {
           <Link
             to="/projects/$prefix"
             params={{ prefix: project.prefix }}
-            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:size-11 max-sm:justify-center"
+            className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:min-h-11"
           >
             <ProjectMark project={project} className="size-5" />
-            <span className="truncate max-sm:sr-only">{project.name}</span>
+            <span className="truncate">{project.name}</span>
           </Link>
           <ChevronRightIcon
             aria-hidden="true"
@@ -190,7 +190,7 @@ const IssuePage = () => {
           />
           <span
             aria-current="page"
-            className="font-mono text-sm font-medium tabular-nums"
+            className="shrink-0 font-mono text-sm font-medium whitespace-nowrap tabular-nums"
           >
             {issue.identifier}
           </span>
