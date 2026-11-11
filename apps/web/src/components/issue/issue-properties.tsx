@@ -66,7 +66,13 @@ const Row = ({
 );
 
 /** The assignee's avatar and name inside its picker button. */
-const AssigneeValue = ({ assignee }: { assignee: MemberSummary | null }) => (
+const AssigneeValue = ({
+  assignee,
+  wrap,
+}: {
+  assignee: MemberSummary | null;
+  wrap: boolean;
+}) => (
   <>
     {assignee === null ? (
       <UnassignedAvatar />
@@ -74,7 +80,10 @@ const AssigneeValue = ({ assignee }: { assignee: MemberSummary | null }) => (
       <MemberAvatar member={assignee} />
     )}
     <span
-      className={cn("truncate", assignee === null && "text-muted-foreground")}
+      className={cn(
+        wrap ? "min-w-0 [overflow-wrap:anywhere]" : "truncate",
+        assignee === null && "text-muted-foreground"
+      )}
     >
       {assignee?.displayName ?? "Unassigned"}
     </span>
@@ -224,7 +233,9 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
       <Row term="Created by">
         <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
           <MemberAvatar member={issue.creator} />
-          <span className="min-w-0 break-all">{issue.creator.displayName}</span>
+          <span className="min-w-0 [overflow-wrap:anywhere]">
+            {issue.creator.displayName}
+          </span>
         </span>
       </Row>
       <Row term="Created">
@@ -380,12 +391,16 @@ export const IssueProperties = ({
                 render={
                   <Button
                     variant={variant}
-                    className={width}
+                    className={cn(
+                      width,
+                      // The rail has room, so an email-only name wraps instead of being cut.
+                      !chip && "h-auto min-h-8 text-left whitespace-normal"
+                    )}
                     aria-label={`Assignee: ${assignee?.displayName ?? "Unassigned"}`}
                   />
                 }
               >
-                <AssigneeValue assignee={assignee} />
+                <AssigneeValue assignee={assignee} wrap={!chip} />
                 {opens}
               </TooltipTrigger>
             }

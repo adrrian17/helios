@@ -55,10 +55,20 @@ const SignInPage = () => {
         </CardHeader>
         <CardContent>
           {requestLink.isSuccess ? (
-            <output className="block">
-              If {email} belongs to a Member or has an Invitation, a sign-in
-              link is on its way. It works once and expires in 5 minutes.
-            </output>
+            <div className="grid gap-4">
+              <output className="block">
+                If {email} belongs to a Member or has an Invitation, a sign-in
+                link is on its way. It works once and expires in 5 minutes.
+              </output>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  requestLink.reset();
+                }}
+              >
+                Use a different email
+              </Button>
+            </div>
           ) : (
             <form
               className="grid gap-4"

@@ -155,7 +155,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
             id="label-name"
             autoComplete="off"
             maxLength={NAME_LIMIT}
-            placeholder="Bug"
+            placeholder="Needs review"
             aria-invalid={error !== undefined || undefined}
             value={name}
             onChange={(event) => {

@@ -170,80 +170,82 @@ export const AppSidebar = () => {
     <>
       <CreateProjectDialog open={creating} onOpenChange={setCreating} />
       <Sidebar>
-        <SidebarHeader>
-          <Link
-            to="/"
-            className="flex h-8 items-center gap-2 rounded-md px-2 font-semibold tracking-tight max-md:h-11"
-          >
-            <HeliosMark />
-            Helios
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <CommandButton
-                  icon={<SquarePenIcon />}
-                  label="New Issue"
-                  keys={keysOf(shortcuts.createIssue)}
-                  run={commands.createIssue}
-                />
-                <CommandButton
-                  icon={<SearchIcon />}
-                  label="Search"
-                  keys={keysOf(shortcuts.palette)}
-                  run={commands.openPalette}
-                />
-                <NavLink
-                  to="/my-issues"
-                  activePath="/my-issues"
-                  icon={<CircleUserRoundIcon />}
-                  label="My Issues"
-                />
-                <NavLink
-                  to="/labels"
-                  activePath="/labels"
-                  icon={<TagIcon />}
-                  label="Labels"
-                />
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-          <ProjectsGroup
-            onCreate={
-              isAdmin
-                ? () => {
-                    // The dialog lives outside the drawer, so the drawer can close under it.
-                    setOpenMobile(false);
-                    setCreating(true);
-                  }
-                : null
-            }
-          />
-          {isAdmin ? (
+        <nav aria-label="Workspace" className="flex min-h-0 flex-1 flex-col">
+          <SidebarHeader>
+            <Link
+              to="/"
+              className="flex h-8 items-center gap-2 rounded-md px-2 font-semibold tracking-tight max-md:h-11"
+            >
+              <HeliosMark />
+              Helios
+            </Link>
+          </SidebarHeader>
+          <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Workspace</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
+                  <CommandButton
+                    icon={<SquarePenIcon />}
+                    label="New Issue"
+                    keys={keysOf(shortcuts.createIssue)}
+                    run={commands.createIssue}
+                  />
+                  <CommandButton
+                    icon={<SearchIcon />}
+                    label="Search"
+                    keys={keysOf(shortcuts.palette)}
+                    run={commands.openPalette}
+                  />
                   <NavLink
-                    to="/members"
-                    activePath="/members"
-                    icon={<UsersIcon />}
-                    label="Members"
+                    to="/my-issues"
+                    activePath="/my-issues"
+                    icon={<CircleUserRoundIcon />}
+                    label="My Issues"
+                  />
+                  <NavLink
+                    to="/labels"
+                    activePath="/labels"
+                    icon={<TagIcon />}
+                    label="Labels"
                   />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-          ) : null}
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <UserMenu />
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
+            <ProjectsGroup
+              onCreate={
+                isAdmin
+                  ? () => {
+                      // The dialog lives outside the drawer, so the drawer can close under it.
+                      setOpenMobile(false);
+                      setCreating(true);
+                    }
+                  : null
+              }
+            />
+            {isAdmin ? (
+              <SidebarGroup>
+                <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <NavLink
+                      to="/members"
+                      activePath="/members"
+                      icon={<UsersIcon />}
+                      label="Members"
+                    />
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            ) : null}
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <UserMenu />
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </nav>
       </Sidebar>
     </>
   );
