@@ -34,6 +34,9 @@ const priorityLabels: Record<Priority, string> = {
 const SEARCH_LIMIT = 20;
 const MAX_SEARCH_WORDS = 10;
 
+/** D1 rejects LIKE patterns over 50 bytes; a word's first 12 code points, of up to 4 bytes each, plus two `%` fit. */
+const firstCodePoints = /^.{0,12}/su;
+
 const titleSchema = z.string().trim().min(1).max(500);
 const descriptionSchema = z.string().max(100_000);
 
@@ -596,10 +599,13 @@ export const issuesRouter = {
       const exact = parsed && `${parsed.prefix}-${parsed.number}`;
 
       // D1 binds at most 100 parameters, and each word binds up to three.
-      const words = [...new Set(query.split(/\s+/u))].slice(
-        0,
-        MAX_SEARCH_WORDS
-      );
+      const words = [
+        ...new Set(
+          query
+            .split(/\s+/u)
+            .map((word) => firstCodePoints.exec(word)?.[0] ?? "")
+        ),
+      ].slice(0, MAX_SEARCH_WORDS);
 
       // shortcut: `%` and `_` typed into the palette act as LIKE wildcards; escape them if that ever confuses anyone.
       const wordsMatch: RowFilter = {

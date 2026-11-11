@@ -532,7 +532,7 @@ describe("search", () => {
     await expect(searchFor(admin, "login pricing")).resolves.toStrictEqual([]);
   });
 
-  it("puts an exact Identifier first and survives a query of many words", async () => {
+  it("puts an exact Identifier first and survives many or very long words", async () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin, "HEL");
@@ -551,5 +551,6 @@ describe("search", () => {
       "HEL-2",
     ]);
     await expect(searchFor(admin, manyNumbers)).resolves.toStrictEqual([]);
+    await expect(searchFor(admin, "🔥".repeat(60))).resolves.toStrictEqual([]);
   });
 });
