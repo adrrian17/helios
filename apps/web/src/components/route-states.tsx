@@ -13,6 +13,7 @@ import type { ErrorComponentProps } from "@tanstack/react-router";
 import { CircleAlertIcon, SearchXIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
+import { HeliosMark } from "@/components/project-mark";
 
 /** `bare` drops the page header, whose sidebar button needs the signed-in shell, for states rendered outside it. */
 const StatePage = ({
@@ -26,14 +27,29 @@ const StatePage = ({
     {bare ? null : <PageHeader />}
     <main
       className={cn(
-        "grid place-items-center p-4",
+        "flex flex-col items-center justify-center gap-6 p-4",
         bare ? "min-h-svh" : "flex-1 overflow-y-auto"
       )}
     >
+      {bare ? (
+        <p className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+          <HeliosMark className="size-7 rounded-md text-sm" />
+          Helios
+        </p>
+      ) : null}
       {children}
     </main>
   </>
 );
+
+const describeError = (error: ErrorComponentProps["error"]) => {
+  // fetch rejects with a TypeError when the server cannot be reached at all.
+  if (error instanceof TypeError) {
+    return "Helios can’t reach its server. Check your connection, then try again.";
+  }
+
+  return error instanceof Error ? error.message : "Unexpected error.";
+};
 
 export const RouteError = ({
   error,
@@ -50,9 +66,7 @@ export const RouteError = ({
             <CircleAlertIcon />
           </EmptyMedia>
           <EmptyTitle>Something went wrong</EmptyTitle>
-          <EmptyDescription>
-            {error instanceof Error ? error.message : "Unexpected error."}
-          </EmptyDescription>
+          <EmptyDescription>{describeError(error)}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button

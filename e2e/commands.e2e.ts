@@ -480,5 +480,6 @@ test("an unknown page, a missing Issue or Project and an unreachable API each sh
   await expect(
     page.getByText("Something went wrong", { exact: true })
   ).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/can’t reach its server/u)).toBeVisible();
   await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
 });

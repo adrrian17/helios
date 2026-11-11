@@ -38,13 +38,17 @@ const IssueComposer = ({
       onSubmit={(event) => {
         event.preventDefault();
 
-        if (title.trim() !== "") {
+        const submitted = title.trim();
+
+        if (submitted !== "") {
+          // Cleared now, not on success: success lands after the refetch and would wipe text typed meanwhile.
+          setTitle("");
           create.mutate(
-            { projectId, stateId: state.id, title: title.trim() },
+            { projectId, stateId: state.id, title: submitted },
             {
-              onSuccess: () => {
-                setTitle("");
-                onCreated();
+              onSuccess: onCreated,
+              onError: () => {
+                setTitle((current) => (current === "" ? submitted : current));
               },
             }
           );
