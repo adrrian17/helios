@@ -55,12 +55,18 @@ const TYPING =
   "input, textarea, select, [contenteditable]:not([contenteditable='false'])";
 
 // Base UI popovers (the pickers) are dialogs too; menus trap the keyboard the same way.
-const OVERLAY = "[role='dialog'], [role='alertdialog'], [role='menu']";
+// One that is animating out (`data-closed`) no longer holds the keyboard.
+const OVERLAY = ["dialog", "alertdialog", "menu"]
+  .map((role) => `[role='${role}']:not([data-closed])`)
+  .join(", ");
 
 export const overlayOpen = () => document.querySelector(OVERLAY) !== null;
 
+// A field in an overlay that is animating out still has focus, but takes no more text.
 const typing = (event: KeyboardEvent) =>
-  event.target instanceof Element && event.target.closest(TYPING) !== null;
+  event.target instanceof Element &&
+  event.target.closest(TYPING) !== null &&
+  event.target.closest("[data-closed]") === null;
 
 const modified = (event: KeyboardEvent) =>
   event.metaKey || event.ctrlKey || event.altKey;

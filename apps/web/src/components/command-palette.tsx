@@ -49,6 +49,7 @@ const PaletteBody = ({
   // Phones have no keyboard to use the shortcut list with.
   const hasKeyboard = useMediaQuery("(min-width: 48rem)");
   const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState("");
   const query = useDeferredValue(search.trim());
   const projects = useQuery(orpc.projects.list.queryOptions());
 
@@ -141,6 +142,16 @@ const PaletteBody = ({
   );
 
   const foundIssues = query === "" ? [] : (issues.data ?? []);
+
+  // In render order. Issues arrive after the keystroke, so the highlight
+  // falls back to the first item whenever the chosen one is gone.
+  const values = [
+    ...foundIssues.map((issue) => `issue:${issue.id}`),
+    ...shownActions.map((action) => `action:${action.id}`),
+    ...shownProjects.map((project) => `project:${project.id}`),
+  ];
+
+  const highlighted = values.includes(selected) ? selected : (values[0] ?? "");
   const searching = query !== "" && issues.isFetching;
 
   const issueGroup =
@@ -172,6 +183,8 @@ const PaletteBody = ({
   return (
     <Command
       shouldFilter={false}
+      value={highlighted}
+      onValueChange={setSelected}
       loop
       label="Command palette"
       className="max-md:h-full"
@@ -182,7 +195,11 @@ const PaletteBody = ({
             placeholder="Search Issues, Projects and actions…"
             aria-label="Search Issues, Projects and actions"
             value={search}
-            onValueChange={setSearch}
+            onValueChange={(next) => {
+              setSearch(next);
+              // Each new search starts from its best match.
+              setSelected("");
+            }}
           />
         </div>
         {searching ? <Spinner aria-label="Searching" className="mx-1" /> : null}
