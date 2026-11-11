@@ -1,9 +1,11 @@
+import { Badge } from "@helios/ui/components/badge";
 import { Button } from "@helios/ui/components/button";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
+  FieldTitle,
 } from "@helios/ui/components/field";
 import { Input } from "@helios/ui/components/input";
 import { Spinner } from "@helios/ui/components/spinner";
@@ -68,16 +70,12 @@ const GeneralForm = ({ project }: { project: Project }) => {
           </div>
         </Field>
         <Field>
-          <FieldLabel htmlFor="project-prefix">Identifier prefix</FieldLabel>
-          <div className="max-w-28">
-            <Input
-              id="project-prefix"
-              readOnly
-              aria-describedby="project-prefix-help"
-              value={project.prefix}
-            />
-          </div>
-          <FieldDescription id="project-prefix-help">
+          {/* Read-only, so a static badge rather than a field that looks editable. */}
+          <FieldTitle>Identifier prefix</FieldTitle>
+          <Badge variant="outline" className="self-start">
+            <span className="font-mono">{project.prefix}</span>
+          </Badge>
+          <FieldDescription>
             Fixed after creation, so Identifiers like{" "}
             <span className="font-mono">{project.prefix}-1</span> people have
             shared never change.

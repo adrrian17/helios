@@ -147,36 +147,34 @@ const CreateLabelForm = ({ count }: { count: number }) => {
       <FieldGroup>
         <Field data-invalid={error !== undefined || undefined}>
           <FieldLabel htmlFor="label-name">Name</FieldLabel>
-          <div className="flex gap-2 max-sm:flex-col">
-            <Input
-              id="label-name"
-              autoComplete="off"
-              maxLength={NAME_LIMIT}
-              placeholder="Bug"
-              aria-invalid={error !== undefined || undefined}
-              value={name}
-              onChange={(event) => {
-                setName(event.target.value);
-                create.reset();
-              }}
-            />
-            <Button
-              type="submit"
-              className="shrink-0"
-              disabled={create.isPending || name.trim() === ""}
-            >
-              {create.isPending ? (
-                <Spinner data-icon="inline-start" />
-              ) : (
-                <LabelDot color={color} />
-              )}
-              Create Label
-            </Button>
-          </div>
+          <Input
+            id="label-name"
+            autoComplete="off"
+            maxLength={NAME_LIMIT}
+            placeholder="Bug"
+            aria-invalid={error !== undefined || undefined}
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+              create.reset();
+            }}
+          />
           {error === undefined ? null : <FieldError>{error}</FieldError>}
         </Field>
         <ColorSwatches label="Colour" value={color} onChange={setColor} />
       </FieldGroup>
+      <Button
+        type="submit"
+        className="self-end max-sm:self-stretch"
+        disabled={create.isPending || name.trim() === ""}
+      >
+        {create.isPending ? (
+          <Spinner data-icon="inline-start" />
+        ) : (
+          <LabelDot color={color} />
+        )}
+        Create Label
+      </Button>
     </form>
   );
 };
