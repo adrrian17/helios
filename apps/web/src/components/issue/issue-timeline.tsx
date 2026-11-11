@@ -58,7 +58,7 @@ const activityCopy: Record<
     icon: TypeIcon,
     describe: (entry) => (
       <>
-        renamed the Issue to <Value>{entry.newValue}</Value>
+        renamed the Issue from <Change entry={entry} />
       </>
     ),
   },
@@ -157,7 +157,7 @@ const CommentItem = ({
   const remove = useMutation(orpc.comments.delete.mutationOptions());
 
   const save = () => {
-    if (draft !== null && draft.trim() !== "") {
+    if (!edit.isPending && draft !== null && draft.trim() !== "") {
       edit.mutate({ id: entry.id, body: draft });
     }
   };
@@ -276,7 +276,7 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
   const add = useMutation(orpc.comments.add.mutationOptions());
 
   const submit = () => {
-    if (body.trim() !== "") {
+    if (!add.isPending && body.trim() !== "") {
       add.mutate(
         { issueId, body },
         {

@@ -198,7 +198,11 @@ const IssuePage = () => {
       </PageHeader>
       <div className="flex min-h-0 flex-1">
         <main className="min-w-0 flex-1 overflow-y-auto max-md:pb-20">
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10">
+          {/* Keyed so drafts belong to one Issue and never follow a navigation. */}
+          <div
+            key={issue.id}
+            className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10"
+          >
             <IssueTitle />
             {wide ? null : (
               <div className="bg-card rounded-lg border p-2">{properties}</div>

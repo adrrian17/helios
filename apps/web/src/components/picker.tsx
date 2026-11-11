@@ -80,7 +80,13 @@ export const Picker = ({
     <Popover open={isOpen} onOpenChange={setOpen}>
       <PopoverTrigger render={trigger} />
       <PopoverContent align={align} className="w-64">
-        <Command filter={matches} label={label} loop>
+        {/* Single pickers open on the current value, so Enter alone keeps it. */}
+        <Command
+          filter={matches}
+          label={label}
+          loop
+          defaultValue={multiple ? undefined : selected[0]}
+        >
           <CommandInput
             placeholder={`${label}…`}
             aria-label={label}

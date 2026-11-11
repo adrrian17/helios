@@ -18,6 +18,10 @@ export const IssueTitle = () => {
   const save = () => {
     const title = draft?.trim() ?? "";
 
+    if (update.isPending) {
+      return;
+    }
+
     if (draft !== null && title !== "" && title !== issue.title) {
       update.mutate(
         { id: issue.id, title },
@@ -72,7 +76,9 @@ export const IssueDescription = () => {
 
   if (draft !== null) {
     const save = () => {
-      update.mutate({ id: issue.id, description: draft });
+      if (!update.isPending) {
+        update.mutate({ id: issue.id, description: draft });
+      }
     };
 
     return (

@@ -93,6 +93,75 @@ test.describe("issue view", () => {
     await archiveProject(page, prefix);
   });
 
+  test("pickers open on the current value, a rename shows old and new, ⌘↵ sends once and drafts stay with their Issue", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+    const api = apiAs(page);
+
+    const first = await api.issues.create({
+      projectId: project.id,
+      title: "Old name",
+    });
+
+    const second = await api.issues.create({
+      projectId: project.id,
+      title: "The other Issue",
+    });
+
+    await page.goto(`/issue/${first.identifier}`);
+    const activity = page.getByRole("list", { name: "Activity and Comments" });
+
+    const title = page.getByRole("textbox", { name: "Title" });
+    await title.fill("New name");
+    await title.press("Enter");
+    await expect(activity).toContainText(
+      "renamed the Issue from Old name to New name"
+    );
+
+    await page.getByRole("heading", { name: "Activity" }).click();
+    await page.keyboard.press("s");
+    await expect(page.getByRole("option", { name: "Backlog" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    );
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("combobox", { name: "Move to" })).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Workflow State: Backlog" })
+    ).toBeVisible();
+    await expect(activity).not.toContainText("moved it");
+
+    const comment = page.getByRole("textbox", { name: "Comment", exact: true });
+    const once = `Only once ${uniqueId()}`;
+    await comment.fill(once);
+    await comment.press("ControlOrMeta+Enter");
+    await comment.press("ControlOrMeta+Enter");
+    await expect(comment).toHaveValue("");
+    await page.reload();
+    await expect(
+      page.getByRole("article").filter({ hasText: once })
+    ).toHaveCount(1);
+
+    await comment.fill("A draft for the first Issue");
+    await page.keyboard.press("ControlOrMeta+k");
+    const palette = page.getByRole("dialog", { name: "Command palette" });
+    await palette.getByRole("combobox").fill(second.identifier);
+    await expect(palette.getByRole("option").first()).toContainText(
+      second.identifier
+    );
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("heading", { name: "The other Issue" })
+    ).toBeVisible();
+    await expect(comment).toHaveValue("");
+
+    await archiveProject(page, prefix);
+  });
+
   test("Markdown in a description renders, and HTML in it never runs", async ({
     page,
     request,
