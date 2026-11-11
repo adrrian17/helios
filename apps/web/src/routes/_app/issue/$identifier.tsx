@@ -152,12 +152,12 @@ const IssuePage = () => {
     })
   );
 
-  const properties = (
+  const properties = (layout: "rail" | "summary" | "details") => (
     <IssueProperties
       states={project.states}
       openPicker={openPicker}
       onOpenPickerChange={setOpenPicker}
-      compact={!wide}
+      layout={layout}
     />
   );
 
@@ -204,11 +204,17 @@ const IssuePage = () => {
             className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10"
           >
             <IssueTitle />
-            {wide ? null : (
-              <div className="bg-card rounded-lg border p-2">{properties}</div>
-            )}
+            {wide ? null : properties("summary")}
             <IssueDescription />
             <IssueChecklist />
+            {wide ? null : (
+              <section
+                aria-label="Properties"
+                className="bg-card rounded-lg border p-2"
+              >
+                {properties("details")}
+              </section>
+            )}
             <IssueTimeline />
           </div>
         </main>
@@ -217,7 +223,7 @@ const IssuePage = () => {
             aria-label="Properties"
             className="bg-sidebar/40 w-80 shrink-0 overflow-y-auto border-l px-4 py-6"
           >
-            {properties}
+            {properties("rail")}
           </aside>
         ) : null}
       </div>

@@ -1,7 +1,12 @@
 import { Button } from "@helios/ui/components/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@helios/ui/components/tooltip";
 import { cn } from "@helios/ui/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { ChevronDownIcon, PlusIcon } from "lucide-react";
 
 import {
   LabelDot,
@@ -20,7 +25,7 @@ import {
 import { useIssue, useIssueCache } from "@/components/issue/use-issue";
 import { Picker } from "@/components/picker";
 import { labelColors, pickerPriorities, priorityLabels } from "@/utils/domain";
-import type { Label, WorkflowState } from "@/utils/domain";
+import type { Label, MemberSummary, WorkflowState } from "@/utils/domain";
 import { UNASSIGNED } from "@/utils/filters";
 import { formatDate } from "@/utils/format";
 import { orpc } from "@/utils/orpc";
@@ -28,17 +33,60 @@ import { orpc } from "@/utils/orpc";
 /** The pickers a keyboard shortcut can open by name (S, P, A, and one for Labels). */
 export type IssuePicker = "state" | "priority" | "assignee" | "labels";
 
+/** Where the properties show: the desktop rail, or the phone's chip row and the card below the body. */
+type Layout = "rail" | "summary" | "details";
+
 const Row = ({
   term,
+  chip = false,
   children,
 }: {
   term: string;
+  /** A bare value in the phone's chip row; the term is only spoken. */
+  chip?: boolean;
   children: React.ReactNode;
 }) => (
-  <div className="flex min-h-8 items-center gap-2">
-    <dt className="text-muted-foreground w-24 shrink-0 text-xs">{term}</dt>
-    <dd className="flex min-w-0 flex-1">{children}</dd>
+  <div
+    className={
+      chip
+        ? "flex min-w-0 shrink-0 last:shrink"
+        : "flex min-h-8 items-center gap-2"
+    }
+  >
+    <dt
+      className={
+        chip ? "sr-only" : "text-muted-foreground w-24 shrink-0 text-xs"
+      }
+    >
+      {term}
+    </dt>
+    <dd className={cn("flex min-w-0", !chip && "flex-1")}>{children}</dd>
   </div>
+);
+
+/** The assignee's avatar and name inside its picker button. */
+const AssigneeValue = ({ assignee }: { assignee: MemberSummary | null }) => (
+  <>
+    {assignee === null ? (
+      <UnassignedAvatar />
+    ) : (
+      <MemberAvatar member={assignee} />
+    )}
+    <span
+      className={cn("truncate", assignee === null && "text-muted-foreground")}
+    >
+      {assignee?.displayName ?? "Unassigned"}
+    </span>
+  </>
+);
+
+/** Marks a property value as a control that opens a picker. */
+const Opens = () => (
+  <ChevronDownIcon
+    data-icon="inline-end"
+    aria-hidden="true"
+    className="text-muted-foreground ml-auto"
+  />
 );
 
 const byName = (a: Label, b: Label) => a.name.localeCompare(b.name);
@@ -100,7 +148,7 @@ const LabelsField = ({
   });
 
   return (
-    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pl-1">
+    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pl-2.5">
       {issue.labels.map((label) => (
         <span
           key={label.id}
@@ -159,7 +207,7 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
 
   if (compact) {
     return (
-      <div className="text-muted-foreground px-2.5 pt-1 text-xs text-pretty">
+      <div className="text-muted-foreground pt-1 text-xs text-pretty">
         <dt className="sr-only">History</dt>
         <dd>
           Created by {issue.creator.displayName} on{" "}
@@ -188,18 +236,21 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
   );
 };
 
-/** Workflow State, Priority, assignee and Labels, each edited through a picker; plus who created it and when. */
+/**
+ * Workflow State, Priority, assignee and Labels, each edited through a picker;
+ * plus who created it and when. Phones split them: the first three as chips
+ * under the title (`summary`), the rest in a card below the body (`details`).
+ */
 export const IssueProperties = ({
   states,
   openPicker,
   onOpenPickerChange,
-  compact = false,
+  layout,
 }: {
   states: WorkflowState[];
   openPicker: IssuePicker | null;
   onOpenPickerChange: (picker: IssuePicker | null) => void;
-  /** Folds who created it and when into one line, for the narrow layout. */
-  compact?: boolean;
+  layout: Layout;
 }) => {
   const issue = useIssue();
   const members = useQuery(orpc.workspace.members.queryOptions());
@@ -230,9 +281,39 @@ export const IssueProperties = ({
     (member) => member.active || member.id === issue.assignee?.id
   );
 
+  const details = (
+    <>
+      <Row term="Labels">
+        <LabelsField {...pickerProps("labels")} />
+      </Row>
+      <IssueMetadata compact={layout === "details"} />
+    </>
+  );
+
+  if (layout === "details") {
+    return <dl className="flex flex-col gap-1">{details}</dl>;
+  }
+
+  const chip = layout === "summary";
+
+  const { variant, width, opens, list } = chip
+    ? ({
+        variant: "outline",
+        // Chips shrink and truncate so all three stay on one row.
+        width: "min-w-0 max-w-full",
+        opens: null,
+        list: "flex gap-1.5",
+      } as const)
+    : ({
+        variant: "property",
+        width: "",
+        opens: <Opens />,
+        list: "flex flex-col gap-1",
+      } as const);
+
   return (
-    <dl className="flex flex-col gap-1">
-      <Row term="Workflow State">
+    <dl className={list}>
+      <Row term="Workflow State" chip={chip}>
         <Picker
           label="Move to"
           {...pickerProps("state")}
@@ -243,16 +324,18 @@ export const IssueProperties = ({
           }}
           trigger={
             <Button
-              variant="property"
+              variant={variant}
+              className={width}
               aria-label={`Workflow State: ${state.name}`}
             >
               <StateIcon category={state.category} />
               <span className="truncate">{state.name}</span>
+              {opens}
             </Button>
           }
         />
       </Row>
-      <Row term="Priority">
+      <Row term="Priority" chip={chip}>
         <Picker
           label="Change Priority"
           {...pickerProps("priority")}
@@ -267,53 +350,51 @@ export const IssueProperties = ({
           }}
           trigger={
             <Button
-              variant="property"
+              variant={variant}
+              className={width}
               aria-label={`Priority: ${priorityLabels[priority]}`}
             >
               <PriorityIcon priority={priority} labelled={false} />
               <span className="truncate">{priorityLabels[priority]}</span>
+              {opens}
             </Button>
           }
         />
       </Row>
-      <Row term="Assignee">
-        <Picker
-          label="Assign to"
-          {...pickerProps("assignee")}
-          options={assigneeOptions(assignable)}
-          selected={[assignee?.id ?? UNASSIGNED]}
-          onSelect={(value) => {
-            update.mutate({
-              id: issue.id,
-              assigneeId: value === UNASSIGNED ? null : value,
-            });
-          }}
-          trigger={
-            <Button
-              variant="property"
-              aria-label={`Assignee: ${assignee?.displayName ?? "Unassigned"}`}
-            >
-              {assignee === null ? (
-                <UnassignedAvatar />
-              ) : (
-                <MemberAvatar member={assignee} />
-              )}
-              <span
-                className={cn(
-                  "truncate",
-                  assignee === null && "text-muted-foreground"
-                )}
+      <Row term="Assignee" chip={chip}>
+        <Tooltip>
+          <Picker
+            label="Assign to"
+            {...pickerProps("assignee")}
+            options={assigneeOptions(assignable)}
+            selected={[assignee?.id ?? UNASSIGNED]}
+            onSelect={(value) => {
+              update.mutate({
+                id: issue.id,
+                assigneeId: value === UNASSIGNED ? null : value,
+              });
+            }}
+            trigger={
+              <TooltipTrigger
+                render={
+                  <Button
+                    variant={variant}
+                    className={width}
+                    aria-label={`Assignee: ${assignee?.displayName ?? "Unassigned"}`}
+                  />
+                }
               >
-                {assignee?.displayName ?? "Unassigned"}
-              </span>
-            </Button>
-          }
-        />
+                <AssigneeValue assignee={assignee} />
+                {opens}
+              </TooltipTrigger>
+            }
+          />
+          {assignee === null ? null : (
+            <TooltipContent>{assignee.email}</TooltipContent>
+          )}
+        </Tooltip>
       </Row>
-      <Row term="Labels">
-        <LabelsField {...pickerProps("labels")} />
-      </Row>
-      <IssueMetadata compact={compact} />
+      {chip ? null : details}
     </dl>
   );
 };
