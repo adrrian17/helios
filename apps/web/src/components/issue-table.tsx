@@ -117,7 +117,7 @@ const SortHeader = ({
   );
 };
 
-/** What the phone sort menu calls each field, since phones hide most column headers. */
+/** What the sort menu calls each field, since narrower widths hide some column headers. */
 const sortNames: Record<SortField, string> = {
   identifier: "Identifier",
   title: "Title",
@@ -135,7 +135,7 @@ const directions = ["asc", "desc"] as const;
 const isField = (value: unknown): value is SortField =>
   sortFields.some((field) => field === value);
 
-/** Every sort field and the direction, for phones where the List hides most headers. */
+/** Every sort field and the direction, for widths where the List hides the date columns. */
 export const SortMenu = ({
   sort,
   onChange,
@@ -149,7 +149,7 @@ export const SortMenu = ({
         <Button
           variant="muted"
           size="icon-sm"
-          className="md:hidden"
+          className="xl:hidden"
           aria-label={`Sort: ${sortNames[sort.field]}, ${directionNames[sort.direction].toLowerCase()}`}
         />
       }

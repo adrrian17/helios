@@ -146,6 +146,30 @@ test.describe("desktop list", () => {
     ).toBeVisible();
     await expect(group).toBeHidden();
   });
+
+  test("at tablet widths the Sort menu reaches the hidden date columns", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    await seedProject(page, prefix);
+    await page.setViewportSize({ width: 1024, height: 768 });
+
+    await page.goto(`/projects/${prefix}/list`);
+    await expect(
+      page.getByRole("columnheader", { name: "Created" })
+    ).toBeHidden();
+    await page.getByRole("button", { name: /^Sort: /u }).click();
+    await page.getByRole("menuitemradio", { name: "Created" }).click();
+    await expect(page).toHaveURL(/sort=created/u);
+    await page.keyboard.press("Escape");
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(page.getByRole("button", { name: /^Sort: /u })).toBeHidden();
+
+    await archiveProject(page, prefix);
+  });
 });
 
 test.describe("phone list", () => {
@@ -183,6 +207,30 @@ test.describe("phone list", () => {
     const overflow = await horizontalOverflow(page);
 
     expect(overflow, "no horizontal page scroll").toBeLessThanOrEqual(0);
+
+    await archiveProject(page, prefix);
+  });
+
+  test("at 360px the Sort menu stays fully on screen with filters active", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    await seedProject(page, prefix);
+    await page.setViewportSize({ width: 360, height: 740 });
+
+    await page.goto(`/projects/${prefix}/list`);
+    await page.getByRole("button", { name: "Assignee filter" }).click();
+    await page.getByRole("option", { name: "Unassigned" }).click();
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Priority filter" }).click();
+    await page.getByRole("option", { name: "Urgent" }).click();
+    await page.keyboard.press("Escape");
+
+    await expect(page.getByRole("button", { name: /^Sort: /u })).toBeInViewport(
+      { ratio: 1 }
+    );
 
     await archiveProject(page, prefix);
   });

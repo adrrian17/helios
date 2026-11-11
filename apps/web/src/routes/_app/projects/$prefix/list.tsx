@@ -89,7 +89,7 @@ const ListPage = () => {
           });
         }}
       >
-        <span className="text-muted-foreground shrink-0 pl-2 text-xs tabular-nums">
+        <span className="text-muted-foreground shrink-0 pl-2 text-xs tabular-nums max-md:sr-only">
           {issues.length} {issues.length === 1 ? "Issue" : "Issues"}
         </span>
         <SortMenu sort={sort} onChange={setSort} />

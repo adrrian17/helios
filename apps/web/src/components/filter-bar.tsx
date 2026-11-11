@@ -92,55 +92,57 @@ export const FilterBar = ({
   const labels = useQuery(orpc.labels.list.queryOptions());
 
   return (
-    <fieldset className="flex h-11 min-w-0 shrink-0 items-center gap-1 overflow-x-auto border-b px-3 max-md:h-14 max-md:px-2">
+    <fieldset className="flex h-11 min-w-0 shrink-0 items-center gap-1 border-b pr-3 max-md:h-14 max-md:pr-2">
       <legend className="sr-only">Filters</legend>
-      <FilterPicker
-        name="Assignee"
-        icon={UserRoundIcon}
-        options={assigneeOptions(members.data ?? [])}
-        selected={search.assignee ?? []}
-        onSelect={(value) => {
-          onChange({ ...search, assignee: toggled(search.assignee, value) });
-        }}
-      />
-      <FilterPicker
-        name="Label"
-        icon={TagIcon}
-        options={labelOptions(labels.data ?? [])}
-        selected={search.label ?? []}
-        onSelect={(value) => {
-          onChange({ ...search, label: toggled(search.label, value) });
-        }}
-      />
-      <FilterPicker
-        name="Priority"
-        icon={SignalIcon}
-        options={priorityOptions}
-        selected={search.priority ?? []}
-        onSelect={(value) => {
-          const priority = pickerPriorities.find((entry) => entry === value);
-
-          if (priority !== undefined) {
-            onChange({
-              ...search,
-              priority: toggled(search.priority, priority),
-            });
-          }
-        }}
-      />
-      {hasFilters(search) ? (
-        <Button
-          variant="muted"
-          size="sm"
-          onClick={() => {
-            onChange({});
+      {/* Only the filters scroll sideways, so the controls after them always stay on screen. */}
+      <div className="flex min-w-0 flex-1 items-center gap-1 self-stretch overflow-x-auto pr-1 pl-3 max-md:pl-2">
+        <FilterPicker
+          name="Assignee"
+          icon={UserRoundIcon}
+          options={assigneeOptions(members.data ?? [])}
+          selected={search.assignee ?? []}
+          onSelect={(value) => {
+            onChange({ ...search, assignee: toggled(search.assignee, value) });
           }}
-        >
-          <XIcon data-icon="inline-start" />
-          <span className="max-md:sr-only">Clear filters</span>
-        </Button>
-      ) : null}
-      <span className="flex-1" />
+        />
+        <FilterPicker
+          name="Label"
+          icon={TagIcon}
+          options={labelOptions(labels.data ?? [])}
+          selected={search.label ?? []}
+          onSelect={(value) => {
+            onChange({ ...search, label: toggled(search.label, value) });
+          }}
+        />
+        <FilterPicker
+          name="Priority"
+          icon={SignalIcon}
+          options={priorityOptions}
+          selected={search.priority ?? []}
+          onSelect={(value) => {
+            const priority = pickerPriorities.find((entry) => entry === value);
+
+            if (priority !== undefined) {
+              onChange({
+                ...search,
+                priority: toggled(search.priority, priority),
+              });
+            }
+          }}
+        />
+        {hasFilters(search) ? (
+          <Button
+            variant="muted"
+            size="sm"
+            onClick={() => {
+              onChange({});
+            }}
+          >
+            <XIcon data-icon="inline-start" />
+            <span className="max-md:sr-only">Clear filters</span>
+          </Button>
+        ) : null}
+      </div>
       {children}
     </fieldset>
   );
