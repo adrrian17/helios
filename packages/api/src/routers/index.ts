@@ -1,6 +1,7 @@
 import type { RouterClient } from "@orpc/server";
 
 import { memberProcedure } from "../index";
+import { issuesRouter } from "./issues";
 import { projectsRouter } from "./projects";
 import { workflowStatesRouter } from "./workflow-states";
 import { workspaceRouter } from "./workspace";
@@ -15,6 +16,7 @@ export const appRouter = {
   workspace: workspaceRouter,
   projects: projectsRouter,
   workflowStates: workflowStatesRouter,
+  issues: issuesRouter,
 };
 
 export type AppRouter = typeof appRouter;
