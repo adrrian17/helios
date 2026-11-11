@@ -135,7 +135,18 @@ const CreateIssueForm = ({
             }}
           >
             <SelectTrigger id="new-issue-project" className="w-full">
-              <SelectValue />
+              <SelectValue className="min-w-0">
+                {(value: string) => {
+                  const project = projects.find(({ id }) => id === value);
+
+                  return project ? (
+                    <>
+                      <ProjectMark project={project} />
+                      <span className="truncate">{project.name}</span>
+                    </>
+                  ) : null;
+                }}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
