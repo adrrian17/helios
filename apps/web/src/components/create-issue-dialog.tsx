@@ -159,7 +159,8 @@ const CreateIssueForm = ({
             aria-invalid={titleInvalid || undefined}
             value={title}
             onChange={(event) => {
-              onDraftChange({ ...draft, title: event.target.value });
+              // Pin the shown Project too, so a dismissed draft does not follow navigation.
+              onDraftChange({ projectId, title: event.target.value });
             }}
           />
           {titleInvalid ? (

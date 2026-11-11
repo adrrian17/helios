@@ -398,6 +398,21 @@ test("on a short screen the New Issue dialog scrolls to its button and keeps a d
   await open();
   await expect(dialog.getByLabel("Title")).toHaveValue("");
   await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
+  await dialog.getByLabel("Title").fill("Default Project, then navigated");
+  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog).toBeHidden();
+
+  // In-app navigation, as a reload would drop the draft anyway.
+  await page.evaluate(
+    `history.pushState(null, "", "/projects/${otherPrefix}/list"); dispatchEvent(new PopStateEvent("popstate"));`
+  );
+  await expect(page).toHaveTitle(new RegExp(`Seed ${otherPrefix}`, "u"));
+  await open();
+  await expect(dialog.getByLabel("Title")).toHaveValue(
+    "Default Project, then navigated"
+  );
+  await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
+  await dialog.getByLabel("Title").fill("");
   await dialog.getByRole("button", { name: "Cancel" }).click();
 
   await page.setViewportSize(
