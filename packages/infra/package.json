@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "alchemy dev",
-    "deploy": "NODE_ENV=production alchemy deploy",
-    "destroy": "NODE_ENV=production alchemy destroy"
+    "dev": "portless helios sh -c 'WEB_PORT=$PORT portless api.helios alchemy dev'",
+    "deploy": "APP_ENV=production alchemy deploy",
+    "destroy": "APP_ENV=production alchemy destroy"
   },
   "devDependencies": {
     "@alchemy.run/cloudflare": "2.0.0-beta.85",

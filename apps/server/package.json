@@ -10,13 +10,10 @@
     "@helios/api": "workspace:*",
     "@helios/auth": "workspace:*",
     "@helios/db": "workspace:*",
-    "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
-    "@orpc/zod": "catalog:",
     "evlog": "^2.33.1",
     "hono": "^4.13.7",
-    "varlock": "catalog:",
-    "zod": "catalog:"
+    "varlock": "catalog:"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "catalog:",
