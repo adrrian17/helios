@@ -40,6 +40,9 @@ export type ShortcutName = keyof typeof shortcuts;
 
 const isMac = () => /Mac|iPhone|iPad/u.test(navigator.userAgent);
 
+/** The keys that send a Markdown editor, as shown under it. */
+export const submitKeys = () => (isMac() ? "⌘↵" : "Ctrl+Enter");
+
 /** What to press, as shown on screen: "⌘ K", "Ctrl K", "Esc", "C". */
 export const keysOf = (shortcut: Shortcut): string[] => {
   const key = shortcut.key === "Escape" ? "Esc" : shortcut.key.toUpperCase();

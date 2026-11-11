@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { useIssue } from "@/components/issue/use-issue";
 import { Markdown, MarkdownEditor } from "@/components/markdown";
 import { orpc } from "@/utils/orpc";
+import { submitKeys } from "@/utils/shortcuts";
 
 /** The title as a borderless field: Enter or leaving it saves, Escape puts it back. */
 export const IssueTitle = () => {
@@ -42,7 +43,7 @@ export const IssueTitle = () => {
         aria-label="Title"
         rows={1}
         maxLength={500}
-        className="focus-visible:bg-muted/40 -mx-1 field-sizing-content w-full resize-none rounded-md bg-transparent px-1 py-0.5 text-pretty outline-none"
+        className="focus-visible:bg-muted/40 focus-visible:ring-ring -mx-1 field-sizing-content w-full resize-none rounded-md bg-transparent px-1 py-0.5 text-pretty outline-none focus-visible:ring-2"
         value={draft ?? issue.title}
         onChange={(event) => {
           setDraft(event.target.value.replaceAll("\n", " "));
@@ -101,8 +102,8 @@ export const IssueDescription = () => {
           }}
         />
         <div className="flex items-center justify-end gap-1.5">
-          <span className="text-muted-foreground mr-auto text-xs max-sm:hidden">
-            Markdown supported · ⌘↵ to save
+          <span className="text-muted-foreground mr-auto text-xs max-md:hidden">
+            Markdown supported · {submitKeys()} to save
           </span>
           <Button
             variant="ghost"

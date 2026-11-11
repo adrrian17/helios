@@ -29,6 +29,7 @@ import { useIssue } from "@/components/issue/use-issue";
 import { Markdown, MarkdownEditor } from "@/components/markdown";
 import type { TimelineEntry } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
+import { submitKeys } from "@/utils/shortcuts";
 import { useMe } from "@/utils/use-me";
 
 type ActivityEntry = Extract<TimelineEntry, { type: "activity" }>;
@@ -66,7 +67,8 @@ const activityCopy: Record<
     icon: ArrowRightIcon,
     describe: (entry) => (
       <>
-        moved it from <Change entry={entry} />
+        moved it <span className="sr-only">from </span>
+        <Change entry={entry} />
       </>
     ),
   },
@@ -317,8 +319,8 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
           onSubmit={submit}
         />
         <div className="flex items-center justify-end gap-2">
-          <span className="text-muted-foreground mr-auto text-xs max-sm:hidden">
-            Markdown supported · ⌘↵ to send
+          <span className="text-muted-foreground mr-auto text-xs max-md:hidden">
+            Markdown supported · {submitKeys()} to send
           </span>
           <Button
             size="sm"
