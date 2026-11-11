@@ -36,6 +36,7 @@ import { ColumnPager } from "@/components/board/column-pager";
 import { IssueCardBody } from "@/components/board/issue-card";
 import { useKeyboardMoves } from "@/components/board/use-keyboard-moves";
 import type { BoardColumn, IssueRow, Project } from "@/utils/domain";
+import type { toApiFilters } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
 
 const screenReaderInstructions = {
@@ -46,9 +47,9 @@ const screenReaderInstructions = {
 const CLICK_GUARD_MS = 150;
 
 /** Server columns plus optimistic moves through `issues.move`, snapping back when the server refuses. */
-const useBoardMoves = (projectId: string) => {
+const useBoardMoves = (input: BoardInput) => {
   const queryClient = useQueryClient();
-  const boardKey = orpc.issues.board.queryKey({ input: { projectId } });
+  const boardKey = orpc.issues.board.queryKey({ input });
 
   const move = useMutation({
     ...orpc.issues.move.mutationOptions(),
@@ -70,15 +71,23 @@ const useBoardMoves = (projectId: string) => {
   };
 };
 
+/** What the board was loaded with; moves edit that cached board. */
+export interface BoardInput {
+  projectId: string;
+  filters: ReturnType<typeof toApiFilters>;
+}
+
 export const Board = ({
   project,
+  input,
   columns,
 }: {
   project: Project;
+  input: BoardInput;
   columns: BoardColumn[];
 }) => {
   const isMobile = useIsMobile();
-  const commit = useBoardMoves(project.id);
+  const commit = useBoardMoves(input);
 
   // While a card is moving, the board renders this working copy instead of the server's columns.
   const [working, setWorking] = useState<BoardColumn[] | null>(null);

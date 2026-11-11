@@ -3,7 +3,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { Board } from "@/components/board/board";
+import { FilterBar } from "@/components/filter-bar";
+import { toApiFilters } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
+import { rememberView } from "@/utils/project-view";
 
 const SKELETON_COLUMNS = [
   { id: "a", cards: ["1", "2", "3"] },
@@ -34,26 +37,39 @@ const BoardSkeleton = () => (
 
 const BoardPage = () => {
   const { prefix } = Route.useParams();
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const { filters } = Route.useLoaderDeps();
 
   const { data: project } = useSuspenseQuery(
     orpc.projects.get.queryOptions({ input: { prefix } })
   );
 
+  const input = { projectId: project.id, filters };
+
   const { data: columns } = useSuspenseQuery(
-    orpc.issues.board.queryOptions({ input: { projectId: project.id } })
+    orpc.issues.board.queryOptions({ input })
   );
 
   return (
     <main className="flex min-h-0 flex-1 flex-col">
-      <Board project={project} columns={columns} />
+      <FilterBar
+        search={search}
+        onChange={(next) => {
+          void navigate({ search: next, replace: true });
+        }}
+      />
+      <Board project={project} input={input} columns={columns} />
     </main>
   );
 };
 
 export const Route = createFileRoute("/_app/projects/$prefix/board")({
+  loaderDeps: ({ search }) => ({ filters: toApiFilters(search) }),
   loader: async ({
     context: { orpc: api, queryClient },
     params: { prefix },
+    deps: { filters },
   }) => {
     const project = await queryClient.query({
       ...api.projects.get.queryOptions({ input: { prefix } }),
@@ -61,9 +77,14 @@ export const Route = createFileRoute("/_app/projects/$prefix/board")({
     });
 
     await queryClient.query({
-      ...api.issues.board.queryOptions({ input: { projectId: project.id } }),
+      ...api.issues.board.queryOptions({
+        input: { projectId: project.id, filters },
+      }),
       staleTime: "static",
     });
+  },
+  onEnter: ({ params }) => {
+    rememberView(params.prefix, "board");
   },
   pendingComponent: BoardSkeleton,
   component: BoardPage,

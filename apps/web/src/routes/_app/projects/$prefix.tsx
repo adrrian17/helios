@@ -14,6 +14,7 @@ import { ArchiveIcon, KanbanIcon, ListIcon, SettingsIcon } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ProjectMark } from "@/components/project-mark";
 import { NotFound } from "@/components/route-states";
+import { filterSearchSchema, filtersOf } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
 import { useMe } from "@/utils/use-me";
 
@@ -75,6 +76,7 @@ const ProjectLayout = () => {
           <Link
             to="/projects/$prefix/board"
             params={{ prefix }}
+            search={filtersOf}
             className={VIEW_LINK}
           >
             <KanbanIcon />
@@ -83,6 +85,7 @@ const ProjectLayout = () => {
           <Link
             to="/projects/$prefix/list"
             params={{ prefix }}
+            search={filtersOf}
             className={VIEW_LINK}
           >
             <ListIcon />
@@ -96,6 +99,7 @@ const ProjectLayout = () => {
 };
 
 export const Route = createFileRoute("/_app/projects/$prefix")({
+  validateSearch: filterSearchSchema,
   loader: async ({
     context: { orpc: api, queryClient },
     params: { prefix },
