@@ -37,10 +37,10 @@ const moveSaved = async (page: Page) =>
     (response) => response.url().includes("/rpc/issues/move") && response.ok()
   );
 
-/** The colour of the ring drawn around a card. */
-const ringColorOf = async (target: Locator) =>
-  await target.evaluate<string, undefined>(
-    "(element) => getComputedStyle(element).getPropertyValue('--tw-ring-color')"
+/** The colour of the ring drawn around the focused element. */
+const focusedRingColor = async (page: Page) =>
+  await page.evaluate<string>(
+    "getComputedStyle(document.activeElement).getPropertyValue('--tw-ring-color')"
   );
 
 const card = (scope: Locator, identifier: string) =>
@@ -113,18 +113,16 @@ test.describe("desktop board", () => {
     await card(column(page, "Backlog"), `${prefix}-1`).focus();
     await page.keyboard.press("Space");
     await page.keyboard.press("ArrowRight");
-    await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeAttached();
-
-    const pickedRing = await ringColorOf(
-      card(column(page, IN_PROGRESS), `${prefix}-1`)
-    );
+    await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeFocused();
+    const pickedRing = await focusedRingColor(page);
+    expect(pickedRing, "a picked card has a ring").not.toBe("");
 
     const saved = moveSaved(page);
     await page.keyboard.press("Space");
     await saved;
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeFocused();
     expect(
-      await ringColorOf(card(column(page, IN_PROGRESS), `${prefix}-1`)),
+      await focusedRingColor(page),
       "a picked card has a different ring colour from a focused one"
     ).not.toBe(pickedRing);
 
