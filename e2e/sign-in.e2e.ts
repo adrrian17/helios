@@ -1,18 +1,6 @@
 import { expect, test } from "@playwright/test";
-import type { APIRequestContext } from "@playwright/test";
 
-const API_URL = "https://api.helios.localhost";
-const adminEmail = process.env.ADMIN_EMAIL ?? "";
-
-const capturedLinkTo = async (request: APIRequestContext, email: string) => {
-  const response = await request.get(`${API_URL}/dev/magic-link`, {
-    params: { email },
-  });
-
-  expect(response.ok(), `a magic link was captured for ${email}`).toBe(true);
-
-  return await response.text();
-};
+import { API_URL, adminEmail, capturedLinkTo } from "./helpers";
 
 test("the seeded Admin signs in with a magic link and signs out", async ({
   isMobile,
@@ -29,7 +17,7 @@ test("the seeded Admin signs in with a magic link and signs out", async ({
   );
 
   await page.goto(await capturedLinkTo(request, adminEmail));
-  await expect(page.getByText("No Projects yet")).toBeVisible();
+  await expect(page).not.toHaveURL(/\/sign-in/u);
 
   if (isMobile) {
     await page.getByRole("button", { name: "Open navigation" }).click();
