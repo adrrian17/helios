@@ -1,4 +1,4 @@
-import { Button } from "@helios/ui/components/button";
+import { Button, buttonVariants } from "@helios/ui/components/button";
 import {
   Empty,
   EmptyContent,
@@ -98,9 +98,9 @@ export const NotFound = ({
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button render={<Link to="/" />} nativeButton={false}>
+        <Link to="/" className={buttonVariants()}>
           Go home
-        </Button>
+        </Link>
       </EmptyContent>
     </Empty>
   </StatePage>

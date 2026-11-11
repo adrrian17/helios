@@ -1,5 +1,5 @@
 import { Badge } from "@helios/ui/components/badge";
-import { Button, buttonVariants } from "@helios/ui/components/button";
+import { buttonVariants } from "@helios/ui/components/button";
 import { cn } from "@helios/ui/lib/utils";
 import { ORPCError } from "@orpc/client";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -43,24 +43,15 @@ const ProjectLayout = () => {
       <PageHeader
         actions={
           me.role === "admin" ? (
-            <Button
-              variant="ghost"
-              size="icon-sm"
+            <Link
+              to="/projects/$prefix/settings"
+              params={{ prefix }}
               aria-label="Project settings"
-              render={
-                <Link
-                  to="/projects/$prefix/settings"
-                  params={{ prefix }}
-                  activeProps={{
-                    "aria-current": "page",
-                    className: "bg-muted",
-                  }}
-                />
-              }
-              nativeButton={false}
+              className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
+              activeProps={{ "aria-current": "page", className: "bg-muted" }}
             >
               <SettingsIcon />
-            </Button>
+            </Link>
           ) : null
         }
       >

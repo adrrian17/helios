@@ -105,6 +105,9 @@ test.describe("desktop keyboard", () => {
 
     await page.goto(`/projects/${prefix}/board`);
     await expect(column(page, "Backlog")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Project settings" })
+    ).toBeVisible();
     await page.keyboard.press(OPEN_PALETTE);
     await palette(page).getByRole("combobox").fill("go labels");
     await expect(
@@ -506,6 +509,8 @@ test("an unknown page, a missing Issue or Project and an unreachable API each sh
     // oxlint-disable-next-line eslint/no-await-in-loop -- each state is a page visit.
     await expect(page).toHaveTitle("Not found");
   }
+
+  await expect(page.getByRole("link", { name: "Go home" })).toBeVisible();
 
   await page.route(`${API_URL}/**`, async (route) => {
     await route.abort();

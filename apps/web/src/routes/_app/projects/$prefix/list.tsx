@@ -1,4 +1,4 @@
-import { Button } from "@helios/ui/components/button";
+import { Button, buttonVariants } from "@helios/ui/components/button";
 import {
   Empty,
   EmptyContent,
@@ -116,15 +116,13 @@ const ListPage = () => {
                   Clear filters
                 </Button>
               ) : (
-                <Button
-                  variant="outline"
-                  nativeButton={false}
-                  render={
-                    <Link to="/projects/$prefix/board" params={{ prefix }} />
-                  }
+                <Link
+                  to="/projects/$prefix/board"
+                  params={{ prefix }}
+                  className={buttonVariants({ variant: "outline" })}
                 >
                   Add Issues on the Board
-                </Button>
+                </Link>
               )}
             </EmptyContent>
           </Empty>
