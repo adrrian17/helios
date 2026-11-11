@@ -10,7 +10,7 @@ import { cors } from "hono/cors";
 
 import { createContext } from "./context";
 import { ENV } from "./env.server";
-import { createAuth } from "./services";
+import { capturedMail, createAuth } from "./services";
 
 initLogger({
   env: { service: "helios-server" },
@@ -47,6 +47,15 @@ app.on(
   async (c) => await createAuth().handler(c.req.raw)
 );
 
+if (capturedMail) {
+  const mail = capturedMail;
+  app.get("/dev/magic-link", (c) => {
+    const url = mail.lastLinkTo(c.req.query("email") ?? "");
+
+    return url === undefined ? c.json({ url: null }, 404) : c.json({ url });
+  });
+}
+
 const logError: Parameters<typeof onError>[0] = (error) => {
   console.error(error);
 };
@@ -56,7 +65,7 @@ export const rpcHandler = new RPCHandler(appRouter, {
 });
 
 app.use("/*", async (c, next) => {
-  const context = await createContext({ headers: c.req.raw.headers });
+  const context = await createContext(c.req.raw.headers);
 
   const rpcResult = await rpcHandler.handle(c.req.raw, {
     prefix: "/rpc",

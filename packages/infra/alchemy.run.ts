@@ -20,6 +20,11 @@ export const server = Cloudflare.Worker("server", {
   },
   env: {
     DB: db,
+    APP_ENV: Config.String("APP_ENV"),
+    ADMIN_EMAIL: Config.String("ADMIN_EMAIL"),
+    EMAIL_FROM: Config.String("EMAIL_FROM"),
+    // Under `alchemy dev` this binding writes .eml files locally; the server uses the capture Mailer there.
+    EMAIL: Cloudflare.Email.SendEmail("EMAIL"),
     CORS_ORIGIN: Config.String("CORS_ORIGIN"),
     BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
     BETTER_AUTH_URL: portlessServerUrl ?? Cloudflare.Worker.URL,

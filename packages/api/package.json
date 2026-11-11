@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@helios/config": "workspace:*",
+    "miniflare": "4.20260730.0",
     "typescript": "catalog:"
   }
 }

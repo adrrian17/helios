@@ -1,19 +1,9 @@
-import type { Context as ApiContext } from "@helios/api/context";
+import { createContext as createApiContext } from "@helios/api/context";
 
-import { getDb, createAuth } from "./services";
+import { createAuth, getDb } from "./services";
 
-export interface CreateContextOptions {
-  headers: Headers;
-}
-
-export const createContext = async ({
-  headers,
-}: CreateContextOptions): Promise<ApiContext> => {
+export const createContext = async (headers: Headers) => {
   const db = getDb();
-  const session = await createAuth(db).api.getSession({ headers });
 
-  return {
-    db,
-    session,
-  };
+  return await createApiContext({ auth: createAuth(db), db, headers });
 };
