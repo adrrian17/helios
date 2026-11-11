@@ -32,6 +32,7 @@ const priorityLabels: Record<Priority, string> = {
 };
 
 const SEARCH_LIMIT = 20;
+const MAX_SEARCH_WORDS = 10;
 
 const titleSchema = z.string().trim().min(1).max(500);
 const descriptionSchema = z.string().max(100_000);
@@ -587,17 +588,29 @@ export const issuesRouter = {
       .toArray();
   }),
 
-  /** Command palette search: an exact Identifier, or a title match in active Projects. */
+  /** Command palette search: an exact Identifier, or every typed word in the title or Identifier of an Issue in an active Project. */
   search: memberProcedure
     .input(z.object({ query: z.string().trim().min(1).max(200) }))
     .handler(async ({ context: { db }, input: { query } }) => {
       const parsed = parseIdentifier(query);
       const exact = parsed && `${parsed.prefix}-${parsed.number}`;
 
+      // D1 binds at most 100 parameters, and each word binds up to three.
+      const words = [...new Set(query.split(/\s+/u))].slice(
+        0,
+        MAX_SEARCH_WORDS
+      );
+
       // shortcut: `%` and `_` typed into the palette act as LIKE wildcards; escape them if that ever confuses anyone.
-      const titleMatch: RowFilter = {
-        title: { like: `%${query}%` },
+      const wordsMatch: RowFilter = {
         project: { archivedAt: { isNull: true } },
+        AND: words.map((word) => ({
+          OR: [
+            { title: { like: `%${word}%` } },
+            { project: { prefix: { like: `%${word}%` } } },
+            ...(/^\d+$/u.test(word) ? [{ number: Number(word) }] : []),
+          ],
+        })),
       };
 
       const rows = await loadRows(
@@ -606,10 +619,10 @@ export const issuesRouter = {
           ? {
               OR: [
                 { number: parsed.number, project: { prefix: parsed.prefix } },
-                titleMatch,
+                wordsMatch,
               ],
             }
-          : titleMatch
+          : wordsMatch
       );
 
       return rows

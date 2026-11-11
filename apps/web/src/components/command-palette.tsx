@@ -141,9 +141,8 @@ const PaletteBody = ({
     matchesWords(`${action.label} ${action.keywords ?? ""}`, query)
   );
 
-  const shownProjects = (projects.data ?? []).filter(
-    (project) =>
-      includes(project.name, query) || includes(project.prefix, query)
+  const shownProjects = (projects.data ?? []).filter((project) =>
+    matchesWords(`${project.name} ${project.prefix}`, query)
   );
 
   const foundIssues = query === "" ? [] : (issues.data ?? []);

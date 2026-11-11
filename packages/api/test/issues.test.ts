@@ -490,6 +490,12 @@ describe("My Issues", () => {
   });
 });
 
+const searchFor = async (client: Client, query: string) => {
+  const rows = await client.issues.search({ query });
+
+  return rows.map((row) => row.identifier);
+};
+
 describe("search", () => {
   it("finds an Issue by Identifier or by title, skipping archived Projects for titles", async () => {
     await using harness = await createHarness();
@@ -501,14 +507,49 @@ describe("search", () => {
     await admin.issues.create({ projectId: old.id, title: "Old login bug" });
     await admin.projects.archive({ id: old.id });
 
-    const search = async (query: string) => {
-      const rows = await admin.issues.search({ query });
+    await expect(searchFor(admin, "hel-2")).resolves.toStrictEqual(["HEL-2"]);
+    await expect(searchFor(admin, "LOGIN")).resolves.toStrictEqual(["HEL-1"]);
+    await expect(searchFor(admin, "OLD-1")).resolves.toStrictEqual(["OLD-1"]);
+  });
 
-      return rows.map((row) => row.identifier);
-    };
+  it("finds an Issue when every word appears in its title or Identifier, in any order", async () => {
+    await using harness = await createHarness();
+    const admin = await signInAsAdmin(harness);
+    const project = await createProject(admin, "HEL");
+    await admin.issues.create({ projectId: project.id, title: "Fix login" });
+    await admin.issues.create({
+      projectId: project.id,
+      title: "Update the pricing page copy",
+    });
 
-    await expect(search("hel-2")).resolves.toStrictEqual(["HEL-2"]);
-    await expect(search("LOGIN")).resolves.toStrictEqual(["HEL-1"]);
-    await expect(search("OLD-1")).resolves.toStrictEqual(["OLD-1"]);
+    await expect(searchFor(admin, "pricing copy")).resolves.toStrictEqual([
+      "HEL-2",
+    ]);
+    await expect(searchFor(admin, "copy  PRICING")).resolves.toStrictEqual([
+      "HEL-2",
+    ]);
+    await expect(searchFor(admin, "hel 1")).resolves.toStrictEqual(["HEL-1"]);
+    await expect(searchFor(admin, "login pricing")).resolves.toStrictEqual([]);
+  });
+
+  it("puts an exact Identifier first and survives a query of many words", async () => {
+    await using harness = await createHarness();
+    const admin = await signInAsAdmin(harness);
+    const project = await createProject(admin, "HEL");
+    await admin.issues.create({ projectId: project.id, title: "Fix login" });
+    await admin.issues.create({
+      projectId: project.id,
+      title: "Follow up on HEL-1",
+    });
+
+    const manyNumbers = Array.from({ length: 60 }, (_, index) =>
+      String(index)
+    ).join(" ");
+
+    await expect(searchFor(admin, "HEL-1")).resolves.toStrictEqual([
+      "HEL-1",
+      "HEL-2",
+    ]);
+    await expect(searchFor(admin, manyNumbers)).resolves.toStrictEqual([]);
   });
 });
