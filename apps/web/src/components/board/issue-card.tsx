@@ -199,7 +199,8 @@ export const SortableIssueCard = ({
         className={cn(
           "focus-visible:ring-ring block touch-manipulation rounded-lg outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3",
           isDragging && "opacity-40",
-          picked && "ring-primary ring-offset-background ring-2 ring-offset-2"
+          picked &&
+            "ring-primary focus-visible:ring-primary ring-offset-background shadow-lg ring-2 ring-offset-2"
         )}
       >
         <IssueCardBody
