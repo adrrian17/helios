@@ -111,10 +111,23 @@ test.describe("desktop board", () => {
     const saved = moveSaved(page);
     await page.keyboard.press("Space");
     await saved;
-    await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
+    await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeFocused();
+
+    await page.keyboard.press("Space");
+    await page.keyboard.press("ArrowRight");
+    await expect(card(column(page, "Done"), `${prefix}-1`)).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeFocused();
+
+    await page.keyboard.press("Space");
+    await page.keyboard.press("ArrowRight");
+    const savedAgain = moveSaved(page);
+    await page.keyboard.press("Space");
+    await savedAgain;
+    await expect(card(column(page, "Done"), `${prefix}-1`)).toBeFocused();
 
     await page.reload();
-    await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
+    await expect(card(column(page, "Done"), `${prefix}-1`)).toBeVisible();
 
     await archiveProject(page, prefix);
   });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
 import {
@@ -44,6 +44,15 @@ export const useKeyboardMoves = ({
 }) => {
   const [pickedId, setPickedId] = useState<string | null>(null);
   const [note, setNote] = useState("");
+  // After a drop the working board stays up until the cache has the move, so the card never jumps back and loses focus.
+  const droppedFrom = useRef<BoardColumn[] | null>(null);
+
+  useEffect(() => {
+    if (droppedFrom.current !== null && droppedFrom.current !== columns) {
+      droppedFrom.current = null;
+      setWorking(null);
+    }
+  }, [columns, setWorking]);
 
   // A card that changes column remounts, so focus follows it right after the synchronous render.
   const refocus = (id: string) => {
@@ -114,18 +123,24 @@ export const useKeyboardMoves = ({
       step(issue, current, event.key);
     } else if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
-      flushSync(putDown);
-      refocus(issue.id);
       setNote(
         `Dropped ${issue.identifier} ${describePosition(current, issue.id)}.`
       );
 
       const placement = changedPlacement(columns, current, issue.id);
 
-      if (placement !== undefined) {
+      if (placement === undefined) {
+        putDown();
+      } else {
+        droppedFrom.current = columns;
+        setPickedId(null);
         commit(current, placement);
       }
-    } else if (event.key === "Escape" || event.key === "Tab") {
+    } else if (event.key === "Escape") {
+      flushSync(putDown);
+      refocus(issue.id);
+      setNote(`Cancelled. ${issue.identifier} went back to where it was.`);
+    } else if (event.key === "Tab") {
       putDown();
       setNote(`Cancelled. ${issue.identifier} went back to where it was.`);
     }
