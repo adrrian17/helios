@@ -347,7 +347,7 @@ const CategoryGroup = ({
           <h3 className="text-xs font-medium tracking-wide uppercase">
             {label}
           </h3>
-          <p className="text-muted-foreground truncate text-xs">
+          <p className="text-muted-foreground text-xs md:truncate">
             {categoryHints[category]}
           </p>
         </div>

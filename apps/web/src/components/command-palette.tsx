@@ -174,7 +174,10 @@ const PaletteBody = ({
             <span className="text-muted-foreground w-[4.5rem] shrink-0 font-mono text-xs tabular-nums">
               {issue.identifier}
             </span>
-            <span className="truncate">{issue.title}</span>
+            {/* Phones show two lines of title rather than cutting it at a few words. */}
+            <span className="truncate max-md:line-clamp-2 max-md:whitespace-normal">
+              {issue.title}
+            </span>
           </CommandItem>
         ))}
       </CommandGroup>
