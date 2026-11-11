@@ -59,9 +59,13 @@ export const MarkdownEditor = ({
   className?: string;
 }) => (
   <Tabs defaultValue="write">
-    <TabsList variant="line" className="h-7">
-      <TabsTrigger value="write">Write</TabsTrigger>
-      <TabsTrigger value="preview">Preview</TabsTrigger>
+    <TabsList variant="line" className="h-7 max-md:h-auto">
+      <TabsTrigger value="write" className="max-md:min-h-11">
+        Write
+      </TabsTrigger>
+      <TabsTrigger value="preview" className="max-md:min-h-11">
+        Preview
+      </TabsTrigger>
     </TabsList>
     <TabsContent value="write">
       <Textarea

@@ -71,13 +71,20 @@ const SortHeader = ({
   return (
     <th
       scope="col"
-      className={cn(CELL, "h-9 text-left font-normal", column.className)}
+      className={cn(
+        CELL,
+        "h-9 text-left font-normal",
+        // Icon-only phone columns give their whole 44px width to the button.
+        Icon !== undefined && "max-md:px-0",
+        column.className
+      )}
       aria-sort={active ? ariaSort[sort.direction] : undefined}
     >
       <button
         type="button"
         className={cn(
-          "hover:text-foreground focus-visible:ring-ring/50 -mx-1 inline-flex h-7 max-w-full items-center gap-1 rounded-md px-1 text-xs outline-none focus-visible:ring-3 max-md:h-11",
+          "hover:text-foreground focus-visible:ring-ring/50 -mx-1 inline-flex h-7 max-w-full items-center gap-1 rounded-md px-1 text-xs outline-none focus-visible:ring-3 max-md:h-11 max-md:min-w-11",
+          Icon !== undefined && "max-md:mx-0 max-md:w-full max-md:px-2",
           active ? "text-foreground" : "text-muted-foreground"
         )}
         onClick={() => {

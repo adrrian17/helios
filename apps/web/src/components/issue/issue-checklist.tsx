@@ -103,7 +103,7 @@ const ItemRow = ({
       ref={setNodeRef}
       data-checklist-item={item.text}
       className={cn(
-        "group/item bg-background relative flex min-h-9 items-center gap-1 rounded-md pr-1 max-md:min-h-11",
+        "group/item bg-background relative flex min-h-9 items-center gap-1 rounded-md pr-1 max-md:min-h-11 max-md:gap-3",
         SORTABLE_MOTION,
         isDragging && "ring-foreground/10 z-10 shadow-md ring-1"
       )}
@@ -135,7 +135,7 @@ const ItemRow = ({
         <button
           type="button"
           className={cn(
-            "focus-visible:ring-ring/50 min-w-0 flex-1 cursor-text truncate rounded-sm px-2 py-1 text-left text-sm outline-none focus-visible:ring-3",
+            "focus-visible:ring-ring/50 min-w-0 flex-1 cursor-text truncate rounded-sm px-2 py-1 text-left text-sm outline-none focus-visible:ring-3 max-md:min-h-11",
             item.checked && "text-muted-foreground line-through"
           )}
           onClick={() => {
