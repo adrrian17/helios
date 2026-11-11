@@ -189,7 +189,8 @@ export const MemberAvatar = ({
   size?: "xs" | "sm" | "default";
   className?: string;
 }) => (
-  <Avatar size={size} className={className}>
+  // Decorative: a name always sits beside it or is spoken separately.
+  <Avatar size={size} className={className} aria-hidden="true">
     <AvatarFallback colored style={{ "--avatar-hue": hueOf(member.id) }}>
       {initialsOf(member.displayName)}
     </AvatarFallback>

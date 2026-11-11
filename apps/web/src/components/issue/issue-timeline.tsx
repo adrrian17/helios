@@ -43,7 +43,7 @@ const Change = ({ entry }: { entry: ActivityEntry }) => (
   <>
     <Value>{entry.oldValue}</Value>
     <ArrowRightIcon aria-hidden="true" className="mx-1 inline size-3" />
-    <span className="sr-only">to</span>
+    <span className="sr-only">{" to "}</span>
     <Value>{entry.newValue}</Value>
   </>
 );
