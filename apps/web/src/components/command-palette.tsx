@@ -14,6 +14,7 @@ import { Spinner } from "@helios/ui/components/spinner";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
+  CircleAlertIcon,
   CircleUserRoundIcon,
   KeyboardIcon,
   PlusIcon,
@@ -146,10 +147,13 @@ const PaletteBody = ({
   );
 
   const foundIssues = query === "" ? [] : (issues.data ?? []);
+  // A failed search must not read as "nothing matches".
+  const searchFailed = query !== "" && issues.isError;
 
   // In render order. Issues arrive after the keystroke, so the highlight
   // falls back to the first item whenever the chosen one is gone.
   const values = [
+    ...(searchFailed ? ["issue-search-retry"] : []),
     ...foundIssues.map((issue) => `issue:${issue.id}`),
     ...shownActions.map((action) => `action:${action.id}`),
     ...shownProjects.map((project) => `project:${project.id}`),
@@ -218,6 +222,20 @@ const PaletteBody = ({
         {searching && foundIssues.length === 0 ? null : (
           <CommandEmpty>No Issues, Projects or actions match.</CommandEmpty>
         )}
+        {searchFailed ? (
+          <CommandGroup heading="Issues">
+            <CommandItem
+              value="issue-search-retry"
+              onSelect={() => {
+                void issues.refetch();
+              }}
+            >
+              <CircleAlertIcon className="text-destructive" />
+              <span className="truncate">Couldn’t search Issues.</span>
+              <CommandShortcut>Retry</CommandShortcut>
+            </CommandItem>
+          </CommandGroup>
+        ) : null}
         {issueGroup}
         {shownActions.length > 0 ? (
           <CommandGroup heading="Actions">

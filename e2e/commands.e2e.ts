@@ -20,6 +20,9 @@ const newIssueDialog = (page: Page) =>
   page.getByRole("dialog", { name: "New Issue" });
 
 const MY_ISSUES = "/my-issues";
+const OPEN_PALETTE = "ControlOrMeta+k";
+const GO_TO_LABELS = "Go to Labels";
+const SEARCH_RPC = `${API_URL}/rpc/issues/search`;
 
 /** Keys go to the window, so wait until the signed-in page has mounted. */
 const openMyIssues = async (page: Page) => {
@@ -44,7 +47,7 @@ test.describe("desktop keyboard", () => {
     });
 
     await openMyIssues(page);
-    await page.keyboard.press("ControlOrMeta+k");
+    await page.keyboard.press(OPEN_PALETTE);
     await palette(page).getByRole("combobox").fill(issue.identifier);
     await expect(palette(page).getByRole("option").first()).toContainText(
       issue.identifier
@@ -102,10 +105,10 @@ test.describe("desktop keyboard", () => {
 
     await page.goto(`/projects/${prefix}/board`);
     await expect(column(page, "Backlog")).toBeVisible();
-    await page.keyboard.press("ControlOrMeta+k");
+    await page.keyboard.press(OPEN_PALETTE);
     await palette(page).getByRole("combobox").fill("go labels");
     await expect(
-      palette(page).getByRole("option", { name: "Go to Labels" })
+      palette(page).getByRole("option", { name: GO_TO_LABELS })
     ).toBeVisible();
 
     await palette(page).getByRole("combobox").fill("new issue");
@@ -121,6 +124,38 @@ test.describe("desktop keyboard", () => {
     await page.keyboard.press("Escape");
 
     await archiveProject(page, prefix);
+  });
+
+  test("a failed Issue search says so with Retry and keeps the actions", async ({
+    page,
+    request,
+  }) => {
+    await signIn(page, request, adminEmail);
+    await openMyIssues(page);
+
+    await page.route(SEARCH_RPC, async (route) => {
+      await route.abort();
+    });
+    await page.keyboard.press(OPEN_PALETTE);
+    await palette(page).getByRole("combobox").fill("go labels");
+
+    const retry = palette(page).getByRole("option", {
+      name: /Couldn’t search Issues/u,
+    });
+
+    // Network errors are retried twice with backoff before the query fails.
+    await expect(retry).toBeVisible({ timeout: 10_000 });
+    await expect(palette(page)).not.toContainText("match");
+    await expect(
+      palette(page).getByRole("option", { name: GO_TO_LABELS })
+    ).toBeVisible();
+
+    await page.unroute(SEARCH_RPC);
+    await retry.click();
+    await expect(retry).toBeHidden();
+    await expect(
+      palette(page).getByRole("option", { name: GO_TO_LABELS })
+    ).toBeVisible();
   });
 
   test("S, P and A open the Issue view's pickers; keys typed in a field or over a dialog do nothing", async ({
