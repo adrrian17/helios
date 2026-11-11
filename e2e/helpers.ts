@@ -91,3 +91,20 @@ export const addIssue = async (page: Page, state: string, title: string) => {
     target.getByRole("link", { name: new RegExp(title, "u") })
   ).toBeVisible();
 };
+
+/** Archives the Project through its settings, so test runs do not pile up in the sidebar. */
+export const archiveProject = async (page: Page, prefix: string) => {
+  await page.goto(`/projects/${prefix}/settings`);
+  await page.getByRole("button", { name: "Archive Project" }).click();
+  await page
+    .getByRole("alertdialog")
+    .getByRole("button", { name: "Archive Project" })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Unarchive Project" })
+  ).toBeVisible();
+  await page.goto("/projects/archived");
+  await expect(
+    page.getByRole("list", { name: "Archived Projects" })
+  ).toContainText(prefix);
+};

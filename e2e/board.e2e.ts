@@ -4,6 +4,7 @@ import type { Locator, Page } from "@playwright/test";
 import {
   addIssue,
   adminEmail,
+  archiveProject,
   column,
   createProject,
   openNavigation,
@@ -30,6 +31,12 @@ const dragTo = async (
   await page.mouse.up();
 };
 
+/** Resolves once the server has stored a move, so a reload shows the stored order. */
+const moveSaved = async (page: Page) =>
+  await page.waitForResponse(
+    (response) => response.url().includes("/rpc/issues/move") && response.ok()
+  );
+
 const card = (scope: Locator, identifier: string) =>
   scope.getByRole("link", { name: new RegExp(`^${identifier}(?!\\d)`, "u") });
 
@@ -54,17 +61,20 @@ test.describe("desktop board", () => {
     await addIssue(page, "Backlog", "Plan the launch");
 
     const inProgress = await column(page, IN_PROGRESS).boundingBox();
+    const firstMove = moveSaved(page);
     await dragTo(page, card(column(page, "Backlog"), `${prefix}-1`), {
       x: (inProgress?.x ?? 0) + 100,
       y: (inProgress?.y ?? 0) + 60,
     });
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
+    await firstMove;
 
     const second = await card(
       column(page, "Backlog"),
       `${prefix}-2`
     ).boundingBox();
 
+    const secondMove = moveSaved(page);
     await dragTo(page, card(column(page, "Backlog"), `${prefix}-3`), {
       x: (second?.x ?? 0) + 40,
       y: (second?.y ?? 0) + 4,
@@ -74,12 +84,15 @@ test.describe("desktop board", () => {
       new RegExp(`${prefix}-2`, "u"),
     ]);
 
+    await secondMove;
     await page.reload();
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
     await expect(column(page, "Backlog").getByRole("listitem")).toHaveText([
       new RegExp(`${prefix}-3`, "u"),
       new RegExp(`${prefix}-2`, "u"),
     ]);
+
+    await archiveProject(page, prefix);
   });
 
   test("a keyboard user moves an Issue to the next column", async ({
@@ -95,11 +108,15 @@ test.describe("desktop board", () => {
     await page.keyboard.press("Space");
     await page.keyboard.press("ArrowRight");
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeAttached();
+    const saved = moveSaved(page);
     await page.keyboard.press("Space");
+    await saved;
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
 
     await page.reload();
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
+
+    await archiveProject(page, prefix);
   });
 });
 
@@ -135,7 +152,9 @@ test.describe("phone board", () => {
 
     await addIssue(page, "Backlog", "Call the venue");
     await page.getByRole("button", { name: `Move ${prefix}-1 to` }).click();
+    const moved = moveSaved(page);
     await page.getByRole("menuitem", { name: IN_PROGRESS }).click();
+    await moved;
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeAttached();
 
     await page.reload();
@@ -143,5 +162,7 @@ test.describe("phone board", () => {
     await page.getByRole("button", { name: "Next Workflow State" }).click();
     await expect(indicator).toContainText(IN_PROGRESS);
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
+
+    await archiveProject(page, prefix);
   });
 });
