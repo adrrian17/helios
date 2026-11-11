@@ -20,8 +20,9 @@ import type {
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
 import { useIsMobile } from "@helios/ui/hooks/use-mobile";
+import { cn } from "@helios/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { BoardColumnView } from "@/components/board/board-column";
 import {
@@ -71,6 +72,9 @@ const useBoardMoves = (input: BoardInput) => {
   };
 };
 
+const overflowsRight = (scroller: HTMLElement) =>
+  scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1;
+
 /** What the board was loaded with; moves edit that cached board. */
 export interface BoardInput {
   projectId: string;
@@ -100,6 +104,26 @@ export const Board = ({
   const [currentColumn, setCurrentColumn] = useState(0);
   // Set while the pager's smooth scroll runs, so taps in a row step from where it is heading.
   const pagingTo = useRef<number | null>(null);
+  // Whether columns continue past the right edge, which fades it as a hint to scroll.
+  const [moreRight, setMoreRight] = useState(false);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+
+    const observer = new ResizeObserver(() => {
+      if (scroller !== null) {
+        setMoreRight(overflowsRight(scroller));
+      }
+    });
+
+    if (scroller !== null) {
+      observer.observe(scroller);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const keyboard = useKeyboardMoves({
     columns,
@@ -279,8 +303,12 @@ export const Board = ({
         <div
           ref={scrollerRef}
           data-testid="board"
-          className="flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overscroll-x-contain p-3 max-md:snap-x max-md:snap-mandatory max-md:items-stretch max-md:gap-0 max-md:p-0"
+          className={cn(
+            "flex min-h-0 flex-1 items-start gap-3 overflow-x-auto overscroll-x-contain p-3 max-md:snap-x max-md:snap-mandatory max-md:items-stretch max-md:gap-0 max-md:p-0",
+            moreRight && "md:mask-r-from-95%"
+          )}
           onScroll={(event) => {
+            setMoreRight(overflowsRight(event.currentTarget));
             const { scrollLeft, clientWidth } = event.currentTarget;
             const index = Math.round(scrollLeft / clientWidth);
 
