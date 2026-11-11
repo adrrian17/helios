@@ -35,10 +35,14 @@ import { orpc } from "@/utils/orpc";
 const CreateIssueForm = ({
   projects,
   prefix,
+  title,
+  onTitleChange,
   onDone,
 }: {
   projects: ProjectSummary[];
   prefix: string | undefined;
+  title: string;
+  onTitleChange: (title: string) => void;
   onDone: () => void;
 }) => {
   const navigate = useNavigate();
@@ -49,7 +53,6 @@ const CreateIssueForm = ({
         ?.id ?? null
   );
 
-  const [title, setTitle] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const titleInvalid = submitted && title.trim() === "";
   const create = useMutation(orpc.issues.create.mutationOptions());
@@ -91,6 +94,7 @@ const CreateIssueForm = ({
           { projectId, title: title.trim() },
           {
             onSuccess: ({ identifier }) => {
+              onTitleChange("");
               onDone();
               toast.success(`${identifier} created.`, {
                 action: {
@@ -145,7 +149,7 @@ const CreateIssueForm = ({
             aria-invalid={titleInvalid || undefined}
             value={title}
             onChange={(event) => {
-              setTitle(event.target.value);
+              onTitleChange(event.target.value);
             }}
           />
           {titleInvalid ? (
@@ -177,6 +181,8 @@ export const CreateIssueDialog = ({
   onClose: () => void;
 }) => {
   const projects = useQuery(orpc.projects.list.queryOptions());
+  // Kept here, outside the form that unmounts on close, so a dismissed title comes back.
+  const [title, setTitle] = useState("");
 
   return (
     <Dialog
@@ -200,6 +206,8 @@ export const CreateIssueDialog = ({
           <CreateIssueForm
             projects={projects.data}
             prefix={prefix}
+            title={title}
+            onTitleChange={setTitle}
             onDone={onClose}
           />
         )}
