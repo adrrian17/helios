@@ -2,7 +2,7 @@ import { Button } from "@helios/ui/components/button";
 import { Spinner } from "@helios/ui/components/spinner";
 import { useMutation } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { useIssue } from "@/components/issue/use-issue";
 import { Markdown, MarkdownEditor } from "@/components/markdown";
@@ -66,17 +66,23 @@ export const IssueTitle = () => {
 export const IssueDescription = () => {
   const issue = useIssue();
   const [draft, setDraft] = useState<string | null>(null);
+  // Set at once on save; `isPending` only arrives with the next render, after a fast second ⌘↵.
+  const saving = useRef(false);
 
   const update = useMutation({
     ...orpc.issues.update.mutationOptions(),
     onSuccess: () => {
       setDraft(null);
     },
+    onSettled: () => {
+      saving.current = false;
+    },
   });
 
   if (draft !== null) {
     const save = () => {
-      if (!update.isPending) {
+      if (!saving.current) {
+        saving.current = true;
         update.mutate({ id: issue.id, description: draft });
       }
     };

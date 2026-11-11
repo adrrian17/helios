@@ -20,7 +20,7 @@ import {
   UserRoundIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import type { ConfirmRequest } from "@/components/confirm-dialog";
@@ -144,6 +144,8 @@ const CommentItem = ({
 }) => {
   const me = useMe();
   const [draft, setDraft] = useState<string | null>(null);
+  // Set at once on send; `isPending` only arrives with the next render, after a fast second ⌘↵.
+  const sending = useRef(false);
   const own = entry.author.id === me.id;
   const canDelete = own || me.role === "admin";
 
@@ -152,12 +154,16 @@ const CommentItem = ({
     onSuccess: () => {
       setDraft(null);
     },
+    onSettled: () => {
+      sending.current = false;
+    },
   });
 
   const remove = useMutation(orpc.comments.delete.mutationOptions());
 
   const save = () => {
-    if (!edit.isPending && draft !== null && draft.trim() !== "") {
+    if (!sending.current && draft !== null && draft.trim() !== "") {
+      sending.current = true;
       edit.mutate({ id: entry.id, body: draft });
     }
   };
@@ -273,18 +279,23 @@ const CommentItem = ({
 const CommentComposer = ({ issueId }: { issueId: string }) => {
   const me = useMe();
   const [body, setBody] = useState("");
-  const add = useMutation(orpc.comments.add.mutationOptions());
+  // See CommentItem: guards a second ⌘↵ before `isPending` renders.
+  const sending = useRef(false);
+
+  const add = useMutation({
+    ...orpc.comments.add.mutationOptions(),
+    onSuccess: () => {
+      setBody("");
+    },
+    onSettled: () => {
+      sending.current = false;
+    },
+  });
 
   const submit = () => {
-    if (!add.isPending && body.trim() !== "") {
-      add.mutate(
-        { issueId, body },
-        {
-          onSuccess: () => {
-            setBody("");
-          },
-        }
-      );
+    if (!sending.current && body.trim() !== "") {
+      sending.current = true;
+      add.mutate({ issueId, body });
     }
   };
 
