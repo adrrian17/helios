@@ -36,6 +36,7 @@ export type IssuePicker = "state" | "priority" | "assignee" | "labels";
 /** Where the properties show: the desktop rail, or the phone's chip row and the card below the body. */
 type Layout = "rail" | "summary" | "details";
 
+// In the chip row the last chip (assignee) takes what is left and truncates; it wraps only below 44px.
 const Row = ({
   term,
   chip = false,
@@ -48,7 +49,9 @@ const Row = ({
 }) => (
   <div
     className={
-      chip ? "flex max-w-full min-w-0" : "flex min-h-8 items-center gap-2"
+      chip
+        ? "flex max-w-full min-w-0 last:min-w-11 last:grow last:basis-0"
+        : "flex min-h-8 items-center gap-2"
     }
   >
     <dt
