@@ -125,7 +125,7 @@ export const UserMenu = () => {
   const me = useMe();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { theme = "dark", setTheme } = useTheme();
+  const { theme = "system", setTheme } = useTheme();
   const { showShortcuts } = useCommands();
   const [editingName, setEditingName] = useState(false);
   const displayName = me.name.trim() === "" ? me.email : me.name;

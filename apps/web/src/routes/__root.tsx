@@ -21,7 +21,7 @@ const RootComponent = () => (
     <HeadContent />
     <ThemeProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="system"
       disableTransitionOnChange
       // React never runs a script it renders on the client, and warns about it; index.html applies the theme before first paint instead.
       scriptProps={{ type: "application/json" }}
