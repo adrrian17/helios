@@ -72,9 +72,12 @@ const GeneralForm = ({ project }: { project: Project }) => {
         <Field>
           {/* Read-only, so a static badge rather than a field that looks editable. */}
           <FieldTitle>Identifier prefix</FieldTitle>
-          <Badge variant="outline" className="self-start">
-            <span className="font-mono">{project.prefix}</span>
-          </Badge>
+          {/* Field stretches its children; the wrapper takes that, so the badge keeps its width. */}
+          <div>
+            <Badge variant="outline">
+              <span className="font-mono">{project.prefix}</span>
+            </Badge>
+          </div>
           <FieldDescription>
             Fixed after creation, so Identifiers like{" "}
             <span className="font-mono">{project.prefix}-1</span> people have
