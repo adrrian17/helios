@@ -148,3 +148,88 @@
     @apply font-sans;
   }
 }
+/* Rendered Markdown in descriptions and Comments; no typography plugin, so the few elements are styled here. */
+@utility markdown {
+  @apply text-sm leading-relaxed break-words;
+
+  & > * + * {
+    @apply mt-3;
+  }
+
+  & h1,
+  & h2,
+  & h3,
+  & h4 {
+    @apply mt-5 font-semibold tracking-tight first:mt-0;
+  }
+
+  & h1 {
+    @apply text-xl;
+  }
+
+  & h2 {
+    @apply text-lg;
+  }
+
+  & h3,
+  & h4 {
+    @apply text-base;
+  }
+
+  & a {
+    @apply text-primary underline underline-offset-2;
+  }
+
+  & ul {
+    @apply list-disc pl-5;
+  }
+
+  & ol {
+    @apply list-decimal pl-5;
+  }
+
+  & li + li {
+    @apply mt-1;
+  }
+
+  & li:has(> input[type="checkbox"]) {
+    @apply -ml-5 list-none;
+  }
+
+  & input[type="checkbox"] {
+    @apply mr-1.5 align-middle;
+  }
+
+  & code {
+    @apply bg-muted rounded px-1 py-0.5 font-mono text-[0.85em];
+  }
+
+  & pre {
+    @apply bg-muted overflow-x-auto rounded-lg p-3;
+
+    & code {
+      @apply bg-transparent p-0;
+    }
+  }
+
+  & blockquote {
+    @apply text-muted-foreground border-l-2 pl-3;
+  }
+
+  & hr {
+    @apply border-border;
+  }
+
+  & table {
+    @apply block w-full overflow-x-auto text-left;
+  }
+
+  & th,
+  & td {
+    @apply border px-2 py-1;
+  }
+
+  & img {
+    @apply max-w-full rounded-md;
+  }
+}

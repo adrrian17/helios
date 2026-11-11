@@ -19,6 +19,9 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        /** A full-width, left-aligned value that opens a picker, as in an Issue's properties. */
+        property:
+          "w-full justify-start font-normal hover:bg-muted aria-expanded:bg-muted dark:hover:bg-muted/50",
       },
       size: {
         default:
