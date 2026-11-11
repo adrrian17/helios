@@ -1,6 +1,9 @@
 import type { RouterClient } from "@orpc/server";
 
 import { memberProcedure } from "../index";
+import { projectsRouter } from "./projects";
+import { workflowStatesRouter } from "./workflow-states";
+import { workspaceRouter } from "./workspace";
 
 export const appRouter = {
   me: memberProcedure.handler(({ context: { member } }) => ({
@@ -9,6 +12,9 @@ export const appRouter = {
     name: member.user.name,
     role: member.role,
   })),
+  workspace: workspaceRouter,
+  projects: projectsRouter,
+  workflowStates: workflowStatesRouter,
 };
 
 export type AppRouter = typeof appRouter;
