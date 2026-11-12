@@ -88,6 +88,23 @@ test.describe("focus after closing an editor", () => {
     await expect(editComment).toHaveValue("First Comment and more");
     await page.keyboard.press("Escape");
 
+    // A confirm opened from the menu takes focus, and gives it back on Escape.
+    await commentActions.focus();
+    await page.keyboard.press("Enter");
+    await page.getByRole("menuitem", { name: "Delete…" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("alertdialog").getByRole("button", { name: "Cancel" })
+    ).toBeFocused();
+    // The menu finishes closing just after the confirm opens; that is when it used to take focus back.
+    expect(
+      await page.evaluate<string>(
+        'new Promise((done) => { setTimeout(() => { done(document.activeElement?.textContent ?? ""); }, 300); })'
+      )
+    ).toBe("Cancel");
+    await page.keyboard.press("Escape");
+    await expect(commentActions).toBeFocused();
+
     const newIssue = page.getByRole("button", { name: "New Issue" });
     await escapeReturnsFocus(page, newIssue, async () => {
       await newIssue.click();

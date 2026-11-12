@@ -34,9 +34,9 @@ export const useReturnFocus = <T extends HTMLElement>(open: boolean) => {
 };
 
 /**
- * For a menu whose item opens an inline editor in place of the menu's
- * trigger: the menu must not move focus on close, or it lands on some older
- * trigger and takes it from the editor.
+ * For a menu whose Edit or Rename item swaps the menu's trigger for an inline
+ * editor: after that item the menu must not move focus on close, or it lands
+ * on some older trigger and takes it from the editor.
  */
 export const useEditorMenuFocus = () => {
   const opening = useRef(false);
@@ -46,10 +46,17 @@ export const useEditorMenuFocus = () => {
       opening.current = true;
     },
     finalFocus: () => {
-      const restore = !opening.current;
+      const openedEditor = opening.current;
       opening.current = false;
+      const active = document.activeElement;
 
-      return restore;
+      // A function turns off Base UI's own check, so leave focus that an item moved on, like a confirm's Cancel.
+      const unclaimed =
+        active === null ||
+        active === document.body ||
+        active.closest('[role="menu"]') !== null;
+
+      return !openedEditor && unclaimed;
     },
   };
 };
