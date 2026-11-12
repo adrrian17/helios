@@ -10,16 +10,24 @@ export const useReturnFocus = <T extends HTMLElement>(open: boolean) => {
   const wasOpen = useRef(open);
 
   useEffect(() => {
-    const lost =
-      document.activeElement === null ||
-      document.activeElement === document.body;
-
-    // Only when focus was dropped: a click elsewhere already put it somewhere.
-    if (wasOpen.current && !open && lost) {
-      opener.current?.focus();
-    }
-
+    const closed = wasOpen.current && !open;
     wasOpen.current = open;
+
+    // Deferred: an editor that closes on blur gets here before focus lands on what was clicked or tabbed to.
+    const timer = setTimeout(() => {
+      // Only when focus was dropped: a click or Tab elsewhere already put it somewhere.
+      const lost =
+        document.activeElement === null ||
+        document.activeElement === document.body;
+
+      if (closed && lost) {
+        opener.current?.focus();
+      }
+    }, 0);
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [open]);
 
   return opener;

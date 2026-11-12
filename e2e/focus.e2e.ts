@@ -57,6 +57,17 @@ test.describe("focus after closing an editor", () => {
       await step.click();
     });
 
+    // The Checklist edit saves on blur; focus must stay where the user moved it.
+    const comment = page.getByRole("textbox", { name: "Comment", exact: true });
+    await step.click();
+    await comment.click();
+    await expect(comment).toBeFocused();
+    await step.click();
+    await page.keyboard.press("Tab");
+    await expect(
+      page.getByRole("button", { name: "Delete Step one" })
+    ).toBeFocused();
+
     const commentActions = page.getByRole("button", {
       name: /^Actions for the Comment by/u,
     });
