@@ -6,6 +6,9 @@ import * as Effect from "effect/Effect";
 import "varlock/auto-load";
 // oxlint-enable sonarjs/no-wildcard-import
 
+// Set by portless in `pnpm dev`; unset on deploy.
+const portlessServerUrl = process.env.PORTLESS_URL;
+
 export const db = Cloudflare.D1.Database("database", {
   migrations: "../../packages/db/src/migrations",
 });
@@ -17,12 +20,19 @@ export const server = Cloudflare.Worker("server", {
   },
   env: {
     DB: db,
+    APP_ENV: Config.String("APP_ENV"),
+    ADMIN_EMAIL: Config.String("ADMIN_EMAIL"),
+    EMAIL_FROM: Config.String("EMAIL_FROM"),
+    // Under `alchemy dev` this binding writes .eml files locally; the server uses the capture Mailer there.
+    EMAIL: Cloudflare.Email.SendEmail("EMAIL"),
     CORS_ORIGIN: Config.String("CORS_ORIGIN"),
     BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
-    BETTER_AUTH_URL: Cloudflare.Worker.URL,
+    BETTER_AUTH_URL: portlessServerUrl ?? Cloudflare.Worker.URL,
   },
   dev: {
-    port: 3000,
+    // portless assigns both ports; see the dev script in package.json.
+    port: Number(process.env.PORT),
+    strictPort: true,
   },
 });
 
@@ -44,10 +54,11 @@ export default Alchemy.Stack(
         notFoundHandling: "single-page-application",
       },
       env: {
-        VITE_SERVER_URL: serverWorker.url.as<string>(),
+        VITE_SERVER_URL: portlessServerUrl ?? serverWorker.url.as<string>(),
       },
       dev: {
-        port: 3001,
+        port: Number(process.env.WEB_PORT),
+        strictPort: true,
       },
     });
 

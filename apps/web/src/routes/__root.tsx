@@ -1,14 +1,12 @@
 import { Toaster } from "@helios/ui/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   HeadContent,
   Outlet,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
-import Header from "@/components/header";
+import { NotFound } from "@/components/route-states";
 import { ThemeProvider } from "@/components/theme-provider";
 import type { orpc } from "@/utils/orpc";
 
@@ -24,31 +22,30 @@ const RootComponent = () => (
     <HeadContent />
     <ThemeProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="system"
       disableTransitionOnChange
+      // React never runs a script it renders on the client, and warns about it; index.html applies the theme before first paint instead.
+      scriptProps={{ type: "application/json" }}
       storageKey="vite-ui-theme"
     >
-      <div className="grid h-svh grid-rows-[auto_1fr]">
-        <Header />
-        <Outlet />
-      </div>
+      <Outlet />
       <Toaster richColors />
     </ThemeProvider>
-    <TanStackRouterDevtools position="bottom-left" />
-    <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
   </>
 );
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootComponent,
-  head: () => ({
+  notFoundComponent: () => <NotFound bare />,
+  head: ({ matches }) => ({
     meta: [
       {
-        title: "helios",
+        // The root has no index route, so a path no route matches leaves it alone.
+        title: matches.length === 1 ? "Not found" : "Helios",
       },
       {
         name: "description",
-        content: "helios is a web application",
+        content: "Track the work of one small team.",
       },
     ],
     links: [

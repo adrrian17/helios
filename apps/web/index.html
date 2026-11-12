@@ -3,7 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>helios</title>
+    <title>Helios</title>
+    <script>
+      // Mirrors next-themes (key "vite-ui-theme", default system) so the first paint already has the right theme.
+      try {
+        const theme = localStorage.getItem("vite-ui-theme") ?? "system";
+        const dark =
+          theme === "dark" ||
+          (theme === "system" &&
+            matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.add(dark ? "dark" : "light");
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+      } catch {
+        const dark = matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.classList.add(dark ? "dark" : "light");
+      }
+    </script>
   </head>
 
   <body>

@@ -9,7 +9,9 @@ A work tracker for a single small team: React + TanStack Router web app, Hono + 
 ## Commands
 
 - `pnpm fix`: format and autofix lint.
-- Done means all three pass, the same as CI: `pnpm knip && pnpm check && pnpm build`.
+- `pnpm test`: API tests (oRPC in-process, fresh Miniflare D1 per test).
+- `pnpm test:e2e`: Playwright against `pnpm dev` (desktop and phone projects). Needs `pnpm exec playwright install chromium` once.
+- Done means these pass, the same as CI: `pnpm knip && pnpm check && pnpm build && pnpm test`.
 
 ## Never
 

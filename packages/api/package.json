@@ -9,10 +9,14 @@
   "dependencies": {
     "@helios/auth": "workspace:*",
     "@helios/db": "workspace:*",
-    "@orpc/server": "catalog:"
+    "@orpc/server": "catalog:",
+    "drizzle-orm": "catalog:",
+    "fractional-indexing": "4.0.0",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@helios/config": "workspace:*",
+    "miniflare": "4.20260730.0",
     "typescript": "catalog:"
   }
 }

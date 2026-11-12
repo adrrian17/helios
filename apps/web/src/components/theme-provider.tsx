@@ -7,5 +7,3 @@ export const ThemeProvider = ({
 }: ComponentProps<typeof NextThemesProvider>) => (
   <NextThemesProvider {...props}>{children}</NextThemesProvider>
 );
-
-export { useTheme } from "next-themes";

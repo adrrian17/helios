@@ -14,6 +14,7 @@ local.db-*
 
 # Environment variables
 .env
+.env.production
 .env*.local
 
 # IDEs and editors
@@ -48,6 +49,8 @@ lerna-debug.log*
 
 # Testing
 coverage
+test-results
+playwright-report
 .nyc_output
 
 # Misc
