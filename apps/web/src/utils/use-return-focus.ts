@@ -32,3 +32,24 @@ export const useReturnFocus = <T extends HTMLElement>(open: boolean) => {
 
   return opener;
 };
+
+/**
+ * For a menu whose item opens an inline editor in place of the menu's
+ * trigger: the menu must not move focus on close, or it lands on some older
+ * trigger and takes it from the editor.
+ */
+export const useEditorMenuFocus = () => {
+  const opening = useRef(false);
+
+  return {
+    openingEditor: () => {
+      opening.current = true;
+    },
+    finalFocus: () => {
+      const restore = !opening.current;
+      opening.current = false;
+
+      return restore;
+    },
+  };
+};

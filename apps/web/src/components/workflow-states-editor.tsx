@@ -40,7 +40,7 @@ import { StateIcon } from "@/components/issue-meta";
 import { categories } from "@/utils/domain";
 import type { Project, StateCategory, WorkflowState } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
-import { useReturnFocus } from "@/utils/use-return-focus";
+import { useEditorMenuFocus, useReturnFocus } from "@/utils/use-return-focus";
 
 const categoryHints: Record<StateCategory, string> = {
   ideas: "Not committed to; may never be done.",
@@ -223,6 +223,7 @@ const StateRow = ({
 }) => {
   const [renaming, setRenaming] = useState(false);
   const opener = useReturnFocus<HTMLButtonElement>(renaming);
+  const menuFocus = useEditorMenuFocus();
 
   const rename = useMutation({
     ...orpc.workflowStates.rename.mutationOptions(),
@@ -300,10 +301,15 @@ const StateRow = ({
             >
               <MoreHorizontalIcon />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-40">
+            <DropdownMenuContent
+              align="end"
+              className="min-w-40"
+              finalFocus={menuFocus.finalFocus}
+            >
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => {
+                    menuFocus.openingEditor();
                     setRenaming(true);
                   }}
                 >

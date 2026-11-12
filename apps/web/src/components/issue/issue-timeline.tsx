@@ -31,7 +31,7 @@ import type { TimelineEntry } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 import { submitKeys } from "@/utils/shortcuts";
 import { useMe } from "@/utils/use-me";
-import { useReturnFocus } from "@/utils/use-return-focus";
+import { useEditorMenuFocus, useReturnFocus } from "@/utils/use-return-focus";
 
 type ActivityEntry = Extract<TimelineEntry, { type: "activity" }>;
 
@@ -148,6 +148,7 @@ const CommentItem = ({
   const me = useMe();
   const [draft, setDraft] = useState<string | null>(null);
   const opener = useReturnFocus<HTMLButtonElement>(draft !== null);
+  const menuFocus = useEditorMenuFocus();
   // Set at once on send; `isPending` only arrives with the next render, after a fast second ⌘↵.
   const sending = useRef(false);
   const own = entry.author.id === me.id;
@@ -205,11 +206,16 @@ const CommentItem = ({
               >
                 <MoreHorizontalIcon />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-36">
+              <DropdownMenuContent
+                align="end"
+                className="min-w-36"
+                finalFocus={menuFocus.finalFocus}
+              >
                 <DropdownMenuGroup>
                   {own ? (
                     <DropdownMenuItem
                       onClick={() => {
+                        menuFocus.openingEditor();
                         setDraft(entry.body);
                       }}
                     >

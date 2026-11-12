@@ -52,7 +52,7 @@ import {
 import { labelColors } from "@/utils/domain";
 import type { Label } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
-import { useReturnFocus } from "@/utils/use-return-focus";
+import { useEditorMenuFocus, useReturnFocus } from "@/utils/use-return-focus";
 
 const NAME_LIMIT = 120;
 
@@ -271,6 +271,7 @@ const LabelRow = ({
 }) => {
   const [renaming, setRenaming] = useState(false);
   const opener = useReturnFocus<HTMLButtonElement>(renaming);
+  const menuFocus = useEditorMenuFocus();
   const recolor = useMutation(orpc.labels.update.mutationOptions());
   const remove = useMutation(orpc.labels.delete.mutationOptions());
 
@@ -329,10 +330,15 @@ const LabelRow = ({
             >
               <MoreHorizontalIcon />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-40">
+            <DropdownMenuContent
+              align="end"
+              className="min-w-40"
+              finalFocus={menuFocus.finalFocus}
+            >
               <DropdownMenuGroup>
                 <DropdownMenuItem
                   onClick={() => {
+                    menuFocus.openingEditor();
                     setRenaming(true);
                   }}
                 >

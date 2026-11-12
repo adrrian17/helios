@@ -77,6 +77,17 @@ test.describe("focus after closing an editor", () => {
       await page.getByRole("menuitem", { name: "Edit" }).click();
     });
 
+    // An earlier popover must not take focus from an editor opened through a menu.
+    await page.getByRole("button", { name: "Priority: No priority" }).click();
+    await page.getByRole("option", { name: "High" }).click();
+    await commentActions.click();
+    await page.getByRole("menuitem", { name: "Edit" }).click();
+    const editComment = page.getByRole("textbox", { name: "Edit Comment" });
+    await expect(editComment).toBeFocused();
+    await page.keyboard.type(" and more");
+    await expect(editComment).toHaveValue("First Comment and more");
+    await page.keyboard.press("Escape");
+
     const newIssue = page.getByRole("button", { name: "New Issue" });
     await escapeReturnsFocus(page, newIssue, async () => {
       await newIssue.click();
