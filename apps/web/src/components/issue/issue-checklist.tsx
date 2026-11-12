@@ -27,6 +27,7 @@ import { useState } from "react";
 import { useIssue, useIssueCache } from "@/components/issue/use-issue";
 import type { IssueDetail } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
+import { useReturnFocus } from "@/utils/use-return-focus";
 
 type Item = IssueDetail["checklist"][number];
 
@@ -77,6 +78,7 @@ const ItemRow = ({
   writes: ReturnType<typeof useChecklistWrites>;
 }) => {
   const [editing, setEditing] = useState<string | null>(null);
+  const opener = useReturnFocus<HTMLButtonElement>(editing !== null);
 
   const {
     attributes,
@@ -141,6 +143,7 @@ const ItemRow = ({
       />
       {editing === null ? (
         <button
+          ref={opener}
           type="button"
           className={cn(
             "focus-visible:ring-ring min-w-0 flex-1 cursor-text rounded-sm px-2 py-1 text-left text-sm break-words outline-none focus-visible:ring-3 max-md:min-h-11",

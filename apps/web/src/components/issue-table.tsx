@@ -61,7 +61,7 @@ const columns: {
     className: "w-11 md:max-xl:pr-4 lg:w-40",
   },
   { field: "created", label: "Created", className: "w-26 max-xl:hidden" },
-  { field: "updated", label: "Updated", className: "w-24 max-xl:hidden" },
+  { field: "updated", label: "Updated", className: "w-28 max-xl:hidden" },
 ];
 
 const CELL = "px-2 first:pl-4 last:pr-4";

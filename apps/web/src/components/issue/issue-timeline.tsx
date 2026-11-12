@@ -31,6 +31,7 @@ import type { TimelineEntry } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 import { submitKeys } from "@/utils/shortcuts";
 import { useMe } from "@/utils/use-me";
+import { useReturnFocus } from "@/utils/use-return-focus";
 
 type ActivityEntry = Extract<TimelineEntry, { type: "activity" }>;
 
@@ -146,6 +147,7 @@ const CommentItem = ({
 }) => {
   const me = useMe();
   const [draft, setDraft] = useState<string | null>(null);
+  const opener = useReturnFocus<HTMLButtonElement>(draft !== null);
   // Set at once on send; `isPending` only arrives with the next render, after a fast second ⌘↵.
   const sending = useRef(false);
   const own = entry.author.id === me.id;
@@ -192,6 +194,7 @@ const CommentItem = ({
           {canDelete && draft === null ? (
             <DropdownMenu>
               <DropdownMenuTrigger
+                ref={opener}
                 render={
                   <Button
                     variant="muted"

@@ -52,6 +52,7 @@ import {
 import { labelColors } from "@/utils/domain";
 import type { Label } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
+import { useReturnFocus } from "@/utils/use-return-focus";
 
 const NAME_LIMIT = 120;
 
@@ -269,6 +270,7 @@ const LabelRow = ({
   onDelete: (request: ConfirmRequest) => void;
 }) => {
   const [renaming, setRenaming] = useState(false);
+  const opener = useReturnFocus<HTMLButtonElement>(renaming);
   const recolor = useMutation(orpc.labels.update.mutationOptions());
   const remove = useMutation(orpc.labels.delete.mutationOptions());
 
@@ -316,6 +318,7 @@ const LabelRow = ({
           <span className="min-w-0 flex-1 truncate text-sm">{label.name}</span>
           <DropdownMenu>
             <DropdownMenuTrigger
+              ref={opener}
               render={
                 <Button
                   variant="ghost"

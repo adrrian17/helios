@@ -25,7 +25,7 @@ import {
 import { Spinner } from "@helios/ui/components/spinner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { ProjectMark } from "@/components/project-mark";
@@ -45,9 +45,11 @@ const CreateIssueForm = ({
   draft,
   onDraftChange,
   onDone,
+  titleRef,
 }: {
   projects: ProjectSummary[];
   prefix: string | undefined;
+  titleRef: React.RefObject<HTMLInputElement | null>;
   draft: Draft;
   onDraftChange: (draft: Draft) => void;
   onDone: () => void;
@@ -163,8 +165,8 @@ const CreateIssueForm = ({
         <Field data-invalid={titleInvalid || undefined}>
           <FieldLabel htmlFor="new-issue-title">Title</FieldLabel>
           <Input
+            ref={titleRef}
             id="new-issue-title"
-            autoFocus
             autoComplete="off"
             placeholder="What needs doing?"
             aria-invalid={titleInvalid || undefined}
@@ -207,6 +209,8 @@ export const CreateIssueDialog = ({
   const projects = useQuery(orpc.projects.list.queryOptions());
   // Kept here, outside the form that unmounts on close, so a dismissed draft comes back.
   const [draft, setDraft] = useState(EMPTY_DRAFT);
+  // Not `autoFocus`: it moves focus before the dialog records where to return it on close.
+  const titleRef = useRef<HTMLInputElement>(null);
 
   const close = () => {
     // A Project picked without a title is not a draft; the next open follows the current Project.
@@ -226,7 +230,7 @@ export const CreateIssueDialog = ({
         }
       }}
     >
-      <DialogContent>
+      <DialogContent initialFocus={titleRef}>
         <DialogHeader>
           <DialogTitle>New Issue</DialogTitle>
           <DialogDescription>
@@ -242,6 +246,7 @@ export const CreateIssueDialog = ({
             draft={draft}
             onDraftChange={setDraft}
             onDone={close}
+            titleRef={titleRef}
           />
         )}
       </DialogContent>

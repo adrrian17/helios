@@ -8,6 +8,7 @@ import { useIssue } from "@/components/issue/use-issue";
 import { Markdown, MarkdownEditor } from "@/components/markdown";
 import { orpc } from "@/utils/orpc";
 import { submitKeys } from "@/utils/shortcuts";
+import { useReturnFocus } from "@/utils/use-return-focus";
 
 /** The title as a borderless field: Enter or leaving it saves, Escape puts it back. */
 export const IssueTitle = () => {
@@ -67,6 +68,7 @@ export const IssueTitle = () => {
 export const IssueDescription = () => {
   const issue = useIssue();
   const [draft, setDraft] = useState<string | null>(null);
+  const opener = useReturnFocus<HTMLButtonElement>(draft !== null);
   // Set at once on save; `isPending` only arrives with the next render, after a fast second ⌘↵.
   const saving = useRef(false);
 
@@ -126,6 +128,7 @@ export const IssueDescription = () => {
   if (issue.description.trim() === "") {
     return (
       <Button
+        ref={opener}
         variant="muted"
         className="-ml-2.5 self-start"
         onClick={() => {
@@ -142,6 +145,7 @@ export const IssueDescription = () => {
       <Markdown className="pr-10">{issue.description}</Markdown>
       <span className="absolute top-0 right-0 md:opacity-0 md:group-hover/description:opacity-100 md:focus-within:opacity-100">
         <Button
+          ref={opener}
           variant="muted"
           size="icon-sm"
           aria-label="Edit description"

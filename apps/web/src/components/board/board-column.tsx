@@ -17,6 +17,7 @@ import { SortableIssueCard } from "@/components/board/issue-card";
 import { StateIcon } from "@/components/issue-meta";
 import type { BoardColumn, IssueRow, WorkflowState } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
+import { useReturnFocus } from "@/utils/use-return-focus";
 
 /** Inline title input at the bottom of a column; stays open so several Issues can be added in a row. */
 const IssueComposer = ({
@@ -147,8 +148,7 @@ export const BoardColumnView = ({
   const { setNodeRef, isOver } = useDroppable({ id: state.id });
   const [composing, setComposing] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
-  // Set when the composer closes, so focus returns to "Add Issue" instead of the page.
-  const refocusAdd = useRef(false);
+  const addButton = useReturnFocus<HTMLButtonElement>(composing);
   const headingId = `column-${state.id}`;
 
   return (
@@ -222,7 +222,6 @@ export const BoardColumnView = ({
               projectId={projectId}
               state={state}
               onClose={() => {
-                refocusAdd.current = true;
                 setComposing(false);
               }}
               isShown={isShown}
@@ -234,12 +233,7 @@ export const BoardColumnView = ({
             />
           ) : (
             <Button
-              ref={(button: HTMLButtonElement | null) => {
-                if (button !== null && refocusAdd.current) {
-                  refocusAdd.current = false;
-                  button.focus();
-                }
-              }}
+              ref={addButton}
               variant="muted"
               size="sm"
               className="w-full justify-start"

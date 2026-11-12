@@ -40,6 +40,7 @@ import { StateIcon } from "@/components/issue-meta";
 import { categories } from "@/utils/domain";
 import type { Project, StateCategory, WorkflowState } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
+import { useReturnFocus } from "@/utils/use-return-focus";
 
 const categoryHints: Record<StateCategory, string> = {
   ideas: "Not committed to; may never be done.",
@@ -221,6 +222,7 @@ const StateRow = ({
   onDelete: () => void;
 }) => {
   const [renaming, setRenaming] = useState(false);
+  const opener = useReturnFocus<HTMLButtonElement>(renaming);
 
   const rename = useMutation({
     ...orpc.workflowStates.rename.mutationOptions(),
@@ -287,6 +289,7 @@ const StateRow = ({
           )}
           <DropdownMenu>
             <DropdownMenuTrigger
+              ref={opener}
               render={
                 <Button
                   variant="ghost"
@@ -334,6 +337,7 @@ const CategoryGroup = ({
   onDelete: (state: WorkflowState) => void;
 }) => {
   const [adding, setAdding] = useState(false);
+  const addButton = useReturnFocus<HTMLButtonElement>(adding);
 
   const add = useMutation({
     ...orpc.workflowStates.add.mutationOptions(),
@@ -354,6 +358,7 @@ const CategoryGroup = ({
           </p>
         </div>
         <Button
+          ref={addButton}
           variant="ghost"
           size="sm"
           aria-label={`Add a Workflow State to ${label}`}
