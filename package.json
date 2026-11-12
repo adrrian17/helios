@@ -1,0 +1,51 @@
+{
+  "name": "helios",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vp run -r dev",
+    "build": "vp run -r build",
+    "check": "vp check",
+    "lint": "vp lint",
+    "knip": "knip",
+    "format": "vp fmt",
+    "staged": "vp staged",
+    "prepare": "vp config --no-agent",
+    "dev:web": "vp run --filter web dev:bare",
+    "dev:server": "vp run --filter hono dev:bare",
+    "db:generate": "vp run --filter @helios/db db:generate",
+    "deploy": "vp run --filter @helios/infra deploy",
+    "destroy": "vp run --filter @helios/infra destroy",
+    "env:generate": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
+    "postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
+    "fix": "vp check --fix"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@coderabbitai/config": "1.2.0",
+    "@helios/config": "workspace:*",
+    "@oxlint/plugins": "1.93.0",
+    "@shadcn/lint": "^0.2.5",
+    "@types/node": "catalog:",
+    "eslint-plugin-github": "6.1.2",
+    "eslint-plugin-sonarjs": "^4.2.2",
+    "eslint-plugin-tsdoc": "^0.5.4",
+    "knip": "^6.44.2",
+    "oxfmt": "0.78.0",
+    "oxlint": "1.93.0",
+    "oxlint-plugin-react-doctor": "^0.9.22",
+    "oxlint-tsgolint": "7.0.2006",
+    "typescript": "catalog:",
+    "ultracite": "8.1.1",
+    "varlock": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "engines": {
+    "node": "24.21.0"
+  },
+  "packageManager": "pnpm@12.18.0"
+}

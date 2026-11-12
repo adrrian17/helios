@@ -1,0 +1,21 @@
+{
+  "name": "@helios/auth",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@better-auth/core": "catalog:",
+    "@better-auth/drizzle-adapter": "catalog:",
+    "@helios/db": "workspace:*",
+    "better-auth": "catalog:",
+    "drizzle-orm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@helios/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

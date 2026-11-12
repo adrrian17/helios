@@ -1,0 +1,18 @@
+{
+  "name": "@helios/api",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {},
+  "dependencies": {
+    "@helios/auth": "workspace:*",
+    "@helios/db": "workspace:*",
+    "@orpc/server": "catalog:"
+  },
+  "devDependencies": {
+    "@helios/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,60 @@
+packages:
+  - apps/*
+  - packages/*
+allowBuilds:
+  esbuild: true
+  sharp: true
+  msgpackr-extract: true
+  workerd: true
+overrides:
+  vite@*: "catalog:"
+catalog:
+  # Vite+ and its core alias move together.
+  vite-plus: 1.5.1
+  vite: npm:@voidzero-dev/vite-plus-core@1.5.1
+  react: ^19.3.0
+  react-dom: ^19.3.0
+  "@types/react": ^19.3.0
+  "@types/react-dom": ^19.3.0
+  "@types/node": ^26.6.5
+  lucide-react: ^1.56.0
+  "@better-auth/core": 1.7.18
+  "@better-auth/drizzle-adapter": 1.7.18
+  drizzle-kit: 1.0.0-rc.5
+  "@tailwindcss/vite": ^4.3.3
+  "@tailwindcss/postcss": ^4.3.3
+  "@orpc/tanstack-query": ^1.15.6
+  zod: ^4.5.4
+  typescript: ^7.0.2
+  varlock: 1.24.0
+  "@cloudflare/workers-types": ^5.20260906.1
+  "@orpc/server": ^1.15.6
+  "@orpc/openapi": ^1.15.6
+  "@orpc/zod": ^1.15.6
+  better-auth: 1.7.18
+  next-themes: ^0.4.6
+  sonner: ^2.0.8
+  "@orpc/client": ^1.15.6
+  tailwindcss: ^4.3.3
+  drizzle-orm: 1.0.0-rc.5
+
+# Unmet peers fail resolution, so a pin outside a dependency's peer range is
+# caught when the lockfile changes instead of scrolling past as a warning.
+strictPeerDependencies: true
+
+peerDependencyRules:
+  # TypeScript 7 and the Vite+ core alias are deliberate; older peer ranges predate them.
+  allowAny:
+    - typescript
+    - vite
+  allowedVersions:
+    # Ultracite's ESLint plugins run inside oxlint, never under ESLint itself.
+    "ultracite>eslint": "9"
+
+# pnpm 12 links agent skills that dependencies ship into .claude/skills once
+# approved. Skills here are curated through skills-lock.json, so deny these.
+permissions:
+  "@tanstack/router-plugin":
+    skills: false
+  drizzle-kit:
+    skills: false

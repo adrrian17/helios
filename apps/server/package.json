@@ -1,0 +1,28 @@
+{
+  "name": "server",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "vp pack",
+    "env:generate": "varlock codegen"
+  },
+  "dependencies": {
+    "@helios/api": "workspace:*",
+    "@helios/auth": "workspace:*",
+    "@helios/db": "workspace:*",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "evlog": "^2.33.1",
+    "hono": "^4.13.7",
+    "varlock": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "catalog:",
+    "@helios/config": "workspace:*",
+    "@helios/infra": "workspace:*",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  // Vendored agent skills are not part of the app.
+  "ignore": [".agents/**"],
+  "workspaces": {
+    ".": {
+      // CodeRabbit loads this file by name.
+      "entry": [".coderabbit.config.ts"],
+    },
+    "packages/infra": {
+      // The alchemy CLI loads this file by name.
+      "entry": ["alchemy.run.ts"],
+    },
+  },
+}
