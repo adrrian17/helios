@@ -13,9 +13,9 @@ const AppLayout = () => (
         href="#main"
         className="bg-background focus-visible:ring-ring fixed top-2 left-2 z-50 -translate-y-16 rounded-md border px-3 py-2 text-sm font-medium focus-visible:translate-y-0 focus-visible:ring-2"
         onClick={(event) => {
-          // Each page renders its own <main>, so focus whichever one is showing.
+          // Each page renders its own <main id="main">; focusing it keeps the URL free of a hash.
           event.preventDefault();
-          const main = document.querySelector("main");
+          const main = document.querySelector<HTMLElement>("#main");
           main?.setAttribute("tabindex", "-1");
           main?.focus();
         }}

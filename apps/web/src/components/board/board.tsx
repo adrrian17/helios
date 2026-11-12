@@ -92,6 +92,21 @@ export const Board = ({
 }) => {
   const isMobile = useIsMobile();
   const commit = useBoardMoves(input);
+  const queryClient = useQueryClient();
+  const filtered = Object.keys(input.filters).length > 0;
+
+  // Read from the cache, which the create mutation has refetched by the time this runs.
+  const isShown = (issueId: string) => {
+    const board = queryClient.getQueryData<BoardColumn[]>(
+      orpc.issues.board.queryKey({ input })
+    );
+
+    return (
+      !filtered ||
+      board === undefined ||
+      board.some(({ issues }) => issues.some(({ id }) => id === issueId))
+    );
+  };
 
   // While a card is moving, the board renders this working copy instead of the server's columns.
   const [working, setWorking] = useState<BoardColumn[] | null>(null);
@@ -339,7 +354,8 @@ export const Board = ({
               onMove={moveToState}
               pickedId={keyboard.pickedId}
               onCardKeyDown={keyboard.handleCardKeyDown}
-              filtered={Object.keys(input.filters).length > 0}
+              filtered={filtered}
+              isShown={isShown}
             />
           ))}
         </div>

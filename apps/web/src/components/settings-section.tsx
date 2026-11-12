@@ -43,7 +43,7 @@ export const SettingsList = ({
 );
 
 export const SettingsPage = ({ children }: { children: React.ReactNode }) => (
-  <main className="flex-1 overflow-y-auto">
+  <main id="main" className="flex-1 overflow-y-auto">
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-10 px-4 py-6 md:px-8 md:py-10">
       {children}
     </div>

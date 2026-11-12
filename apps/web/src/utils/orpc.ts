@@ -78,7 +78,11 @@ const createQueryClient = (): QueryClient => {
           action: {
             label: "Retry",
             onClick: () => {
-              query.invalidate();
+              // Invalidating alone leaves an errored query idle; Retry must send a request.
+              void client.refetchQueries({
+                queryKey: query.queryKey,
+                exact: true,
+              });
             },
           },
         });

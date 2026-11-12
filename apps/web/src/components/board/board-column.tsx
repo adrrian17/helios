@@ -8,8 +8,10 @@ import { Input } from "@helios/ui/components/input";
 import { Spinner } from "@helios/ui/components/spinner";
 import { cn } from "@helios/ui/lib/utils";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { PlusIcon, XIcon } from "lucide-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { SortableIssueCard } from "@/components/board/issue-card";
 import { StateIcon } from "@/components/issue-meta";
@@ -22,12 +24,15 @@ const IssueComposer = ({
   state,
   onClose,
   onCreated,
+  isShown,
 }: {
   projectId: string;
   state: WorkflowState;
   onClose: () => void;
   onCreated: () => void;
+  isShown: (issueId: string) => boolean;
 }) => {
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const create = useMutation(orpc.issues.create.mutationOptions());
   const inputId = `new-issue-${state.id}`;
@@ -46,7 +51,29 @@ const IssueComposer = ({
           create.mutate(
             { projectId, stateId: state.id, title: submitted },
             {
-              onSuccess: onCreated,
+              // Runs after the Board refetch, so a filtered-out Issue is already missing.
+              onSuccess: ({ id, identifier }) => {
+                if (isShown(id)) {
+                  onCreated();
+
+                  return;
+                }
+
+                toast.success(
+                  `${identifier} created. The current filters hide it.`,
+                  {
+                    action: {
+                      label: "Open",
+                      onClick: () => {
+                        void navigate({
+                          to: "/issue/$identifier",
+                          params: { identifier },
+                        });
+                      },
+                    },
+                  }
+                );
+              },
               onError: () => {
                 setTitle((current) => (current === "" ? submitted : current));
               },
@@ -105,6 +132,7 @@ export const BoardColumnView = ({
   pickedId,
   onCardKeyDown,
   filtered,
+  isShown,
 }: {
   column: BoardColumn;
   projectId: string;
@@ -113,11 +141,14 @@ export const BoardColumnView = ({
   pickedId: string | null;
   onCardKeyDown: (issue: IssueRow, event: React.KeyboardEvent) => void;
   filtered: boolean;
+  isShown: (issueId: string) => boolean;
 }) => {
   const { state, issues } = column;
   const { setNodeRef, isOver } = useDroppable({ id: state.id });
   const [composing, setComposing] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  // Set when the composer closes, so focus returns to "Add Issue" instead of the page.
+  const refocusAdd = useRef(false);
   const headingId = `column-${state.id}`;
 
   return (
@@ -149,7 +180,8 @@ export const BoardColumnView = ({
       </header>
       <div
         ref={listRef}
-        className="min-h-0 flex-1 overflow-y-auto px-1.5 max-md:px-3 max-md:pt-3 max-md:pb-24"
+        // Top padding keeps the first card's focus ring inside the scroll area.
+        className="min-h-0 flex-1 overflow-y-auto px-1.5 pt-1 max-md:px-3 max-md:pt-3 max-md:pb-24"
       >
         <SortableContext
           items={issues.map((issue) => issue.id)}
@@ -190,8 +222,10 @@ export const BoardColumnView = ({
               projectId={projectId}
               state={state}
               onClose={() => {
+                refocusAdd.current = true;
                 setComposing(false);
               }}
+              isShown={isShown}
               onCreated={() => {
                 listRef.current?.scrollTo({
                   top: listRef.current.scrollHeight,
@@ -200,6 +234,12 @@ export const BoardColumnView = ({
             />
           ) : (
             <Button
+              ref={(button: HTMLButtonElement | null) => {
+                if (button !== null && refocusAdd.current) {
+                  refocusAdd.current = false;
+                  button.focus();
+                }
+              }}
               variant="muted"
               size="sm"
               className="w-full justify-start"

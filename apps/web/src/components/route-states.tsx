@@ -27,6 +27,7 @@ const StatePage = ({
   <>
     {bare ? null : <PageHeader />}
     <main
+      id="main"
       className={cn(
         "flex flex-col items-center justify-center gap-6 p-4",
         bare ? "min-h-svh" : "flex-1 overflow-y-auto"

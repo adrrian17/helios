@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
 
 import {
+  API_URL,
   addIssue,
   adminEmail,
   archiveProject,
@@ -141,6 +142,60 @@ test.describe("desktop board", () => {
 
     await page.reload();
     await expect(card(column(page, "Done"), `${prefix}-1`)).toBeVisible();
+
+    await archiveProject(page, prefix);
+  });
+});
+
+test.describe("board composer", () => {
+  test.skip(({ isMobile }) => isMobile, "Desktop column composer.");
+
+  test("an Issue added under filters that hide it says so, Esc returns focus, and Retry reloads the Board", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    await createProject(page, false, `Filtered ${prefix}`, prefix);
+
+    await page.goto(
+      `/projects/${prefix}/board?priority=${encodeURIComponent(JSON.stringify(["urgent"]))}`
+    );
+    const backlog = column(page, "Backlog");
+    const add = backlog.getByRole("button", { name: "Add Issue", exact: true });
+    await add.click();
+    const input = backlog.getByLabel("New Issue title in Backlog");
+    await input.fill("Hidden by filters");
+    await input.press("Enter");
+    await expect(
+      page.getByText(`${prefix}-1 created. The current filters hide it.`)
+    ).toBeVisible();
+
+    await input.press("Escape");
+    await expect(add).toBeFocused();
+
+    await page.getByRole("button", { name: "Open", exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`/issue/${prefix}-1$`, "u"));
+
+    await page.goto(`/projects/${prefix}/board`);
+    await expect(card(backlog, `${prefix}-1`)).toBeVisible();
+    await page.route(`${API_URL}/rpc/issues/board`, async (route) => {
+      await route.abort();
+    });
+    await add.click();
+    await input.fill("Added offline");
+    await input.press("Enter");
+    await expect(page.getByText(/can’t reach its server/u)).toBeVisible();
+    await page.unroute(`${API_URL}/rpc/issues/board`);
+
+    const reloaded = page.waitForResponse(
+      (response) =>
+        response.url().includes("/rpc/issues/board") && response.ok()
+    );
+
+    await page.getByRole("button", { name: "Retry" }).click();
+    await reloaded;
+    await expect(card(backlog, `${prefix}-2`)).toBeVisible();
 
     await archiveProject(page, prefix);
   });

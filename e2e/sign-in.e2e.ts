@@ -15,6 +15,8 @@ test("the seeded Admin signs in with a magic link and signs out", async ({
   await expect(page.getByRole("status")).toContainText(
     "a sign-in link is on its way"
   );
+  // Focus moves to the confirmation, so it is read out and not lost with the form.
+  await expect(page.getByRole("status")).toBeFocused();
 
   await page.goto(await capturedLinkTo(request, adminEmail));
   await expect(page).not.toHaveURL(/\/sign-in/u);

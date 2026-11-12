@@ -17,6 +17,10 @@ import { z } from "zod";
 import { HeliosMark } from "@/components/project-mark";
 import { authClient } from "@/utils/auth-client";
 
+const focusOnMount = (element: HTMLElement | null) => {
+  element?.focus();
+};
+
 const requestMagicLink = async (email: string) => {
   const { error } = await authClient.signIn.magicLink({
     email,
@@ -41,7 +45,10 @@ const SignInPage = () => {
   });
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-4">
+    <main
+      id="main"
+      className="flex min-h-svh flex-col items-center justify-center gap-6 p-4"
+    >
       <p className="flex items-center gap-2 text-lg font-semibold tracking-tight">
         <HeliosMark className="size-7 rounded-md text-sm" />
         Helios
@@ -56,7 +63,12 @@ const SignInPage = () => {
         <CardContent>
           {requestLink.isSuccess ? (
             <div className="grid gap-4">
-              <output className="block">
+              <output
+                // Focused so screen readers read it and keyboard focus is not lost with the form.
+                ref={focusOnMount}
+                tabIndex={-1}
+                className="block outline-none"
+              >
                 If {email} belongs to a Member or has an Invitation, a sign-in
                 link is on its way. It works once and expires in 5 minutes.
               </output>

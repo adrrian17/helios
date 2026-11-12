@@ -143,6 +143,8 @@
   }
   body {
     @apply font-sans bg-background text-foreground;
+    /* Inter's contextual alternates rewrite typed text such as "2x7" and "->". */
+    font-feature-settings: "calt" 0;
   }
   html {
     @apply font-sans;

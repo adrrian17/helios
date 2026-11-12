@@ -24,7 +24,10 @@ const NoProjects = () => {
       <PageHeader>
         <PageTitle>Helios</PageTitle>
       </PageHeader>
-      <main className="grid flex-1 place-items-center overflow-y-auto p-4">
+      <main
+        id="main"
+        className="grid flex-1 place-items-center overflow-y-auto p-4"
+      >
         <Empty>
           <EmptyHeader>
             <EmptyMedia variant="icon">

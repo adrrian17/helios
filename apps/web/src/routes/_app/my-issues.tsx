@@ -124,7 +124,7 @@ const MyIssuesPage = () => (
     <PageHeader>
       <PageTitle>My Issues</PageTitle>
     </PageHeader>
-    <main className="flex-1 overflow-y-auto max-md:pb-20">
+    <main id="main" className="flex-1 overflow-y-auto max-md:pb-20">
       <MyIssuesList />
     </main>
   </>

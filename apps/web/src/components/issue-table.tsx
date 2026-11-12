@@ -57,7 +57,8 @@ const columns: {
     field: "assignee",
     label: "Assignee",
     icon: UserRoundIcon,
-    className: "w-11 lg:w-40",
+    // The last shown column until Created and Updated appear.
+    className: "w-11 md:max-xl:pr-4 lg:w-40",
   },
   { field: "created", label: "Created", className: "w-26 max-xl:hidden" },
   { field: "updated", label: "Updated", className: "w-24 max-xl:hidden" },
@@ -255,7 +256,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         </span>
       </span>
     </td>
-    <td className={CELL}>
+    <td className={cn(CELL, "md:max-xl:pr-4")}>
       <span className="flex min-w-0 items-center gap-2">
         {issue.assignee === null ? (
           <UnassignedAvatar />
