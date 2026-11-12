@@ -75,6 +75,8 @@ export default defineConfig({
   },
   test: {
     include: ["packages/*/test/**/*.test.ts"],
+    // Each test boots Miniflare and makes many sequential calls; CI runners run them about 3x slower.
+    testTimeout: 20_000,
   },
   staged: {
     "*.{js,ts,jsx,tsx,vue,svelte,json,jsonc,css,md}": "vp check --fix",
