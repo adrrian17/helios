@@ -75,12 +75,16 @@ export const placeAfter = (siblings: Sibling[], afterId: string | null) => {
       ? -1
       : siblings.findIndex((sibling) => sibling.id === afterId);
 
+  const lower = siblings[index]?.position ?? null;
+
+  // Concurrent creates can share a position; land after every twin instead of between equal keys.
+  const upper = siblings
+    .slice(index + 1)
+    .find((sibling) => lower === null || sibling.position > lower);
+
   return afterId !== null && index === -1
     ? undefined
-    : generateKeyBetween(
-        siblings[index]?.position ?? null,
-        siblings[index + 1]?.position ?? null
-      );
+    : generateKeyBetween(lower, upper?.position ?? null);
 };
 
 /** A position key after `last`, or the first key when there is none. */

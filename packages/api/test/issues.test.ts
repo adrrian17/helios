@@ -179,6 +179,36 @@ describe("manual ordering", () => {
     });
   });
 
+  it("still moves Issues next to ones created at the same moment", async () => {
+    await using harness = await createHarness();
+    const admin = await signInAsAdmin(harness);
+    const project = await createProject(admin);
+    const backlog = stateNamed(project, "Backlog");
+
+    const mover = await admin.issues.create({
+      projectId: project.id,
+      title: "mover",
+    });
+
+    // Both read the same column tail, so they can get the same position.
+    const [first] = await Promise.all(
+      ["twin 1", "twin 2"].map(
+        async (title) =>
+          await admin.issues.create({ projectId: project.id, title })
+      )
+    );
+
+    await admin.issues.move({
+      id: mover.id,
+      stateId: backlog.id,
+      afterId: first?.id ?? null,
+    });
+
+    await expect(columnTitles(admin, project.id)).resolves.toMatchObject({
+      Backlog: [expect.any(String), expect.any(String), "mover"],
+    });
+  });
+
   it("stays correct when Issues are dropped into the same gap many times", async () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);

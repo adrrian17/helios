@@ -25,6 +25,21 @@ test("the seeded Admin signs in with a magic link and signs out", async ({
     await page.getByRole("button", { name: "Open navigation" }).click();
   }
 
+  // A failed sign-out keeps the session, so the app must not pretend it ended.
+  await page.route("**/sign-out", async (route) => {
+    await route.fulfill({ status: 500 });
+  });
+  await page.getByRole("button", { name: "Account" }).click();
+  await page.getByRole("menuitem", { name: "Sign out" }).click();
+  await expect(page.getByText("Could not sign out. Try again.")).toBeVisible();
+  await expect(page).not.toHaveURL(/\/sign-in/u);
+  await page.unroute("**/sign-out");
+
+  if (isMobile) {
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Open navigation" }).click();
+  }
+
   await page.getByRole("button", { name: "Account" }).click();
   await page.getByRole("menuitem", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/sign-in$/u);

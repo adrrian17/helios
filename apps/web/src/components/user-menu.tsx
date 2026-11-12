@@ -134,7 +134,14 @@ export const UserMenu = () => {
 
   // Not a mutation: refetching everything afterwards would only collect 401s.
   const signOut = async () => {
-    await authClient.signOut();
+    const { error } = await authClient.signOut();
+
+    if (error) {
+      toast.error("Could not sign out. Try again.");
+
+      return;
+    }
+
     queryClient.clear();
     await navigate({ to: "/sign-in" });
   };
