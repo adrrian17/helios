@@ -5,9 +5,9 @@ import {
   Outlet,
   createRootRouteWithContext,
 } from "@tanstack/react-router";
+import { ThemeProvider } from "next-themes";
 
 import { NotFound } from "@/components/route-states";
-import { ThemeProvider } from "@/components/theme-provider";
 import type { orpc } from "@/utils/orpc";
 
 import "../index.css";

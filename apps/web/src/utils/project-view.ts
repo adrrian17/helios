@@ -1,8 +1,7 @@
-export type ProjectView = "board" | "list";
+type ProjectView = "board" | "list";
 
 const keyOf = (prefix: string) => `helios:project-view:${prefix}`;
 
-/** Remembers the view last opened in a Project, per browser. */
 export const rememberView = (prefix: string, view: ProjectView) => {
   try {
     localStorage.setItem(keyOf(prefix), view);
