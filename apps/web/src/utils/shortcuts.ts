@@ -41,7 +41,10 @@ type ShortcutName = keyof typeof shortcuts;
 /** Keys on a focused Board card. The Board handles them itself (`use-keyboard-moves.ts`), so `useShortcut` never binds them. */
 export const boardKeys = [
   { label: "Pick up the focused Issue", keys: ["Space"] },
-  { label: "Move it within or across columns", keys: ["←", "↑", "↓", "→"] },
+  {
+    label: "Move it within or across Workflow States",
+    keys: ["←", "↑", "↓", "→"],
+  },
   { label: "Drop it", keys: ["Space"] },
   { label: "Put it back", keys: ["Esc"] },
 ];
