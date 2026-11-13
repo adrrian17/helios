@@ -11,43 +11,15 @@ import {
 } from "drizzle-orm/sqlite-core";
 import type { AnySQLiteColumn } from "drizzle-orm/sqlite-core";
 
+import {
+  activityKinds,
+  invitationStatuses,
+  memberRoles,
+  prefixLength,
+  priorities,
+  stateCategories,
+} from "../enums";
 import { user } from "./auth";
-
-/** Board order: columns sort by category first, then by position inside it. */
-export const stateCategories = [
-  "ideas",
-  "backlog",
-  "started",
-  "completed",
-  "cancelled",
-] as const;
-
-export type StateCategory = (typeof stateCategories)[number];
-
-/** Most urgent first; `none` sorts last. */
-export const priorities = ["urgent", "high", "medium", "low", "none"] as const;
-
-export type Priority = (typeof priorities)[number];
-
-export const memberRoles = ["admin", "member"] as const;
-
-export type MemberRole = (typeof memberRoles)[number];
-
-export const invitationStatuses = ["pending", "accepted", "revoked"] as const;
-
-export type InvitationStatus = (typeof invitationStatuses)[number];
-
-export const activityKinds = [
-  "created",
-  "title_changed",
-  "state_changed",
-  "priority_changed",
-  "assignee_changed",
-  "label_added",
-  "label_removed",
-] as const;
-
-export type ActivityKind = (typeof activityKinds)[number];
 
 const oneOf = (column: AnySQLiteColumn, values: readonly string[]): SQL => {
   const quoted = values.map((value) => `'${value}'`).join(", ");
@@ -129,7 +101,7 @@ export const project = sqliteTable(
   (table) => [
     check(
       "project_prefix_format",
-      sql`length(${table.prefix}) between 2 and 5 and ${table.prefix} not glob '*[^A-Z]*'`
+      sql`length(${table.prefix}) between ${sql.raw(String(prefixLength.min))} and ${sql.raw(String(prefixLength.max))} and ${table.prefix} not glob '*[^A-Z]*'`
     ),
   ]
 );

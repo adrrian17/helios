@@ -1,3 +1,4 @@
+import { priorityLabels } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   Tooltip,
@@ -24,7 +25,7 @@ import {
 } from "@/components/issue-options";
 import { useIssue, useIssueCache } from "@/components/issue/use-issue";
 import { Picker } from "@/components/picker";
-import { labelColors, pickerPriorities, priorityLabels } from "@/utils/domain";
+import { nextLabelColor, pickerPriorities } from "@/utils/domain";
 import type { Label, MemberSummary, WorkflowState } from "@/utils/domain";
 import { UNASSIGNED } from "@/utils/filters";
 import { formatDate } from "@/utils/format";
@@ -65,7 +66,6 @@ const Row = ({
   </div>
 );
 
-/** The assignee's avatar and name inside its picker button. */
 const AssigneeValue = ({
   assignee,
   wrap,
@@ -90,7 +90,6 @@ const AssigneeValue = ({
   </>
 );
 
-/** Marks a property value as a control that opens a picker. */
 const Opens = () => (
   <ChevronDownIcon
     data-icon="inline-end"
@@ -187,11 +186,7 @@ const LabelsField = ({
         onCreate={{
           noun: "Label",
           create: (name) => {
-            // Each new Label takes the next preset colour, so neighbours differ.
-            const color =
-              labelColors[all.length % labelColors.length] ?? labelColors[0];
-
-            create.mutate({ name, color: color.value });
+            create.mutate({ name, color: nextLabelColor(all.length) });
           },
         }}
         trigger={
@@ -211,7 +206,6 @@ const LabelsField = ({
   );
 };
 
-/** Who created the Issue and when; one muted line in the narrow layout. */
 const IssueMetadata = ({ compact }: { compact: boolean }) => {
   const issue = useIssue();
 

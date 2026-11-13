@@ -4,12 +4,11 @@ import { ORPCError } from "@orpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { checklistItemSchema } from "../domain";
 import { memberProcedure } from "../index";
-import { found, idInput, keyAfter, placeAfter } from "./shared";
+import { found, idInput, keyAfter, placeAfter, requireIssue } from "./shared";
 
 const ITEM = "Checklist item";
-
-const textSchema = z.string().trim().min(1).max(1000);
 
 const itemsOf = async (db: Database, issueId: string) =>
   await db.query.checklistItem.findMany({
@@ -20,17 +19,10 @@ const itemsOf = async (db: Database, issueId: string) =>
 
 /** Checklist changes never record Activity. */
 export const checklistRouter = {
-  /** Adds an item at the end of the Issue's Checklist. */
   add: memberProcedure
-    .input(z.object({ issueId: z.string(), text: textSchema }))
+    .input(z.object({ issueId: z.string(), text: checklistItemSchema }))
     .handler(async ({ context: { db }, input: { issueId, text } }) => {
-      found(
-        await db.query.issue.findFirst({
-          columns: { id: true },
-          where: { id: issueId },
-        }),
-        "Issue"
-      );
+      await requireIssue(db, issueId);
       const items = await itemsOf(db, issueId);
 
       const [added] = await db
@@ -41,11 +33,10 @@ export const checklistRouter = {
       return found(added, ITEM);
     }),
 
-  /** Edits an item's text or checks and unchecks it. */
   update: memberProcedure
     .input(
       idInput.extend({
-        text: textSchema.optional(),
+        text: checklistItemSchema.optional(),
         checked: z.boolean().optional(),
       })
     )

@@ -4,26 +4,18 @@ import { ORPCError } from "@orpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { commentSchema } from "../domain";
 import { memberProcedure } from "../index";
-import { found, idInput } from "./shared";
-
-const bodySchema = z.string().trim().min(1).max(50_000);
+import { found, idInput, requireIssue } from "./shared";
 
 const findComment = async (db: Database, id: string) =>
   found(await db.query.comment.findFirst({ where: { id } }), "Comment");
 
 export const commentsRouter = {
-  /** Adds a Markdown Comment by the signed-in Member. */
   add: memberProcedure
-    .input(z.object({ issueId: z.string(), body: bodySchema }))
+    .input(z.object({ issueId: z.string(), body: commentSchema }))
     .handler(async ({ context: { db, member: author }, input }) => {
-      found(
-        await db.query.issue.findFirst({
-          columns: { id: true },
-          where: { id: input.issueId },
-        }),
-        "Issue"
-      );
+      await requireIssue(db, input.issueId);
 
       const [added] = await db
         .insert(comment)
@@ -35,7 +27,7 @@ export const commentsRouter = {
 
   /** Only the author may edit a Comment; the edit marks it as edited. */
   edit: memberProcedure
-    .input(idInput.extend({ body: bodySchema }))
+    .input(idInput.extend({ body: commentSchema }))
     .handler(async ({ context: { db, member: self }, input: { id, body } }) => {
       const existing = await findComment(db, id);
 

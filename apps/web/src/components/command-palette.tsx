@@ -34,7 +34,6 @@ import { useMediaQuery } from "@/utils/use-media-query";
 const includes = (text: string, search: string) =>
   text.toLowerCase().includes(search.toLowerCase());
 
-/** Every typed word appears somewhere, so "go labels" finds "Go to Labels". */
 const matchesWords = (text: string, search: string) =>
   search.split(/\s+/u).every((word) => includes(text, word));
 
@@ -183,7 +182,6 @@ const PaletteBody = ({
             <span className="text-muted-foreground w-[4.5rem] shrink-0 font-mono text-xs tabular-nums">
               {issue.identifier}
             </span>
-            {/* Phones show two lines of title rather than cutting it at a few words. */}
             <span className="truncate max-md:line-clamp-2 max-md:whitespace-normal">
               {issue.title}
             </span>
@@ -209,7 +207,6 @@ const PaletteBody = ({
             value={search}
             onValueChange={(next) => {
               setSearch(next);
-              // Each new search starts from its best match.
               setSelected("");
             }}
           />

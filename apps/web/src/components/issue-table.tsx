@@ -1,3 +1,5 @@
+import { priorityLabels, sortDirections, sortFields } from "@helios/api/domain";
+import type { Sort, SortField } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   DropdownMenu,
@@ -27,11 +29,9 @@ import {
   StateIcon,
   UnassignedAvatar,
 } from "@/components/issue-meta";
-import { priorityLabels } from "@/utils/domain";
 import type { IssueRow } from "@/utils/domain";
-import { sortFields } from "@/utils/filters";
-import type { Sort, SortField } from "@/utils/filters";
 import { formatDate } from "@/utils/format";
+import { nextSort } from "@/utils/list-sort";
 
 /**
  * Each column's header and the breakpoint it appears from. Phones keep
@@ -87,7 +87,6 @@ const SortHeader = ({
       className={cn(
         CELL,
         "h-9 text-left font-normal",
-        // Icon-only phone columns give their whole 44px width to the button.
         Icon !== undefined && "max-md:px-0",
         column.className
       )}
@@ -131,8 +130,6 @@ const sortNames: Record<SortField, string> = {
 
 const directionNames = { asc: "Ascending", desc: "Descending" } as const;
 
-const directions = ["asc", "desc"] as const;
-
 const isField = (value: unknown): value is SortField =>
   sortFields.some((field) => field === value);
 
@@ -162,7 +159,7 @@ export const SortMenu = ({
         value={sort.field}
         onValueChange={(field) => {
           if (isField(field)) {
-            onChange({ ...sort, field });
+            onChange(nextSort(sort, field));
           }
         }}
       >
@@ -177,7 +174,7 @@ export const SortMenu = ({
       <DropdownMenuRadioGroup
         value={sort.direction}
         onValueChange={(value) => {
-          const direction = directions.find((entry) => entry === value);
+          const direction = sortDirections.find((entry) => entry === value);
 
           if (direction !== undefined) {
             onChange({ ...sort, direction });
@@ -202,10 +199,7 @@ export const SortMenu = ({
 const MAX_LABELS = 2;
 
 const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
-  <tr
-    data-issue={issue.identifier}
-    className="hover:bg-muted/50 has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12"
-  >
+  <tr className="hover:bg-muted/50 has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12">
     <td
       className={cn(
         CELL,
@@ -287,7 +281,6 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
   </tr>
 );
 
-/** One dense row per Issue, sorted by the column header last chosen. */
 export const IssueTable = ({
   label,
   issues,

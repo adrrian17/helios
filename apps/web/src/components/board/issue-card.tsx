@@ -1,5 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { priorityLabels } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   DropdownMenu,
@@ -25,7 +26,6 @@ import {
   StateIcon,
   UnassignedAvatar,
 } from "@/components/issue-meta";
-import { priorityLabels } from "@/utils/domain";
 import type { IssueRow, WorkflowState } from "@/utils/domain";
 
 const SORTABLE_MOTION =
@@ -160,7 +160,6 @@ export const SortableIssueCard = ({
   issue: IssueRow;
   states: WorkflowState[];
   onMove: (stateId: string) => void;
-  /** Picked up with the keyboard and following the arrow keys. */
   picked: boolean;
   onKeyDown: (event: React.KeyboardEvent) => void;
 }) => {
@@ -182,7 +181,6 @@ export const SortableIssueCard = ({
   return (
     <li
       ref={setNodeRef}
-      data-issue={issue.identifier}
       data-issue-id={issue.id}
       className={cn("relative", SORTABLE_MOTION)}
       style={{

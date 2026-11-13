@@ -1,9 +1,9 @@
 import type { Database } from "@helios/db";
 import { project, workflowState } from "@helios/db/schema/tracker";
-import type { StateCategory } from "@helios/db/schema/tracker";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { defaultStates, nameSchema, prefixSchema } from "../domain";
 import { adminProcedure, memberProcedure } from "../index";
 import {
   compareStates,
@@ -11,17 +11,7 @@ import {
   idInput,
   conflictOnDuplicate,
   keyAfter,
-  nameSchema,
 } from "./shared";
-
-/** One Workflow State per State Category, so a new Project is usable at once. */
-const defaultStates: { name: string; category: StateCategory }[] = [
-  { name: "Ideas", category: "ideas" },
-  { name: "Backlog", category: "backlog" },
-  { name: "In Progress", category: "started" },
-  { name: "Done", category: "completed" },
-  { name: "Cancelled", category: "cancelled" },
-];
 
 const projectColumns = {
   id: true,
@@ -83,9 +73,7 @@ export const projectsRouter = {
     .input(
       z.object({
         name: nameSchema,
-        prefix: z
-          .string()
-          .regex(/^[A-Z]{2,5}$/u, "Use 2 to 5 uppercase letters."),
+        prefix: prefixSchema,
       })
     )
     .handler(async ({ context: { db }, input: { name, prefix } }) => {
@@ -110,7 +98,7 @@ export const projectsRouter = {
       return { id, name, prefix };
     }),
 
-  /** Renames a Project. The prefix never changes after creation. */
+  /** The prefix never changes after creation. */
   rename: adminProcedure
     .input(idInput.extend({ name: nameSchema }))
     .handler(async ({ context: { db }, input: { id, name } }) => {

@@ -1,3 +1,4 @@
+import { limits } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   Dialog,
@@ -41,6 +42,7 @@ import { toast } from "sonner";
 import { useCommands } from "@/components/commands";
 import { MemberAvatar } from "@/components/issue-meta";
 import { authClient } from "@/utils/auth-client";
+import { roleLabels } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 import { useMe } from "@/utils/use-me";
 
@@ -52,14 +54,11 @@ const DisplayNameDialog = ({
   onOpenChange: (open: boolean) => void;
 }) => {
   const me = useMe();
-  const queryClient = useQueryClient();
   const [name, setName] = useState(me.name);
 
   const save = useMutation({
     ...orpc.workspace.setDisplayName.mutationOptions(),
-    onSuccess: async () => {
-      // `me` is cached as static by the route guard, so refetch it explicitly.
-      await queryClient.refetchQueries({ queryKey: orpc.me.key() });
+    onSuccess: () => {
       toast.success("Display name saved.");
       onOpenChange(false);
     },
@@ -90,7 +89,7 @@ const DisplayNameDialog = ({
                 required
                 // The dialog closes on success, so nothing typed after Save may be lost.
                 readOnly={save.isPending}
-                maxLength={80}
+                maxLength={limits.displayName}
                 placeholder={me.email}
                 value={name}
                 onChange={(event) => {
@@ -130,7 +129,6 @@ export const UserMenu = () => {
   const { theme = "system", setTheme } = useTheme();
   const { showShortcuts } = useCommands();
   const [editingName, setEditingName] = useState(false);
-  const displayName = me.name.trim() === "" ? me.email : me.name;
 
   // Not a mutation: refetching everything afterwards would only collect 401s.
   const signOut = async () => {
@@ -152,11 +150,11 @@ export const UserMenu = () => {
         <DropdownMenuTrigger
           render={
             <SidebarMenuButton size="lg" aria-label="Account">
-              <MemberAvatar member={{ id: me.id, displayName }} size="sm" />
+              <MemberAvatar member={me} size="sm" />
               <span className="grid min-w-0 flex-1 text-left leading-tight">
-                <span className="truncate font-medium">{displayName}</span>
+                <span className="truncate font-medium">{me.displayName}</span>
                 <span className="text-muted-foreground truncate text-xs">
-                  {me.role === "admin" ? "Admin" : "Member"}
+                  {roleLabels[me.role]}
                 </span>
               </span>
               <ChevronsUpDownIcon />

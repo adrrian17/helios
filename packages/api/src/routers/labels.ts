@@ -2,8 +2,9 @@ import { activityEntry, issueLabel, label } from "@helios/db/schema/tracker";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { nameSchema } from "../domain";
 import { memberProcedure } from "../index";
-import { conflictOnDuplicate, found, idInput, nameSchema } from "./shared";
+import { conflictOnDuplicate, found, idInput } from "./shared";
 
 const colorSchema = z
   .string()
@@ -39,7 +40,6 @@ export const labelsRouter = {
       return found(created, "Label");
     }),
 
-  /** Renames or recolours a Label. */
   update: memberProcedure
     .input(
       idInput.extend({

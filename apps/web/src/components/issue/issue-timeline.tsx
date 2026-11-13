@@ -50,7 +50,6 @@ const Change = ({ entry }: { entry: ActivityEntry }) => (
   </>
 );
 
-/** What each kind of Activity says and the icon beside it. */
 const activityCopy: Record<
   ActivityEntry["kind"],
   { icon: LucideIcon; describe: (entry: ActivityEntry) => React.ReactNode }
@@ -314,13 +313,7 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
 
   return (
     <div className="flex items-start gap-3 pt-2">
-      <MemberAvatar
-        member={{
-          id: me.id,
-          displayName: me.name.trim() === "" ? me.email : me.name,
-        }}
-        className="relative z-10"
-      />
+      <MemberAvatar member={me} className="relative z-10" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <MarkdownEditor
           label="Comment"
@@ -358,7 +351,6 @@ export const IssueTimeline = () => {
         Activity
       </h2>
       <div className="relative">
-        {/* The thread line behind the icons and avatars. */}
         <span
           aria-hidden="true"
           className="bg-border absolute top-3 bottom-8 left-2.5 w-px"
@@ -380,7 +372,6 @@ export const IssueTimeline = () => {
       </div>
       <ConfirmDialog
         request={confirm}
-        pending={false}
         onClose={() => {
           setConfirm(null);
         }}

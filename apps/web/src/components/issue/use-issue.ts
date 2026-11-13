@@ -4,7 +4,7 @@ import { useParams } from "@tanstack/react-router";
 import type { IssueDetail } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 
-const useIssueOptions = () => {
+export const useIssueOptions = () => {
   const { identifier } = useParams({ from: "/_app/issue/$identifier" });
 
   return orpc.issues.get.queryOptions({ input: { identifier } });

@@ -7,22 +7,11 @@ import {
 } from "@helios/ui/components/dialog";
 import { Kbd, KbdGroup } from "@helios/ui/components/kbd";
 
-import { keysOf, shortcuts } from "@/utils/shortcuts";
+import { boardKeys, keysOf, shortcuts } from "@/utils/shortcuts";
 
-const byScope = Object.groupBy(
-  Object.entries(shortcuts),
-  ([, shortcut]) => shortcut.scope
+const byScope = Object.entries(
+  Object.groupBy(Object.entries(shortcuts), ([, shortcut]) => shortcut.scope)
 );
-
-const scopes = ["Anywhere", "Issue view"] as const;
-
-/** Keys on a focused Board card; the card handles them, so they are not in the registry. */
-const boardKeys = [
-  { label: "Pick up the focused Issue", keys: ["Space"] },
-  { label: "Move it within or across columns", keys: ["←", "↑", "↓", "→"] },
-  { label: "Drop it", keys: ["Space"] },
-  { label: "Put it back", keys: ["Esc"] },
-];
 
 const ShortcutRow = ({ label, keys }: { label: string; keys: string[] }) => (
   <div className="flex items-center justify-between gap-4 py-2">
@@ -55,7 +44,6 @@ const Section = ({
   </section>
 );
 
-/** The `?` help: every shortcut from the registry, grouped by where it works. */
 export const ShortcutsDialog = ({
   open,
   onClose,
@@ -79,9 +67,9 @@ export const ShortcutsDialog = ({
         </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col gap-4">
-        {scopes.map((scope) => (
+        {byScope.map(([scope, entries]) => (
           <Section key={scope} title={scope}>
-            {byScope[scope]?.map(([name, shortcut]) => (
+            {entries.map(([name, shortcut]) => (
               <ShortcutRow
                 key={name}
                 label={shortcut.label}

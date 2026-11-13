@@ -1,6 +1,7 @@
 import type { RouterClient } from "@orpc/server";
 
 import { memberProcedure } from "../index";
+import { toMemberSummary } from "../member";
 import { checklistRouter } from "./checklist";
 import { commentsRouter } from "./comments";
 import { issuesRouter } from "./issues";
@@ -11,8 +12,7 @@ import { workspaceRouter } from "./workspace";
 
 export const appRouter = {
   me: memberProcedure.handler(({ context: { member } }) => ({
-    id: member.userId,
-    email: member.user.email,
+    ...toMemberSummary(member),
     name: member.user.name,
     role: member.role,
   })),

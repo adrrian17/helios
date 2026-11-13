@@ -75,7 +75,6 @@ export const MarkdownEditor = ({
       <Textarea
         aria-label={label}
         autoFocus={autoFocus}
-        // Opening an editor on existing text puts the caret after it, ready to add more.
         ref={autoFocus ? caretAtEnd : undefined}
         placeholder={placeholder}
         className={cn("max-h-[60svh] min-h-24", className)}

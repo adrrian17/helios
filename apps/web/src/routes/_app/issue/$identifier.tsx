@@ -37,7 +37,7 @@ import { IssueChecklist } from "@/components/issue/issue-checklist";
 import { IssueProperties } from "@/components/issue/issue-properties";
 import type { IssuePicker } from "@/components/issue/issue-properties";
 import { IssueTimeline } from "@/components/issue/issue-timeline";
-import { useIssue } from "@/components/issue/use-issue";
+import { useIssue, useIssueOptions } from "@/components/issue/use-issue";
 import { PageHeader } from "@/components/page-header";
 import { ProjectMark } from "@/components/project-mark";
 import { NotFound } from "@/components/route-states";
@@ -49,8 +49,7 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
   const issue = useIssue();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { identifier } = Route.useParams();
-  const issueKey = orpc.issues.get.queryKey({ input: { identifier } });
+  const { queryKey: issueKey } = useIssueOptions();
   const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
 
   const remove = useMutation({
@@ -121,7 +120,6 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
       </DropdownMenu>
       <ConfirmDialog
         request={confirm}
-        pending={remove.isPending}
         onClose={() => {
           setConfirm(null);
         }}

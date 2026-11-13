@@ -11,7 +11,6 @@ import {
   uniquePrefix,
 } from "./helpers";
 
-/** Opens an editor, closes it with Escape, and expects focus back on what opened it. */
 const escapeReturnsFocus = async (
   page: Page,
   opener: Locator,

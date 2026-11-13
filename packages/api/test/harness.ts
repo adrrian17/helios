@@ -16,7 +16,6 @@ export const ADMIN_EMAIL = "admin@helios.test";
 
 const migrationsDir = path.join(import.meta.dirname, "../../db/src/migrations");
 
-/** Applies every generated migration, in order, in one batch. */
 const applyMigrations = async (d1: D1Database) => {
   const entries = await readdir(migrationsDir, { withFileTypes: true });
 
@@ -107,10 +106,6 @@ export const createHarness = async () => {
     return await openLink(link);
   };
 
-  /** What the web app sees from `/api/auth/get-session`. */
-  const sessionFor = async (headers: Headers) =>
-    await auth.api.getSession({ headers });
-
   const clientFor = (headers = new Headers()) =>
     createRouterClient(appRouter, {
       context: async () => await createContext({ auth, db, headers }),
@@ -119,11 +114,9 @@ export const createHarness = async () => {
   return {
     authFor,
     clientFor,
-    db,
     mailer,
     openLink,
     requestLink,
-    sessionFor,
     signIn,
     [Symbol.asyncDispose]: async () => {
       await miniflare.dispose();

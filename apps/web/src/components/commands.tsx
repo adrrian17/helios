@@ -1,5 +1,6 @@
+import { parseIdentifier } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
-import { useLocation, useParams } from "@tanstack/react-router";
+import { useMatches, useParams } from "@tanstack/react-router";
 import { PlusIcon, SearchIcon } from "lucide-react";
 import { createContext, use, useMemo, useState } from "react";
 
@@ -37,10 +38,14 @@ export const useCommands = () => {
 const useCurrentPrefix = () => {
   const params = useParams({ strict: false });
 
-  return params.prefix ?? params.identifier?.split("-")[0]?.toUpperCase();
+  return (
+    params.prefix ??
+    (params.identifier === undefined
+      ? undefined
+      : parseIdentifier(params.identifier)?.prefix)
+  );
 };
 
-/** The palette, the create dialog, the shortcut help and the keys that open them, for every signed-in page. */
 export const CommandsProvider = ({
   children,
 }: {
@@ -103,11 +108,11 @@ export const CommandsProvider = ({
   );
 };
 
-/** Pages whose phone layout leaves room for the floating New Issue button. */
-const FAB_PAGE = /^\/(?:my-issues|projects\/[^/]+\/(?:board|list))$/u;
-
 const useFabPage = () =>
-  useLocation({ select: (location) => FAB_PAGE.test(location.pathname) });
+  useMatches({
+    select: (matches) =>
+      matches.some((match) => match.staticData.issueList === true),
+  });
 
 /**
  * Search, and New Issue where there is no floating button, for the page

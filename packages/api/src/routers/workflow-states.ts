@@ -1,33 +1,23 @@
 import type { Database } from "@helios/db";
-import {
-  activityEntry,
-  issue,
-  stateCategories,
-  workflowState,
-} from "@helios/db/schema/tracker";
+import { stateCategories } from "@helios/db/enums";
+import type { StateCategory } from "@helios/db/enums";
+import { activityEntry, issue, workflowState } from "@helios/db/schema/tracker";
 import { ORPCError } from "@orpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { nameSchema } from "../domain";
 import { adminProcedure } from "../index";
-import {
-  batchAll,
-  found,
-  idInput,
-  keyAfter,
-  nameSchema,
-  placeAfter,
-} from "./shared";
+import { batchAll, found, idInput, keyAfter, placeAfter } from "./shared";
 
 const STATE = "Workflow State";
 
 const findState = async (db: Database, id: string) =>
   found(await db.query.workflowState.findFirst({ where: { id } }), STATE);
 
-/** States of one category in one Project, in position order. */
 const categoryStates = async (
   db: Database,
-  state: { projectId: string; category: (typeof stateCategories)[number] }
+  state: { projectId: string; category: StateCategory }
 ) =>
   await db.query.workflowState.findMany({
     columns: { id: true, position: true },
@@ -36,7 +26,6 @@ const categoryStates = async (
   });
 
 export const workflowStatesRouter = {
-  /** Adds a Workflow State at the end of its State Category. */
   add: adminProcedure
     .input(
       z.object({

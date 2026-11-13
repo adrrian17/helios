@@ -2,7 +2,6 @@ import { SidebarTrigger } from "@helios/ui/components/sidebar";
 
 import { PhoneCommands } from "@/components/commands";
 
-/** The bar on top of every page; on phones it also holds the button that opens the sidebar drawer. */
 export const PageHeader = ({
   children,
   actions,

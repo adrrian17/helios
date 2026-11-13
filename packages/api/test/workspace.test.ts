@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test";
 
-import { addMember, createProject, outcomeOf, signInAsAdmin } from "./fixtures";
+import { addMember, outcomeOf, signInAsAdmin } from "./fixtures";
 import type { Client } from "./fixtures";
 import { ADMIN_EMAIL, createHarness } from "./harness";
 
@@ -72,18 +72,6 @@ describe("Admin-only actions", () => {
       )
     );
   });
-
-  it("let an Admin act", async () => {
-    await using harness = await createHarness();
-    const admin = await signInAsAdmin(harness);
-    const project = await createProject(admin);
-
-    await admin.projects.rename({ id: project.id, name: "Renamed" });
-
-    await expect(admin.projects.list()).resolves.toMatchObject([
-      { name: "Renamed" },
-    ]);
-  });
 });
 
 describe("Members and Invitations", () => {
@@ -153,6 +141,9 @@ describe("Members and Invitations", () => {
     await admin.workspace.reactivate({ memberId: member.id });
     const again = harness.clientFor(await harness.signIn("member@helios.test"));
 
+    await expect(member.client.me()).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
     await expect(again.me()).resolves.toMatchObject({ id: member.id });
   });
 

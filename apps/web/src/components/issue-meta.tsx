@@ -1,8 +1,8 @@
+import { priorityLabels } from "@helios/api/domain";
 import { Avatar, AvatarFallback } from "@helios/ui/components/avatar";
 import { cn } from "@helios/ui/lib/utils";
 import { UserRoundIcon } from "lucide-react";
 
-import { priorityLabels } from "@/utils/domain";
 import type { MemberSummary, Priority, StateCategory } from "@/utils/domain";
 import { formatDateTime, formatRelative } from "@/utils/format";
 
@@ -160,7 +160,6 @@ export const PriorityIcon = ({
 const HUE_COUNT = 360;
 const HUE_SEED = 31;
 
-/** A stable hue per Member so the same person always gets the same colour. */
 const hueOf = (id: string) => {
   let hash = 0;
 
@@ -197,7 +196,6 @@ export const MemberAvatar = ({
   </Avatar>
 );
 
-/** The empty-assignee placeholder, the same size as a `MemberAvatar`. */
 export const UnassignedAvatar = ({ className }: { className?: string }) => (
   <span
     aria-hidden="true"
@@ -224,7 +222,6 @@ export const LabelDot = ({
   />
 );
 
-/** A relative time ("3 h ago") with the exact time on hover and for assistive tech. */
 export const RelativeTime = ({
   date,
   className,

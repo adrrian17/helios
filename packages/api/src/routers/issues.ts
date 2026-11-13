@@ -1,35 +1,30 @@
 import type { Database } from "@helios/db";
-import {
-  activityEntry,
-  issue,
-  priorities,
-  project,
-} from "@helios/db/schema/tracker";
-import type { Priority } from "@helios/db/schema/tracker";
+import { priorities } from "@helios/db/enums";
+import { activityEntry, issue, project } from "@helios/db/schema/tracker";
 import { ORPCError } from "@orpc/server";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 
+import {
+  descriptionSchema,
+  filtersSchema,
+  formatIdentifier,
+  parseIdentifier,
+  priorityLabels,
+  sortSchema,
+  titleSchema,
+} from "../domain";
+import type { IssueFilters, SortField } from "../domain";
 import { memberProcedure } from "../index";
+import { displayName, memberWith, toMemberSummary } from "../member";
 import {
   compareKeys,
   compareStates,
-  displayName,
   found,
   idInput,
   keyAfter,
   placeAfter,
-  toMemberSummary,
 } from "./shared";
-
-/** Display values stored in Activity, so history reads the same after the enum is relabelled in the UI. */
-const priorityLabels: Record<Priority, string> = {
-  none: "No priority",
-  urgent: "Urgent",
-  high: "High",
-  medium: "Medium",
-  low: "Low",
-};
 
 const SEARCH_LIMIT = 20;
 const MAX_SEARCH_WORDS = 10;
@@ -37,25 +32,6 @@ const MAX_SEARCH_WORDS = 10;
 /** D1 rejects LIKE patterns over 50 bytes; a word's first 12 code points, of up to 4 bytes each, plus two `%` fit. */
 const firstCodePoints = /^.{0,12}/su;
 
-const titleSchema = z.string().trim().min(1).max(500);
-const descriptionSchema = z.string().max(100_000);
-
-const identifierPattern = /^(?<prefix>[A-Za-z]{2,5})-(?<number>\d+)$/u;
-
-const parseIdentifier = (identifier: string) => {
-  const { prefix, number } =
-    identifierPattern.exec(identifier.trim())?.groups ?? {};
-
-  return prefix === undefined || number === undefined
-    ? undefined
-    : { prefix: prefix.toUpperCase(), number: Number(number) };
-};
-
-const memberWith = {
-  with: { user: { columns: { name: true, email: true } } },
-} as const;
-
-/** Everything a Board card or List row shows. */
 const rowWith = {
   project: { columns: { id: true, name: true, prefix: true } },
   state: { columns: { id: true, name: true, category: true, position: true } },
@@ -73,7 +49,7 @@ const loadRows = async (db: Database, where: RowFilter) => {
 
   return rows.map((row) => ({
     id: row.id,
-    identifier: `${row.project.prefix}-${row.number}`,
+    identifier: formatIdentifier(row.project.prefix, row.number),
     number: row.number,
     title: row.title,
     priority: row.priority,
@@ -96,21 +72,7 @@ type IssueRow = Awaited<ReturnType<typeof loadRows>>[number];
 const byPriority = (a: IssueRow, b: IssueRow) =>
   priorities.indexOf(a.priority) - priorities.indexOf(b.priority);
 
-const sortFields = [
-  "identifier",
-  "title",
-  "state",
-  "priority",
-  "assignee",
-  "created",
-  "updated",
-] as const;
-
-/** List sort comparators, each ascending. */
-const sorters: Record<
-  (typeof sortFields)[number],
-  (a: IssueRow, b: IssueRow) => number
-> = {
+const sorters: Record<SortField, (a: IssueRow, b: IssueRow) => number> = {
   identifier: (a, b) => a.number - b.number,
   title: (a, b) => a.title.localeCompare(b.title),
   state: (a, b) => compareStates(a.state, b.state),
@@ -124,19 +86,9 @@ const sorters: Record<
   updated: (a, b) => a.updatedAt.getTime() - b.updatedAt.getTime(),
 };
 
-/** Board and List filters; each list matches any of its values, and filters combine with AND. */
-const filtersSchema = z
-  .object({
-    assigneeIds: z.array(z.string()).optional(),
-    unassigned: z.boolean().optional(),
-    labelIds: z.array(z.string()).optional(),
-    priorities: z.array(z.enum(priorities)).optional(),
-  })
-  .default({});
-
 const projectIssuesWhere = (
   projectId: string,
-  filters: z.infer<typeof filtersSchema>
+  filters: IssueFilters
 ): RowFilter => {
   const assigneeMatches = [
     ...(filters.assigneeIds === undefined
@@ -202,7 +154,6 @@ const activeAssigneeName = async (db: Database, userId: string) => {
   return displayName(assignee.user);
 };
 
-/** Key for the bottom of a Workflow State's column. */
 const bottomOf = async (db: Database, stateId: string) => {
   const last = await db.query.issue.findFirst({
     columns: { position: true },
@@ -287,7 +238,7 @@ export const issuesRouter = {
 
         const { number } = found(created, "Issue");
 
-        return { id, number, identifier: `${prefix}-${number}` };
+        return { id, number, identifier: formatIdentifier(prefix, number) };
       }
     ),
 
@@ -450,7 +401,6 @@ export const issuesRouter = {
       found(deleted, "Issue");
     }),
 
-  /** One Issue by Identifier (such as `HEL-42`), with everything the Issue view shows. */
   get: memberProcedure
     .input(z.object({ identifier: z.string() }))
     .handler(async ({ context: { db }, input }) => {
@@ -501,7 +451,7 @@ export const issuesRouter = {
 
       return {
         id: detail.id,
-        identifier: `${detail.project.prefix}-${detail.number}`,
+        identifier: formatIdentifier(detail.project.prefix, detail.number),
         number: detail.number,
         title: detail.title,
         description: detail.description,
@@ -544,12 +494,7 @@ export const issuesRouter = {
       z.object({
         projectId: z.string(),
         filters: filtersSchema,
-        sort: z
-          .object({
-            field: z.enum(sortFields),
-            direction: z.enum(["asc", "desc"]),
-          })
-          .default({ field: "identifier", direction: "asc" }),
+        sort: sortSchema,
       })
     )
     .handler(
@@ -596,7 +541,7 @@ export const issuesRouter = {
     .input(z.object({ query: z.string().trim().min(1).max(200) }))
     .handler(async ({ context: { db }, input: { query } }) => {
       const parsed = parseIdentifier(query);
-      const exact = parsed && `${parsed.prefix}-${parsed.number}`;
+      const exact = parsed && formatIdentifier(parsed.prefix, parsed.number);
 
       // D1 binds at most 100 parameters, and each word binds up to three.
       const words = [

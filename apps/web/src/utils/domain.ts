@@ -1,3 +1,4 @@
+import { priorities, stateCategories } from "@helios/api/domain";
 import type { AppRouterClient } from "@helios/api/routers/index";
 import type { InferClientOutputs } from "@orpc/client";
 
@@ -28,35 +29,31 @@ export type Label = Outputs["labels"]["list"][number];
 
 export type Member = Outputs["workspace"]["members"][number];
 
-/** State Categories in board order, with the words the UI shows for them. */
-export const categories: { value: StateCategory; label: string }[] = [
-  { value: "ideas", label: "Ideas" },
-  { value: "backlog", label: "Backlog" },
-  { value: "started", label: "Started" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
-
-/** The order pickers offer Priorities in, as Linear does: no priority first, then most to least urgent. */
-export const pickerPriorities = [
-  "none",
-  "urgent",
-  "high",
-  "medium",
-  "low",
-] as const satisfies readonly Priority[];
-
-export const priorityLabels: Record<Priority, string> = {
-  none: "No priority",
-  urgent: "Urgent",
-  high: "High",
-  medium: "Medium",
-  low: "Low",
+export const roleLabels: Record<Member["role"], string> = {
+  admin: "Admin",
+  member: "Member",
 };
 
-export const PREFIX_PATTERN = /^[A-Z]{2,5}$/u;
+const categoryLabels: Record<StateCategory, string> = {
+  ideas: "Ideas",
+  backlog: "Backlog",
+  started: "Started",
+  completed: "Completed",
+  cancelled: "Cancelled",
+};
 
-/** Suggests a prefix from a Project name: initials for several words, else the first letters. */
+/** State Categories in board order, with the words the UI shows for them. */
+export const categories = stateCategories.map((value) => ({
+  value,
+  label: categoryLabels[value],
+}));
+
+/** The order pickers offer Priorities in, as Linear does: no priority first, then most to least urgent. */
+export const pickerPriorities: Priority[] = [
+  "none",
+  ...priorities.filter((priority) => priority !== "none"),
+];
+
 export const suggestPrefix = (name: string) => {
   const words = name
     .toUpperCase()
@@ -84,3 +81,6 @@ export const labelColors = [
   { value: "#a855f7", name: "Purple" },
   { value: "#ec4899", name: "Pink" },
 ] as const;
+
+export const nextLabelColor = (labelCount: number) =>
+  (labelColors[labelCount % labelColors.length] ?? labelColors[0]).value;

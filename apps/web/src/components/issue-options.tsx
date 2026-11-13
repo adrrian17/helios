@@ -1,3 +1,5 @@
+import { priorityLabels } from "@helios/api/domain";
+
 import {
   LabelDot,
   MemberAvatar,
@@ -6,7 +8,7 @@ import {
   UnassignedAvatar,
 } from "@/components/issue-meta";
 import type { PickerOption } from "@/components/picker";
-import { pickerPriorities, priorityLabels } from "@/utils/domain";
+import { pickerPriorities } from "@/utils/domain";
 import type { Label, Member, WorkflowState } from "@/utils/domain";
 import { UNASSIGNED } from "@/utils/filters";
 

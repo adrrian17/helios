@@ -38,7 +38,6 @@ const moveSaved = async (page: Page) =>
     (response) => response.url().includes("/rpc/issues/move") && response.ok()
   );
 
-/** The colour of the ring drawn around the focused element. */
 const focusedRingColor = async (page: Page) =>
   await page.evaluate<string>(
     "getComputedStyle(document.activeElement).getPropertyValue('--tw-ring-color')"

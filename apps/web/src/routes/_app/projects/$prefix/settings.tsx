@@ -1,3 +1,4 @@
+import { limits, formatIdentifier } from "@helios/api/domain";
 import { Badge } from "@helios/ui/components/badge";
 import { Button } from "@helios/ui/components/button";
 import {
@@ -55,7 +56,7 @@ const GeneralForm = ({ project }: { project: Project }) => {
             <Input
               id="project-name"
               autoComplete="off"
-              maxLength={120}
+              maxLength={limits.name}
               value={name}
               onChange={(event) => {
                 setDraft(event.target.value);
@@ -83,8 +84,10 @@ const GeneralForm = ({ project }: { project: Project }) => {
           </div>
           <FieldDescription>
             Fixed after creation, so Identifiers like{" "}
-            <span className="font-mono">{project.prefix}-1</span> people have
-            shared never change.
+            <span className="font-mono">
+              {formatIdentifier(project.prefix, 1)}
+            </span>{" "}
+            people have shared never change.
           </FieldDescription>
         </Field>
       </FieldGroup>
@@ -155,7 +158,6 @@ const ArchiveSection = ({ project }: { project: Project }) => {
       </div>
       <ConfirmDialog
         request={confirm}
-        pending={archive.isPending}
         onClose={() => {
           setConfirm(null);
         }}

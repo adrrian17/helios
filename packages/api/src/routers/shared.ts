@@ -1,13 +1,11 @@
 import type { Database } from "@helios/db";
-import { stateCategories } from "@helios/db/schema/tracker";
-import type { StateCategory } from "@helios/db/schema/tracker";
+import { stateCategories } from "@helios/db/enums";
+import type { StateCategory } from "@helios/db/enums";
 import { ORPCError } from "@orpc/server";
 import { generateKeyBetween } from "fractional-indexing";
 import { z } from "zod";
 
 export const idInput = z.object({ id: z.string() });
-
-export const nameSchema = z.string().trim().min(1).max(120);
 
 /** Returns `value`, or throws NOT_FOUND naming `what`. */
 export const found = <T>(value: T | undefined, what: string): T => {
@@ -16,6 +14,13 @@ export const found = <T>(value: T | undefined, what: string): T => {
   }
 
   return value;
+};
+
+export const requireIssue = async (db: Database, id: string) => {
+  found(
+    await db.query.issue.findFirst({ columns: { id: true }, where: { id } }),
+    "Issue"
+  );
 };
 
 /** Runs a write, turning a UNIQUE index violation into a CONFLICT with `message`. */
@@ -87,7 +92,6 @@ export const placeAfter = (siblings: Sibling[], afterId: string | null) => {
     : generateKeyBetween(lower, upper?.position ?? null);
 };
 
-/** A position key after `last`, or the first key when there is none. */
 export const keyAfter = (last: string | undefined) =>
   generateKeyBetween(last ?? null, null);
 
@@ -98,19 +102,3 @@ export const compareStates = (
 ) =>
   stateCategories.indexOf(a.category) - stateCategories.indexOf(b.category) ||
   compareKeys(a.position, b.position);
-
-/** What the UI shows for a Member: their display name, or their email until they set one. */
-export const displayName = (user: { name: string; email: string }) =>
-  user.name.trim() === "" ? user.email : user.name;
-
-/** The Member shape every procedure returns for authors, assignees and actors. */
-export const toMemberSummary = (member: {
-  userId: string;
-  active: boolean;
-  user: { name: string; email: string };
-}) => ({
-  id: member.userId,
-  displayName: displayName(member.user),
-  email: member.user.email,
-  active: member.active,
-});

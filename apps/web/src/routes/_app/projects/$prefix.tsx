@@ -8,16 +8,20 @@ import {
   Outlet,
   createFileRoute,
   notFound,
-  useLocation,
+  useMatchRoute,
 } from "@tanstack/react-router";
 import { ArchiveIcon, KanbanIcon, ListIcon, SettingsIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { ProjectMark } from "@/components/project-mark";
 import { NotFound } from "@/components/route-states";
-import { filterSearchSchema, filtersOf } from "@/utils/filters";
+import { filterSearchSchema } from "@/utils/filters";
+import type { FilterSearch } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
 import { useMe } from "@/utils/use-me";
+
+/** Carries the filters, and nothing view-specific such as the List sort, to the other view. */
+const keepFilters = (search: FilterSearch) => filterSearchSchema.parse(search);
 
 const VIEW_LINK = cn(
   buttonVariants({ variant: "ghost", size: "sm" }),
@@ -34,9 +38,8 @@ const ProjectLayout = () => {
   const me = useMe();
 
   // On phones the Settings header needs the room for the Project name.
-  const onSettings = useLocation({
-    select: (location) => location.pathname.endsWith("/settings"),
-  });
+  const onSettings =
+    useMatchRoute()({ to: "/projects/$prefix/settings" }) !== false;
 
   return (
     <>
@@ -76,7 +79,7 @@ const ProjectLayout = () => {
           <Link
             to="/projects/$prefix/board"
             params={{ prefix }}
-            search={filtersOf}
+            search={keepFilters}
             className={VIEW_LINK}
           >
             <KanbanIcon />
@@ -85,7 +88,7 @@ const ProjectLayout = () => {
           <Link
             to="/projects/$prefix/list"
             params={{ prefix }}
-            search={filtersOf}
+            search={keepFilters}
             className={VIEW_LINK}
           >
             <ListIcon />

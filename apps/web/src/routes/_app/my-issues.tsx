@@ -1,3 +1,4 @@
+import { priorityLabels } from "@helios/api/domain";
 import {
   Empty,
   EmptyDescription,
@@ -18,7 +19,6 @@ import {
 } from "@/components/issue-meta";
 import { PageHeader, PageTitle } from "@/components/page-header";
 import { ProjectMark } from "@/components/project-mark";
-import { priorityLabels } from "@/utils/domain";
 import type { IssueRow } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 
@@ -83,11 +83,7 @@ const MyIssuesList = () => {
   return (
     <div className="flex flex-col">
       {groups.map(({ project, issues }) => (
-        <section
-          key={project.id}
-          aria-labelledby={`group-${project.id}`}
-          data-project={project.prefix}
-        >
+        <section key={project.id} aria-labelledby={`group-${project.id}`}>
           <h2
             id={`group-${project.id}`}
             className="bg-muted/40 flex h-9 items-center gap-2 border-b px-4 text-sm max-md:h-12"
@@ -151,6 +147,7 @@ const MyIssuesSkeleton = () => (
 );
 
 export const Route = createFileRoute("/_app/my-issues")({
+  staticData: { issueList: true },
   loader: async ({ context: { orpc: api, queryClient } }) => {
     await queryClient.query({
       ...api.issues.mine.queryOptions(),

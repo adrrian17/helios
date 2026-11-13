@@ -1,4 +1,3 @@
-/** A titled block on settings-style pages (Members, Project settings). */
 export const SettingsSection = ({
   title,
   description,
@@ -26,7 +25,6 @@ export const SettingsSection = ({
   </section>
 );
 
-/** The bordered, divided list every settings section uses for its rows. */
 export const SettingsList = ({
   label,
   children,
