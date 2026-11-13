@@ -65,6 +65,7 @@ const BoardPage = () => {
 };
 
 export const Route = createFileRoute("/_app/projects/$prefix/board")({
+  staticData: { issueList: true },
   loaderDeps: ({ search }) => ({ filters: toApiFilters(search) }),
   loader: async ({
     context: { orpc: api, queryClient },

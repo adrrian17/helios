@@ -21,6 +21,11 @@ const router = createRouter({
 });
 
 declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    /** A page that lists Issues, where phones float the New Issue button. */
+    issueList?: boolean;
+  }
+
   interface Register {
     router: typeof router;
   }
