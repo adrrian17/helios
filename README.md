@@ -90,7 +90,7 @@ If you want to add app-specific blocks instead of shared primitives, run the sha
 
 ## Environment Configuration
 
-Every env var is declared once in the root `.env.schema`. Apps and packages import the items they use with `@import(../../, pick=[...])` in their own `.env.schema`, and local values live in the root `.env`. Development needs no `.env`: the schema provides local defaults that apply only when `APP_ENV=development`, and `pnpm deploy` runs with `APP_ENV=production`, so production values must be set explicitly. In CI, pass `CORS_ORIGIN`, `BETTER_AUTH_SECRET`, `ADMIN_EMAIL` and `EMAIL_FROM` to the deploy job from repository secrets; process env overrides the schema. Varlock generates `src/env.ts` during installation; run `pnpm run env:generate` after changing a schema. Commit schemas, and keep secrets in ignored env files or your deployment platform.
+Every env var is declared once in the root `.env.schema`. Apps and packages import the items they use with `@import(../../, pick=[...])` in their own `.env.schema`, and local values live in the root `.env`. Development needs no `.env`: the schema provides local defaults that apply only when `APP_ENV=development`, and `pnpm deploy` runs with `APP_ENV=production`, so production values must be set explicitly. In CI, the deploy job gets `BETTER_AUTH_SECRET`, `ADMIN_EMAIL` and `EMAIL_FROM` from repository secrets and derives `CORS_ORIGIN` from the stage (see Deployment); process env overrides the schema. Varlock generates `src/env.ts` during installation; run `pnpm run env:generate` after changing a schema. Commit schemas, and keep secrets in ignored env files or your deployment platform.
 
 Import the generated `ENV` accessor in application code. Shared database and auth packages receive configuration or initialized clients from the application. See [Varlock's monorepo guide](https://varlock.dev/guides/monorepos/).
 
@@ -112,10 +112,14 @@ Run standalone Node/Bun tools that use Varlock from the owning app directory so 
 
 `alchemy profile edit` stores the selected Axiom, Cloudflare, Neon, PlanetScale, and/or Prisma provider profiles under `~/.alchemy`; no provider-specific setup command is required by this scaffold.
 
-Deploys are staged and default to a personal `dev_<username>` stage. For production, run the deploy with an explicit stage from `packages/infra`:
+Deploys are staged and default to a personal `dev_<username>` stage. In CI, every pull request deploys a preview on the stage `pr-<number>`, closing the pull request destroys it, and every push to `main` deploys `production`. Fork pull requests get no preview.
+
+The workflows need these repository secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `ADMIN_EMAIL`, `EMAIL_FROM` and `BETTER_AUTH_SECRET`. The API token needs the permission groups Workers Scripts Write, D1 Write and Secrets Store Write on the account.
+
+`CORS_ORIGIN` is not a secret. The web Worker has a fixed name on `production` and `pr-<number>` stages, so its origin is `https://helios-web-<stage>.adrrian17.workers.dev` and the workflows export it before deploying. A manual production deploy must export the same value:
 
 ```bash
-cd packages/infra && pnpm exec alchemy deploy --stage production
+cd packages/infra && CORS_ORIGIN=https://helios-web-production.adrrian17.workers.dev pnpm exec alchemy deploy --stage production
 ```
 
 ### First production deploy
@@ -125,14 +129,13 @@ Helios ships the deploy configuration but nobody has run it; these steps need yo
 1. Put the Cloudflare account on the **Workers Paid plan**. Cloudflare Email Service needs it to send magic links to arbitrary addresses.
 2. Onboard your sender domain to **Cloudflare Email Service** and verify it. `EMAIL_FROM` must be an address on that domain, such as `helios@example.com`.
 3. Log Alchemy in: `cd packages/infra && pnpm exec alchemy profile edit`.
-4. Set the production values in `.env.production` at the repo root (git-ignored), or as CI secrets:
+4. Add the repository secrets listed above:
    - `ADMIN_EMAIL`: the first Admin's address.
    - `EMAIL_FROM`: the verified sender from step 2.
    - `BETTER_AUTH_SECRET`: 32 or more random characters, for example from `openssl rand -base64 32`.
-   - `CORS_ORIGIN`: any URL for now; step 6 sets the real one.
-5. Deploy: `cd packages/infra && pnpm exec alchemy deploy --stage production`. It prints the `web` and `server` URLs and applies the D1 migrations.
-6. Set `CORS_ORIGIN` to the exact `web` origin it printed, with no trailing slash, and deploy again.
-7. Open the web URL and request a sign-in link for `ADMIN_EMAIL`. That first request creates the Workspace and the first Admin; there is no separate seed step, and later requests leave both alone.
+   - `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`: the token and account the workflows deploy to.
+5. Merge to `main`. The workflow deploys `production` and applies the D1 migrations. For a manual deploy, put the same values in `.env.production` at the repo root (git-ignored) and use the command above.
+6. Open `https://helios-web-production.adrrian17.workers.dev` and request a sign-in link for `ADMIN_EMAIL`. That first request creates the Workspace and the first Admin; there is no separate seed step, and later requests leave both alone.
 
 The Worker sends mail through its `EMAIL` (`send_email`) binding. With `APP_ENV=production` the capture Mailer and the `/dev/magic-link` route do not exist.
 

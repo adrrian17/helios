@@ -45,9 +45,16 @@ export default Alchemy.Stack(
     state: Cloudflare.state(),
   },
   Effect.gen(function* deployStack() {
+    const stage = yield* Alchemy.Stage;
     const serverWorker = yield* server;
 
+    // CI stages get a fixed name so the workflow can compute CORS_ORIGIN before deploying; the format must match the workflows.
+    const webName = /^(?:production|pr-\d+)$/u.test(stage)
+      ? { name: `helios-web-${stage}` }
+      : {};
+
     const webWorker = yield* Cloudflare.Website.Vite("web", {
+      ...webName,
       rootDir: "../../apps/web",
       assets: {
         htmlHandling: "auto-trailing-slash",
