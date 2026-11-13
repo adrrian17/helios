@@ -1,6 +1,5 @@
 import { cn } from "@helios/ui/lib/utils";
 
-/** The Project's prefix initial on a tinted square, so Projects are told apart at a glance. */
 export const ProjectMark = ({
   project,
   className,
@@ -19,7 +18,6 @@ export const ProjectMark = ({
   </span>
 );
 
-/** Helios's own mark: a white H on the primary colour. */
 export const HeliosMark = ({ className }: { className?: string }) => (
   <span
     aria-hidden="true"

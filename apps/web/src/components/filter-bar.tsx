@@ -41,7 +41,6 @@ const FilterPicker = ({
   selected: string[];
   onSelect: (value: string) => void;
 }) => {
-  // One chosen value reads better by name; several by count.
   const only =
     selected.length === 1
       ? options.find((option) => option.value === selected[0])
@@ -77,7 +76,6 @@ const FilterPicker = ({
   );
 };
 
-/** Assignee, Label and Priority filters over a Project's Issues, kept in the URL. */
 export const FilterBar = ({
   search,
   onChange,
@@ -85,7 +83,6 @@ export const FilterBar = ({
 }: {
   search: FilterSearch;
   onChange: (next: FilterSearch) => void;
-  /** Extra controls at the end of the bar, such as a result count. */
   children?: React.ReactNode;
 }) => {
   const members = useQuery(orpc.workspace.members.queryOptions());
@@ -94,7 +91,6 @@ export const FilterBar = ({
   return (
     <fieldset className="flex h-11 min-w-0 shrink-0 items-center gap-1 border-b pr-3 max-md:h-14 max-md:pr-2">
       <legend className="sr-only">Filters</legend>
-      {/* Only the filters scroll sideways, so the controls after them always stay on screen. */}
       <div className="flex min-w-0 flex-1 items-center gap-1 self-stretch overflow-x-auto pr-1 pl-3 max-md:pl-2">
         <FilterPicker
           name="Assignee"

@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from "react";
 
-/** Whether a CSS media query matches, kept current as the window resizes. */
 export const useMediaQuery = (query: string) =>
   useSyncExternalStore(
     (onChange) => {

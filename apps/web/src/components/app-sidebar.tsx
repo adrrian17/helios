@@ -38,7 +38,6 @@ import { useMe } from "@/utils/use-me";
 
 const SKELETON_ROWS = ["a", "b", "c"];
 
-/** A sidebar link that is highlighted on its own pages and closes the phone drawer when followed. */
 const NavLink = ({
   icon,
   label,
@@ -79,7 +78,6 @@ const NavLink = ({
   );
 };
 
-/** A sidebar row that runs a command, with its shortcut shown on devices that have a keyboard. */
 const CommandButton = ({
   icon,
   label,

@@ -14,7 +14,6 @@ export const columnOf = (columns: BoardColumn[], id: string) =>
       column.state.id === id || column.issues.some((issue) => issue.id === id)
   );
 
-/** The Issue's column and its position in it, for announcements and moves. */
 export const locate = (columns: BoardColumn[], id: string) => {
   const column = columns[columnOf(columns, id)];
   const index = column?.issues.findIndex((issue) => issue.id === id) ?? -1;
@@ -52,7 +51,6 @@ export const changedPlacement = (
     : to;
 };
 
-/** Moves an Issue into `toColumn` at `toIndex`, keeping every other card in place. */
 export const moveIssue = (
   columns: BoardColumn[],
   id: string,

@@ -8,7 +8,6 @@ export const signInAsAdmin = async (harness: Harness) =>
 
 export type Client = Awaited<ReturnType<typeof signInAsAdmin>>;
 
-/** Invites `email` as `admin`, signs them in, and returns their client and id. */
 export const addMember = async (
   harness: Harness,
   admin: Client,
@@ -21,7 +20,6 @@ export const addMember = async (
   return { client, id };
 };
 
-/** Creates a Project and returns it with its Workflow States in column order. */
 export const createProject = async (admin: Client, prefix = "HEL") => {
   await admin.projects.create({ name: `${prefix} project`, prefix });
 
