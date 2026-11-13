@@ -1,10 +1,10 @@
 import { ORPCError, os } from "@orpc/server";
 
 import type { Context } from "./context";
+import { memberWith } from "./member";
 
 const o = os.$context<Context>();
 
-/** Requires a signed-in, active Member and puts it on `context.member`. */
 export const memberProcedure = o.use(async ({ context, next }) => {
   const userId = context.session?.user.id;
 
@@ -13,7 +13,7 @@ export const memberProcedure = o.use(async ({ context, next }) => {
       ? undefined
       : await context.db.query.member.findFirst({
           where: { userId, active: true },
-          with: { user: { columns: { email: true, name: true } } },
+          ...memberWith,
         });
 
   if (!current) {

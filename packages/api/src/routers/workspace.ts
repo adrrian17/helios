@@ -1,13 +1,16 @@
 import { deactivateMember } from "@helios/auth/members";
 import type { Database } from "@helios/db";
+import { memberRoles } from "@helios/db/enums";
 import { user } from "@helios/db/schema/auth";
-import { invitation, member, memberRoles } from "@helios/db/schema/tracker";
+import { invitation, member } from "@helios/db/schema/tracker";
 import { ORPCError } from "@orpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { displayNameSchema } from "../domain";
 import { adminProcedure, memberProcedure } from "../index";
-import { displayName, found, idInput, toMemberSummary } from "./shared";
+import { displayName, memberWith, toMemberSummary } from "../member";
+import { found, idInput } from "./shared";
 
 const memberInput = z.object({ memberId: z.string() });
 
@@ -39,9 +42,7 @@ const keepAnActiveAdmin = async (db: Database, userId: string) => {
 export const workspaceRouter = {
   /** Every Member, active or not; any Member may read it (for example to pick an assignee). */
   members: memberProcedure.handler(async ({ context: { db } }) => {
-    const members = await db.query.member.findMany({
-      with: { user: { columns: { name: true, email: true } } },
-    });
+    const members = await db.query.member.findMany(memberWith);
 
     return members
       .map((row) => ({ ...toMemberSummary(row), role: row.role }))
@@ -131,7 +132,6 @@ export const workspaceRouter = {
         .where(eq(member.userId, memberId));
     }),
 
-  /** Promotes to or demotes from Admin. */
   setRole: adminProcedure
     .input(memberInput.extend({ role: z.enum(memberRoles) }))
     .handler(async ({ context: { db }, input: { memberId, role } }) => {
@@ -142,9 +142,8 @@ export const workspaceRouter = {
       await db.update(member).set({ role }).where(eq(member.userId, memberId));
     }),
 
-  /** Sets the signed-in Member's own display name. */
   setDisplayName: memberProcedure
-    .input(z.object({ name: z.string().trim().min(1).max(80) }))
+    .input(z.object({ name: displayNameSchema }))
     .handler(async ({ context: { db, member: self }, input: { name } }) => {
       await db.update(user).set({ name }).where(eq(user.id, self.userId));
     }),
