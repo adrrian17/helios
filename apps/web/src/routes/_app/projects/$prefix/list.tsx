@@ -1,3 +1,5 @@
+import { sortDirections, sortFields, sortSchema } from "@helios/api/domain";
+import type { Sort } from "@helios/api/domain";
 import { Button, buttonVariants } from "@helios/ui/components/button";
 import {
   Empty,
@@ -15,18 +17,12 @@ import { z } from "zod";
 
 import { FilterBar } from "@/components/filter-bar";
 import { IssueTable, SortMenu } from "@/components/issue-table";
-import { hasFilters, sortFields, toApiFilters } from "@/utils/filters";
-import type { Sort, SortField } from "@/utils/filters";
+import { hasFilters, toApiFilters } from "@/utils/filters";
+import { firstDirection, nextSort } from "@/utils/list-sort";
 import { orpc } from "@/utils/orpc";
 import { rememberView } from "@/utils/project-view";
 
-const DEFAULT_SORT: Sort = { field: "identifier", direction: "asc" };
-
-/** Dates read newest first; every other column starts from the top of its order. */
-const firstDirection = (field: SortField): Sort["direction"] =>
-  field === "created" || field === "updated" ? "desc" : "asc";
-
-const flipped = { asc: "desc", desc: "asc" } as const;
+const DEFAULT_SORT = sortSchema.parse(undefined);
 
 const ROWS = ["a", "b", "c", "d", "e", "f"];
 
@@ -132,13 +128,7 @@ const ListPage = () => {
             issues={issues}
             sort={sort}
             onSort={(field) => {
-              setSort({
-                field,
-                direction:
-                  field === sort.field
-                    ? flipped[sort.direction]
-                    : firstDirection(field),
-              });
+              setSort(nextSort(sort, field));
             }}
           />
         )}
@@ -148,9 +138,10 @@ const ListPage = () => {
 };
 
 export const Route = createFileRoute("/_app/projects/$prefix/list")({
+  staticData: { issueList: true },
   validateSearch: z.object({
     sort: z.enum(sortFields).optional().catch(undefined),
-    dir: z.enum(["asc", "desc"]).optional().catch(undefined),
+    dir: z.enum(sortDirections).optional().catch(undefined),
   }),
   loaderDeps: ({ search }) => ({
     filters: toApiFilters(search),

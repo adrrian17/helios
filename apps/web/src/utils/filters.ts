@@ -1,6 +1,6 @@
+import { priorities } from "@helios/api/domain";
+import type { IssueFilters } from "@helios/api/domain";
 import { z } from "zod";
-
-import { pickerPriorities } from "./domain";
 
 /** Assignee token for "no assignee", so unassigned Issues can be filtered like a Member. */
 export const UNASSIGNED = "none";
@@ -14,25 +14,16 @@ const ids = z.array(z.string()).optional().catch(undefined);
 export const filterSearchSchema = z.object({
   assignee: ids,
   label: ids,
-  priority: z.array(z.enum(pickerPriorities)).optional().catch(undefined),
+  priority: z.array(z.enum(priorities)).optional().catch(undefined),
 });
 
 export type FilterSearch = z.infer<typeof filterSearchSchema>;
 
-/** Only the filter keys of a search, for links that carry filters across views. */
-export const filtersOf = ({ assignee, label, priority }: FilterSearch) => ({
+export const toApiFilters = ({
   assignee,
   label,
   priority,
-});
-
-export const hasFilters = (search: FilterSearch) =>
-  [search.assignee, search.label, search.priority].some(
-    (values) => values !== undefined && values.length > 0
-  );
-
-/** The `filters` input of `issues.board` and `issues.list`. */
-export const toApiFilters = ({ assignee, label, priority }: FilterSearch) => {
+}: FilterSearch): IssueFilters => {
   const members = assignee?.filter((id) => id !== UNASSIGNED) ?? [];
 
   return {
@@ -44,20 +35,5 @@ export const toApiFilters = ({ assignee, label, priority }: FilterSearch) => {
   };
 };
 
-export const sortFields = [
-  "identifier",
-  "title",
-  "state",
-  "priority",
-  "assignee",
-  "created",
-  "updated",
-] as const;
-
-export type SortField = (typeof sortFields)[number];
-
-/** How the List orders its rows; it never changes the Board's manual order. */
-export interface Sort {
-  field: SortField;
-  direction: "asc" | "desc";
-}
+export const hasFilters = (search: FilterSearch) =>
+  Object.keys(toApiFilters(search)).length > 0;

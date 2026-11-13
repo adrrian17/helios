@@ -1,3 +1,4 @@
+import { limits } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   Dialog,
@@ -57,7 +58,6 @@ const CreateIssueForm = ({
   const navigate = useNavigate();
   const { title } = draft;
 
-  // The draft's Project while it still exists, else the current one.
   const projectId =
     (
       projects.find((project) => project.id === draft.projectId) ??
@@ -168,6 +168,7 @@ const CreateIssueForm = ({
             ref={titleRef}
             id="new-issue-title"
             autoComplete="off"
+            maxLength={limits.title}
             placeholder="What needs doing?"
             aria-invalid={titleInvalid || undefined}
             // The dialog closes on success, so nothing typed after Create may be lost.
@@ -196,7 +197,6 @@ const CreateIssueForm = ({
   );
 };
 
-/** A new Issue from anywhere: pick the Project (the current one by default) and give it a title. */
 export const CreateIssueDialog = ({
   open,
   prefix,

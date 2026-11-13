@@ -1,3 +1,4 @@
+import { limits } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   DropdownMenu,
@@ -49,12 +50,10 @@ import {
   SettingsPage,
   SettingsSection,
 } from "@/components/settings-section";
-import { labelColors } from "@/utils/domain";
+import { labelColors, nextLabelColor } from "@/utils/domain";
 import type { Label } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
 import { useEditorMenuFocus, useReturnFocus } from "@/utils/use-return-focus";
-
-const NAME_LIMIT = 120;
 
 const colorName = (value: string) =>
   labelColors.find((color) => color.value === value.toLowerCase())?.name ??
@@ -115,10 +114,7 @@ const ColorSwatches = ({
 const CreateLabelForm = ({ count }: { count: number }) => {
   const [name, setName] = useState("");
 
-  // Suggest the next colour in the palette, so neighbouring Labels differ.
-  const [color, setColor] = useState<string>(
-    (labelColors[count % labelColors.length] ?? labelColors[0]).value
-  );
+  const [color, setColor] = useState<string>(() => nextLabelColor(count));
 
   const create = useMutation({
     ...orpc.labels.create.mutationOptions(),
@@ -128,10 +124,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
       setName((current) => (current.trim() === sent ? "" : current));
       // Advance the suggestion only if no other colour was picked meanwhile.
       setColor((current) =>
-        current === sentColor
-          ? (labelColors[(count + 1) % labelColors.length] ?? labelColors[0])
-              .value
-          : current
+        current === sentColor ? nextLabelColor(count + 1) : current
       );
     },
   });
@@ -155,7 +148,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
           <Input
             id="label-name"
             autoComplete="off"
-            maxLength={NAME_LIMIT}
+            maxLength={limits.name}
             placeholder="Needs review"
             aria-invalid={error !== undefined || undefined}
             value={name}
@@ -222,7 +215,7 @@ const RenameForm = ({
           aria-label={`New name for ${label.name}`}
           autoFocus
           autoComplete="off"
-          maxLength={NAME_LIMIT}
+          maxLength={limits.name}
           aria-invalid={rename.error === null ? undefined : true}
           className="min-w-0 flex-1"
           // The form closes on success, so nothing typed after Save may be lost.
@@ -281,10 +274,7 @@ const LabelRow = ({
       : label.color;
 
   return (
-    <li
-      className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-2"
-      data-label={label.name}
-    >
+    <li className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-2">
       <Popover>
         <PopoverTrigger
           render={
@@ -415,7 +405,6 @@ const LabelsPage = () => {
       </SettingsPage>
       <ConfirmDialog
         request={confirm}
-        pending={false}
         onClose={() => {
           setConfirm(null);
         }}

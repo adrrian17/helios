@@ -1,3 +1,4 @@
+import { limits } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   Dialog,
@@ -50,7 +51,6 @@ const categoryHints: Record<StateCategory, string> = {
   cancelled: "Will not be done.",
 };
 
-/** A single-field inline form used to add or rename a Workflow State. */
 const StateNameForm = ({
   label,
   initial,
@@ -83,7 +83,7 @@ const StateNameForm = ({
         aria-label={label}
         autoFocus
         autoComplete="off"
-        maxLength={120}
+        maxLength={limits.name}
         className="min-w-0 flex-1"
         // The form closes on success, so nothing typed after submitting may be lost.
         readOnly={pending}
@@ -235,10 +235,7 @@ const StateRow = ({
   const move = useMutation(orpc.workflowStates.move.mutationOptions());
 
   return (
-    <li
-      className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-4"
-      data-workflow-state={state.name}
-    >
+    <li className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-4">
       <StateIcon category={state.category} />
       {renaming ? (
         <StateNameForm
@@ -256,7 +253,6 @@ const StateRow = ({
       ) : (
         <>
           <span className="min-w-0 flex-1 truncate text-sm">{state.name}</span>
-          {/* A lone state in its category has nowhere to move. */}
           {above.length === 0 && below === undefined ? null : (
             <>
               <Button
@@ -353,7 +349,7 @@ const CategoryGroup = ({
   });
 
   return (
-    <li className="flex flex-col" data-category={category}>
+    <li className="flex flex-col">
       <div className="bg-muted/40 flex items-center gap-2 py-1.5 pr-1.5 pl-4">
         <div className="flex min-w-0 flex-1 flex-col">
           <h3 className="text-xs font-medium tracking-wide uppercase">
@@ -415,7 +411,6 @@ const CategoryGroup = ({
   );
 };
 
-/** Workflow States grouped by State Category, in board column order. */
 export const WorkflowStatesEditor = ({ project }: { project: Project }) => {
   const [deleting, setDeleting] = useState<WorkflowState | null>(null);
 

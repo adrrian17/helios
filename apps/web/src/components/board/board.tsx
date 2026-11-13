@@ -19,6 +19,7 @@ import type {
   UniqueIdentifier,
 } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
+import type { IssueFilters } from "@helios/api/domain";
 import { useIsMobile } from "@helios/ui/hooks/use-mobile";
 import { cn } from "@helios/ui/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -37,7 +38,6 @@ import { ColumnPager } from "@/components/board/column-pager";
 import { IssueCardBody } from "@/components/board/issue-card";
 import { useKeyboardMoves } from "@/components/board/use-keyboard-moves";
 import type { BoardColumn, IssueRow, Project } from "@/utils/domain";
-import type { toApiFilters } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
 
 const screenReaderInstructions = {
@@ -76,9 +76,9 @@ const overflowsRight = (scroller: HTMLElement) =>
   scroller.scrollLeft + scroller.clientWidth < scroller.scrollWidth - 1;
 
 /** What the board was loaded with; moves edit that cached board. */
-export interface BoardInput {
+interface BoardInput {
   projectId: string;
-  filters: ReturnType<typeof toApiFilters>;
+  filters: IssueFilters;
 }
 
 export const Board = ({
@@ -108,7 +108,6 @@ export const Board = ({
     );
   };
 
-  // While a card is moving, the board renders this working copy instead of the server's columns.
   const [working, setWorking] = useState<BoardColumn[] | null>(null);
   const [activeIssue, setActiveIssue] = useState<IssueRow | null>(null);
   const shown = working ?? columns;
@@ -119,7 +118,6 @@ export const Board = ({
   const [currentColumn, setCurrentColumn] = useState(0);
   // Set while the pager's smooth scroll runs, so taps in a row step from where it is heading.
   const pagingTo = useRef<number | null>(null);
-  // Whether columns continue past the right edge, which fades it as a hint to scroll.
   const [moreRight, setMoreRight] = useState(false);
 
   useEffect(() => {

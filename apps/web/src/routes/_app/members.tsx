@@ -13,11 +13,7 @@ import { Skeleton } from "@helios/ui/components/skeleton";
 import { Spinner } from "@helios/ui/components/spinner";
 import { cn } from "@helios/ui/lib/utils";
 import { ORPCError } from "@orpc/client";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import {
   MailIcon,
@@ -39,6 +35,7 @@ import {
   SettingsPage,
   SettingsSection,
 } from "@/components/settings-section";
+import { roleLabels } from "@/utils/domain";
 import { formatDate } from "@/utils/format";
 import { describeError, orpc } from "@/utils/orpc";
 import { useMe } from "@/utils/use-me";
@@ -168,7 +165,6 @@ const Invitations = () => {
 const Members = () => {
   const me = useMe();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const { data: members } = useSuspenseQuery(
     orpc.workspace.members.queryOptions()
@@ -182,8 +178,7 @@ const Members = () => {
 
   const demoteSelf = async () => {
     await setRole.mutateAsync({ memberId: me.id, role: "member" });
-    // The route guard cached `me`; reload it so Admin pages close at once.
-    await queryClient.resetQueries({ queryKey: orpc.me.key() });
+    // Re-runs the Admin route guards, so Admin pages close at once.
     await router.invalidate();
   };
 
@@ -198,7 +193,6 @@ const Members = () => {
             <li
               key={member.id}
               className="flex items-center gap-3 px-4 py-2.5 max-md:flex-wrap max-md:gap-y-1"
-              data-member={member.email}
             >
               <span className={cn("shrink-0", !member.active && "opacity-50")}>
                 <MemberAvatar member={member} size="default" />
@@ -221,13 +215,12 @@ const Members = () => {
                   </span>
                 )}
               </div>
-              {/* Phones give the name and email the full line; badges wrap below, under the text. */}
               <div className="flex shrink-0 items-center gap-1.5 max-md:order-last max-md:w-full max-md:pl-11">
                 {member.active ? null : (
                   <Badge variant="destructive">Deactivated</Badge>
                 )}
                 <Badge variant={admin ? "secondary" : "outline"}>
-                  {admin ? "Admin" : "Member"}
+                  {roleLabels[member.role]}
                 </Badge>
               </div>
               <DropdownMenu>
@@ -321,7 +314,6 @@ const Members = () => {
       </SettingsList>
       <ConfirmDialog
         request={confirm}
-        pending={setRole.isPending || deactivate.isPending}
         onClose={() => {
           setConfirm(null);
         }}

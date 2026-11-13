@@ -16,6 +16,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { limits } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import { Checkbox } from "@helios/ui/components/checkbox";
 import { Input } from "@helios/ui/components/input";
@@ -34,8 +35,6 @@ type Item = IssueDetail["checklist"][number];
 const SORTABLE_MOTION =
   // oxlint-disable-next-line shadcn/no-arbitrary-values -- dnd-kit computes the transition on every drag frame; no token can express it.
   "transform-(--drag-transform) [transition:var(--drag-transition)]";
-
-const TEXT_LIMIT = 500;
 
 const useChecklistWrites = () => {
   const { patch, revert } = useIssueCache();
@@ -111,7 +110,6 @@ const ItemRow = ({
   return (
     <li
       ref={setNodeRef}
-      data-checklist-item={item.text}
       className={cn(
         "group/item bg-background relative flex min-h-9 items-center gap-1 rounded-md pr-1 max-md:min-h-11 max-md:gap-3",
         SORTABLE_MOTION,
@@ -159,7 +157,7 @@ const ItemRow = ({
         <Input
           aria-label={`Edit ${item.text}`}
           autoFocus
-          maxLength={TEXT_LIMIT}
+          maxLength={limits.checklistItem}
           className="h-7 flex-1"
           value={editing}
           onChange={(event) => {
@@ -229,7 +227,7 @@ const AddItem = ({ issueId }: { issueId: string }) => {
         aria-label="New Checklist item"
         placeholder="Add an item"
         autoComplete="off"
-        maxLength={TEXT_LIMIT}
+        maxLength={limits.checklistItem}
         className="h-8"
         value={text}
         onChange={(event) => {

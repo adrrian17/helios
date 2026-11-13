@@ -1,3 +1,4 @@
+import { limits } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import { Spinner } from "@helios/ui/components/spinner";
 import { useMutation } from "@tanstack/react-query";
@@ -43,7 +44,7 @@ export const IssueTitle = () => {
       <textarea
         aria-label="Title"
         rows={1}
-        maxLength={500}
+        maxLength={limits.title}
         className="focus-visible:bg-muted/40 focus-visible:ring-ring -mx-1 field-sizing-content w-full resize-none rounded-md bg-transparent px-1 py-0.5 text-pretty outline-none focus-visible:ring-2"
         value={draft ?? issue.title}
         onChange={(event) => {

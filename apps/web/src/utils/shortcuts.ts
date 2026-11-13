@@ -36,11 +36,18 @@ export const shortcuts = {
   assignee: { key: "a", label: "Change assignee", scope: ISSUE_VIEW },
 } satisfies Record<string, Shortcut>;
 
-export type ShortcutName = keyof typeof shortcuts;
+type ShortcutName = keyof typeof shortcuts;
+
+/** Keys on a focused Board card. The Board handles them itself (`use-keyboard-moves.ts`), so `useShortcut` never binds them. */
+export const boardKeys = [
+  { label: "Pick up the focused Issue", keys: ["Space"] },
+  { label: "Move it within or across columns", keys: ["←", "↑", "↓", "→"] },
+  { label: "Drop it", keys: ["Space"] },
+  { label: "Put it back", keys: ["Esc"] },
+];
 
 const isMac = () => /Mac|iPhone|iPad/u.test(navigator.userAgent);
 
-/** The keys that send a Markdown editor, as shown under it. */
 export const submitKeys = () => (isMac() ? "⌘↵" : "Ctrl+Enter");
 
 /** What to press, as shown on screen: "⌘ K", "Ctrl K", "Esc", "C". */
@@ -74,7 +81,6 @@ const typing = (event: KeyboardEvent) =>
 const modified = (event: KeyboardEvent) =>
   event.metaKey || event.ctrlKey || event.altKey;
 
-/** Whether a single-key shortcut may run: not while typing, and not over an open dialog. */
 const singleKeyAllowed = (event: KeyboardEvent) =>
   !modified(event) && !event.repeat && !typing(event) && !overlayOpen();
 
@@ -92,7 +98,6 @@ const matches = (name: ShortcutName, event: KeyboardEvent) => {
   return shortcut.mod === true ? modPressed(event) : singleKeyAllowed(event);
 };
 
-/** Runs `run` when the named shortcut is pressed anywhere on the page. */
 export const useShortcut = (name: ShortcutName, run: () => void) => {
   const onKeyDown = useEffectEvent((event: KeyboardEvent) => {
     if (!event.defaultPrevented && matches(name, event)) {

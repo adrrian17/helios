@@ -1,3 +1,9 @@
+import {
+  defaultStates,
+  formatIdentifier,
+  prefixRule,
+  prefixSchema,
+} from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   Dialog,
@@ -21,8 +27,12 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 
-import { PREFIX_PATTERN, suggestPrefix } from "@/utils/domain";
+import { suggestPrefix } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
+
+const defaultStateNames = new Intl.ListFormat("en-GB").format(
+  defaultStates.map((state) => state.name)
+);
 
 const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
   const navigate = useNavigate();
@@ -44,7 +54,8 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
     },
   });
 
-  const prefixInvalid = submitted && !PREFIX_PATTERN.test(prefix);
+  const prefixValid = prefixSchema.safeParse(prefix).success;
+  const prefixInvalid = submitted && !prefixValid;
   const nameInvalid = submitted && name.trim() === "";
 
   const conflict =
@@ -65,7 +76,7 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
         event.preventDefault();
         setSubmitted(true);
 
-        if (name.trim() !== "" && PREFIX_PATTERN.test(prefix)) {
+        if (name.trim() !== "" && prefixValid) {
           create.mutate({ name: name.trim(), prefix });
         }
       }}
@@ -101,7 +112,7 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
             id="project-prefix"
             autoComplete="off"
             spellCheck={false}
-            maxLength={5}
+            maxLength={prefixRule.max}
             placeholder="HEL"
             aria-invalid={prefixInvalid || conflict !== undefined || undefined}
             aria-describedby="project-prefix-help"
@@ -116,15 +127,14 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
             }}
           />
           <FieldDescription id="project-prefix-help">
-            2 to 5 letters. Issues get Identifiers like{" "}
+            {prefixRule.min} to {prefixRule.max} letters. Issues get Identifiers
+            like{" "}
             <span className="font-mono">
-              {PREFIX_PATTERN.test(prefix) ? prefix : "HEL"}-1
+              {formatIdentifier(prefixValid ? prefix : "HEL", 1)}
             </span>
             . The prefix can’t change later.
           </FieldDescription>
-          {prefixInvalid ? (
-            <FieldError>Use 2 to 5 letters, A to Z.</FieldError>
-          ) : null}
+          {prefixInvalid ? <FieldError>{prefixRule.message}</FieldError> : null}
           {conflict === undefined ? null : <FieldError>{conflict}</FieldError>}
         </Field>
         {otherError === undefined ? null : (
@@ -158,8 +168,7 @@ export const CreateProjectDialog = ({
       <DialogHeader>
         <DialogTitle>New Project</DialogTitle>
         <DialogDescription>
-          It starts with five Workflow States: Ideas, Backlog, In Progress, Done
-          and Cancelled.
+          It starts with these Workflow States: {defaultStateNames}.
         </DialogDescription>
       </DialogHeader>
       <CreateProjectForm

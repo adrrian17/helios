@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from "@helios/ui/components/alert-dialog";
 import { Spinner } from "@helios/ui/components/spinner";
+import { useState } from "react";
 
 export interface ConfirmRequest {
   title: string;
@@ -21,43 +22,55 @@ export interface ConfirmRequest {
 /** One confirmation at a time: pass a request to open it, null to close it. */
 export const ConfirmDialog = ({
   request,
-  pending,
   onClose,
 }: {
   request: ConfirmRequest | null;
-  pending: boolean;
   onClose: () => void;
-}) => (
-  <AlertDialog
-    open={request !== null}
-    onOpenChange={(open) => {
-      if (!open) {
-        onClose();
-      }
-    }}
-  >
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>{request?.title}</AlertDialogTitle>
-        <AlertDialogDescription>{request?.description}</AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
-        <AlertDialogAction
-          variant={request?.destructive === true ? "destructive" : "default"}
-          disabled={pending}
-          onClick={() => {
-            // A failed mutation was already reported as a toast by the mutation cache.
-            void request
-              ?.onConfirm()
-              .catch(() => null)
-              .finally(onClose);
-          }}
-        >
-          {pending ? <Spinner data-icon="inline-start" /> : null}
-          {request?.confirmLabel}
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-);
+}) => {
+  const [pending, setPending] = useState(false);
+
+  return (
+    <AlertDialog
+      open={request !== null}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+        }
+      }}
+    >
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{request?.title}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {request?.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            variant={request?.destructive === true ? "destructive" : "default"}
+            disabled={pending}
+            onClick={() => {
+              if (request === null) {
+                return;
+              }
+
+              setPending(true);
+              void request
+                .onConfirm()
+                // A failed mutation was already reported as a toast by the mutation cache.
+                .catch(() => null)
+                .finally(() => {
+                  setPending(false);
+                  onClose();
+                });
+            }}
+          >
+            {pending ? <Spinner data-icon="inline-start" /> : null}
+            {request?.confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
