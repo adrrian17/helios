@@ -1,16 +1,16 @@
+import { createContext } from "@helios/api/context";
 import { appRouter } from "@helios/api/routers/index";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
-import { initLogger } from "evlog";
+import { initLogger, log } from "evlog";
 import { createAuthMiddleware } from "evlog/better-auth";
 import { evlog } from "evlog/hono";
 import type { EvlogVariables } from "evlog/hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
-import { createContext } from "./context";
 import { ENV } from "./env.server";
-import { capturedMail, createAuth } from "./services";
+import { capturedMail, createAuth, getDb } from "./services";
 
 initLogger({
   env: { service: "helios-server" },
@@ -57,15 +57,21 @@ if (capturedMail) {
 }
 
 const logError: Parameters<typeof onError>[0] = (error) => {
-  console.error(error);
+  log.error({ action: "rpc_failed", error });
 };
 
 export const rpcHandler = new RPCHandler(appRouter, {
   interceptors: [onError(logError)],
 });
 
-app.use("/*", async (c, next) => {
-  const context = await createContext(c.req.raw.headers);
+app.use("/rpc/*", async (c, next) => {
+  const db = getDb();
+
+  const context = await createContext({
+    auth: createAuth(db),
+    db,
+    headers: c.req.raw.headers,
+  });
 
   const rpcResult = await rpcHandler.handle(c.req.raw, {
     prefix: "/rpc",
