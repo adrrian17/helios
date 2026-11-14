@@ -59,44 +59,48 @@ jobs:
     env:
       STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
     steps:
-      # A queued deploy can outlive its reason: the PR closed (and its preview was destroyed) or main moved to a newer commit.
-      - name: Skip stale deploys
-        id: freshness
+      # A queued deploy can outlive its reason. If the PR closed, destroy its preview here: a deploy entering this group
+      # cancels a pending preview-cleanup run. If main moved to a newer commit, skip. State is read into a variable
+      # first so a failed API call stops the job instead of reading as "closed".
+      - name: Decide deploy, destroy or skip
+        id: plan
         run: |
+          action=deploy
           if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
-            [[ "$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json state --jq .state)" == OPEN ]] || stale="PR #$PR is closed"
+            state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
+            [[ "$state" == OPEN ]] || action=destroy
           else
-            [[ "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" == "$GITHUB_SHA" ]] || stale="main moved past $GITHUB_SHA"
+            main_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+            [[ "$main_sha" == "$GITHUB_SHA" ]] || action=skip
           fi
-          if [[ -n "${stale:-}" ]]; then
-            echo "Skipping deploy: $stale"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          fi
+          echo "$action $STAGE"
+          echo "action=$action" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}
 
       - name: Checkout
-        if: steps.freshness.outputs.skip != 'true'
+        if: steps.plan.outputs.action != 'skip'
         uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Setup Vite+
-        if: steps.freshness.outputs.skip != 'true'
+        if: steps.plan.outputs.action != 'skip'
         uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
         with:
           node-version-file: package.json
           cache: true
 
       # Previews also run with APP_ENV=production: any other value turns on the capture Mailer and the public /dev/magic-link route (see apps/server/src/services.ts).
-      - name: Deploy
-        if: steps.freshness.outputs.skip != 'true'
+      - name: Deploy or destroy
+        if: steps.plan.outputs.action != 'skip'
         run: |
           export CORS_ORIGIN="https://helios-web-${STAGE}.adrian-secovam.workers.dev"
-          vp exec alchemy deploy --stage "$STAGE" --yes --no-input
+          vp exec alchemy "$ACTION" --stage "$STAGE" --yes --no-input
         working-directory: packages/infra
         env:
+          ACTION: ${{ steps.plan.outputs.action }}
           APP_ENV: production
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

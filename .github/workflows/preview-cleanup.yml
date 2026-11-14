@@ -44,8 +44,21 @@ jobs:
             exit 1
           fi
 
+      # A rerun of an old closed-event run keeps that event's data, so read the live PR state. A failed call stops the job.
+      - name: Skip destroy when the PR is open
+        id: state
+        run: |
+          state=$(gh pr view "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
+          if [[ "$state" == OPEN ]]; then
+            echo "Skipping destroy: PR #$PULL_REQUEST is open"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       # CORS_ORIGIN is only here because Varlock requires it on import, even for destroy.
       - name: Destroy preview
+        if: steps.state.outputs.skip != 'true'
         run: |
           export CORS_ORIGIN="https://helios-web-${STAGE}.adrian-secovam.workers.dev"
           vp exec alchemy destroy --stage "$STAGE" --yes --no-input
