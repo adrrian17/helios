@@ -88,7 +88,7 @@ export default Alchemy.Stack(
           **Web:** ${webWorker.url}
           **API:** ${serverWorker.url}
 
-          Commit \`${github.sha.slice(0, 7)}\`
+          Commit \`${(process.env.PR_HEAD_SHA ?? github.sha).slice(0, 7)}\`
 
           _Este comentario se actualiza con cada push._
         `,

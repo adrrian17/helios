@@ -105,5 +105,5 @@ jobs:
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           GITHUB_TOKEN: ${{ github.token }}
           PULL_REQUEST: ${{ github.event.pull_request.number }}
-          # On pull_request, GITHUB_SHA is the test merge commit; the comment shows the PR head instead.
-          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          # On pull_request, GITHUB_SHA is the test merge commit and the runner ignores overrides of it.
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
