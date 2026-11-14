@@ -1,0 +1,74 @@
+name: Destroy preview
+
+# pull_request skips PRs with merge conflicts; pull_request_target always runs and checks out the base branch, never PR code.
+on:
+  pull_request_target:
+    types: [closed]
+
+permissions:
+  contents: read
+  # Destroying the stage deletes its preview comment.
+  pull-requests: write
+
+# Shares the deploy job's group in ci.yml so a destroy never overlaps a deploy of the same PR.
+concurrency:
+  group: deploy-pr-${{ github.event.number }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Destroy preview
+    # Fork PRs never had a preview.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      STAGE: pr-${{ github.event.number }}
+      PULL_REQUEST: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
+
+      - name: Refuse to destroy anything but this PR's preview
+        run: |
+          if [[ ! "$PULL_REQUEST" =~ ^[0-9]+$ || "$STAGE" != "pr-${PULL_REQUEST}" ]]; then
+            echo "Refusing to destroy unexpected stage '$STAGE' for PR '$PULL_REQUEST'."
+            exit 1
+          fi
+
+      # A rerun of an old closed-event run keeps that event's data, so read the live PR state. A failed call stops the job.
+      - name: Skip destroy when the PR is open
+        id: state
+        run: |
+          state=$(gh pr view "$PULL_REQUEST" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
+          if [[ "$state" == OPEN ]]; then
+            echo "Skipping destroy: PR #$PULL_REQUEST is open"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # CORS_ORIGIN is only here because Varlock requires it on import, even for destroy.
+      - name: Destroy preview
+        if: steps.state.outputs.skip != 'true'
+        run: |
+          export CORS_ORIGIN="https://helios-web-${STAGE}.${WORKERS_SUBDOMAIN:?Set the WORKERS_SUBDOMAIN repository variable}"
+          vp exec alchemy destroy --stage "$STAGE" --yes --no-input
+        working-directory: packages/infra
+        env:
+          APP_ENV: production
+          WORKERS_SUBDOMAIN: ${{ vars.WORKERS_SUBDOMAIN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}

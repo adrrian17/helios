@@ -9,15 +9,15 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ci-${{ github.event.pull_request.number || github.sha }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
+# Concurrency lives on each job: a new push cancels stale checks, but never a deploy halfway through.
 jobs:
   check:
     name: Check
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    concurrency:
+      group: ci-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -40,3 +40,75 @@ jobs:
 
       - name: Test
         run: vp run test
+
+  deploy:
+    name: Deploy
+    needs: check
+    # Fork PRs get no secrets.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      # Lets the stack post and update the preview comment.
+      pull-requests: write
+    # preview-cleanup.yml shares this group so a destroy never overlaps a deploy of the same PR.
+    concurrency:
+      group: deploy-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
+      cancel-in-progress: false
+    env:
+      STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
+    steps:
+      # A queued deploy can outlive its reason. If the PR closed, destroy its preview here: a deploy entering this group
+      # cancels a pending preview-cleanup run. If main moved to a newer commit, skip. State is read into a variable
+      # first so a failed API call stops the job instead of reading as "closed".
+      - name: Decide deploy, destroy or skip
+        id: plan
+        run: |
+          action=deploy
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            state=$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json state --jq .state)
+            [[ "$state" == OPEN ]] || action=destroy
+          else
+            main_sha=$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)
+            [[ "$main_sha" == "$GITHUB_SHA" ]] || action=skip
+          fi
+          echo "$action $STAGE"
+          echo "action=$action" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+
+      - name: Checkout
+        if: steps.plan.outputs.action != 'skip'
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Vite+
+        if: steps.plan.outputs.action != 'skip'
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
+
+      # Previews also run with APP_ENV=production: any other value turns on the capture Mailer and the public /dev/magic-link route (see apps/server/src/services.ts).
+      - name: Deploy or destroy
+        if: steps.plan.outputs.action != 'skip'
+        run: |
+          export CORS_ORIGIN="https://helios-web-${STAGE}.${WORKERS_SUBDOMAIN:?Set the WORKERS_SUBDOMAIN repository variable}"
+          vp exec alchemy "$ACTION" --stage "$STAGE" --yes --no-input
+        working-directory: packages/infra
+        env:
+          ACTION: ${{ steps.plan.outputs.action }}
+          APP_ENV: production
+          WORKERS_SUBDOMAIN: ${{ vars.WORKERS_SUBDOMAIN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          # On pull_request, GITHUB_SHA is the test merge commit and the runner ignores overrides of it.
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
