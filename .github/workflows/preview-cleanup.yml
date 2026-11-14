@@ -44,7 +44,7 @@ jobs:
       # CORS_ORIGIN is only here because Varlock requires it on import, even for destroy.
       - name: Destroy preview
         run: |
-          export CORS_ORIGIN="https://helios-web-${STAGE}.adrrian17.workers.dev"
+          export CORS_ORIGIN="https://helios-web-${STAGE}.adrian-secovam.workers.dev"
           vp exec alchemy destroy --stage "$STAGE" --yes --no-input
         working-directory: packages/infra
         env:

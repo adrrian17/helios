@@ -71,7 +71,7 @@ jobs:
       # Previews also run with APP_ENV=production: any other value turns on the capture Mailer and the public /dev/magic-link route (see apps/server/src/services.ts).
       - name: Deploy
         run: |
-          export CORS_ORIGIN="https://helios-web-${STAGE}.adrrian17.workers.dev"
+          export CORS_ORIGIN="https://helios-web-${STAGE}.adrian-secovam.workers.dev"
           vp exec alchemy deploy --stage "$STAGE" --yes --no-input
         working-directory: packages/infra
         env:
