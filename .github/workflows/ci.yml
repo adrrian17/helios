@@ -50,6 +50,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
+      pull-requests: read
     # preview-cleanup.yml shares this group so a destroy never overlaps a deploy of the same PR.
     concurrency:
       group: deploy-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
@@ -57,12 +58,31 @@ jobs:
     env:
       STAGE: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
     steps:
+      # A queued deploy can outlive its reason: the PR closed (and its preview was destroyed) or main moved to a newer commit.
+      - name: Skip stale deploys
+        id: freshness
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            [[ "$(gh pr view "$PR" --repo "$GITHUB_REPOSITORY" --json state --jq .state)" == OPEN ]] || stale="PR #$PR is closed"
+          else
+            [[ "$(gh api "repos/$GITHUB_REPOSITORY/commits/main" --jq .sha)" == "$GITHUB_SHA" ]] || stale="main moved past $GITHUB_SHA"
+          fi
+          if [[ -n "${stale:-}" ]]; then
+            echo "Skipping deploy: $stale"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+
       - name: Checkout
+        if: steps.freshness.outputs.skip != 'true'
         uses: actions/checkout@v6
         with:
           persist-credentials: false
 
       - name: Setup Vite+
+        if: steps.freshness.outputs.skip != 'true'
         uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
         with:
           node-version-file: package.json
@@ -70,6 +90,7 @@ jobs:
 
       # Previews also run with APP_ENV=production: any other value turns on the capture Mailer and the public /dev/magic-link route (see apps/server/src/services.ts).
       - name: Deploy
+        if: steps.freshness.outputs.skip != 'true'
         run: |
           export CORS_ORIGIN="https://helios-web-${STAGE}.adrian-secovam.workers.dev"
           vp exec alchemy deploy --stage "$STAGE" --yes --no-input

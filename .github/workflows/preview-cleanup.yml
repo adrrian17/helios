@@ -1,7 +1,8 @@
 name: Destroy preview
 
+# pull_request skips PRs with merge conflicts; pull_request_target always runs and checks out the base branch, never PR code.
 on:
-  pull_request:
+  pull_request_target:
     types: [closed]
 
 permissions:

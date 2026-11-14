@@ -119,7 +119,7 @@ The workflows need these repository secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE
 `CORS_ORIGIN` is not a secret. The web Worker has a fixed name on `production` and `pr-<number>` stages, so its origin is `https://helios-web-<stage>.adrian-secovam.workers.dev` and the workflows export it before deploying. A manual production deploy must export the same value:
 
 ```bash
-cd packages/infra && CORS_ORIGIN=https://helios-web-production.adrian-secovam.workers.dev pnpm exec alchemy deploy --stage production
+cd packages/infra && APP_ENV=production CORS_ORIGIN=https://helios-web-production.adrian-secovam.workers.dev pnpm exec alchemy deploy --stage production
 ```
 
 ### First production deploy
