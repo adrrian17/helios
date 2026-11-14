@@ -116,10 +116,10 @@ Deploys are staged and default to a personal `dev_<username>` stage. In CI, ever
 
 The workflows need these repository secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `ADMIN_EMAIL`, `EMAIL_FROM` and `BETTER_AUTH_SECRET`. The API token needs the permission groups Workers Scripts Write, D1 Write and Secrets Store Write on the account.
 
-`CORS_ORIGIN` is not a secret. The web Worker has a fixed name on `production` and `pr-<number>` stages, so its origin is `https://helios-web-<stage>.adrian-secovam.workers.dev` and the workflows export it before deploying. A manual production deploy must export the same value:
+`CORS_ORIGIN` is not a secret. The web Worker has a fixed name on `production` and `pr-<number>` stages, so its origin is `https://helios-web-<stage>.<subdomain>` and the workflows export it before deploying. `<subdomain>` is the account's workers.dev subdomain (Workers & Pages → Overview), set as the repository variable `WORKERS_SUBDOMAIN`, for example `adrian-secovam.workers.dev`. A manual production deploy must export the same value:
 
 ```bash
-cd packages/infra && APP_ENV=production CORS_ORIGIN=https://helios-web-production.adrian-secovam.workers.dev pnpm exec alchemy deploy --stage production
+cd packages/infra && APP_ENV=production CORS_ORIGIN=https://helios-web-production.<subdomain> pnpm exec alchemy deploy --stage production
 ```
 
 ### First production deploy
@@ -135,7 +135,7 @@ Helios ships the deploy configuration but nobody has run it; these steps need yo
    - `BETTER_AUTH_SECRET`: 32 or more random characters, for example from `openssl rand -base64 32`.
    - `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`: the token and account the workflows deploy to.
 5. Merge to `main`. The workflow deploys `production` and applies the D1 migrations. For a manual deploy, put the same values in `.env.production` at the repo root (git-ignored) and use the command above.
-6. Open `https://helios-web-production.adrian-secovam.workers.dev` and request a sign-in link for `ADMIN_EMAIL`. That first request creates the Workspace and the first Admin; there is no separate seed step, and later requests leave both alone.
+6. Open `https://helios-web-production.<subdomain>` and request a sign-in link for `ADMIN_EMAIL`. That first request creates the Workspace and the first Admin; there is no separate seed step, and later requests leave both alone.
 
 The Worker sends mail through its `EMAIL` (`send_email`) binding. With `APP_ENV=production` the capture Mailer and the `/dev/magic-link` route do not exist.
 

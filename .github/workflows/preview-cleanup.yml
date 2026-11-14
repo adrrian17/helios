@@ -60,11 +60,12 @@ jobs:
       - name: Destroy preview
         if: steps.state.outputs.skip != 'true'
         run: |
-          export CORS_ORIGIN="https://helios-web-${STAGE}.adrian-secovam.workers.dev"
+          export CORS_ORIGIN="https://helios-web-${STAGE}.${WORKERS_SUBDOMAIN:?Set the WORKERS_SUBDOMAIN repository variable}"
           vp exec alchemy destroy --stage "$STAGE" --yes --no-input
         working-directory: packages/infra
         env:
           APP_ENV: production
+          WORKERS_SUBDOMAIN: ${{ vars.WORKERS_SUBDOMAIN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
