@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: read
+  # Destroying the stage deletes its preview comment.
+  pull-requests: write
 
 # Shares the deploy job's group in ci.yml so a destroy never overlaps a deploy of the same PR.
 concurrency:
@@ -55,3 +57,4 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}

@@ -1,8 +1,11 @@
 // oxlint-disable sonarjs/no-wildcard-import -- Alchemy and Effect modules are used as namespaces.
 import * as Cloudflare from "@alchemy.run/cloudflare";
+import * as GitHub from "@alchemy.run/github";
 import * as Alchemy from "alchemy";
+import * as Output from "alchemy/Output";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
 import "varlock/auto-load";
 // oxlint-enable sonarjs/no-wildcard-import
 
@@ -41,7 +44,7 @@ export type ServerEnv = Cloudflare.InferEnv<typeof server>;
 export default Alchemy.Stack(
   "helios",
   {
-    providers: Cloudflare.providers(),
+    providers: Layer.mergeAll(Cloudflare.providers(), GitHub.providers()),
     state: Cloudflare.state(),
   },
   Effect.gen(function* deployStack() {
@@ -68,6 +71,29 @@ export default Alchemy.Stack(
         strictPort: true,
       },
     });
+
+    // Set only in GitHub Actions; `pr` only when the workflow passes PULL_REQUEST.
+    const github = yield* GitHub.GitHubEnv;
+
+    if (github?.pr !== undefined) {
+      yield* GitHub.Comment("preview-comment", {
+        owner: github.owner,
+        repository: github.repository,
+        issueNumber: github.pr,
+        // Destroying the preview stage removes the comment with it.
+        allowDelete: true,
+        body: Output.interpolate`
+          ## Preview
+
+          **Web:** ${webWorker.url}
+          **API:** ${serverWorker.url}
+
+          Commit \`${github.sha.slice(0, 7)}\`
+
+          _Este comentario se actualiza con cada push._
+        `,
+      });
+    }
 
     return {
       web: webWorker.url,

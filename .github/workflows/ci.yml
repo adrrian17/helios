@@ -50,7 +50,8 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      pull-requests: read
+      # Lets the stack post and update the preview comment.
+      pull-requests: write
     # preview-cleanup.yml shares this group so a destroy never overlaps a deploy of the same PR.
     concurrency:
       group: deploy-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || 'production' }}
@@ -102,3 +103,7 @@ jobs:
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+          GITHUB_TOKEN: ${{ github.token }}
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+          # On pull_request, GITHUB_SHA is the test merge commit; the comment shows the PR head instead.
+          GITHUB_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
