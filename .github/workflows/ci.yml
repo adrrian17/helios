@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-format-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-lint-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-knip-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-build-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -105,7 +105,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-test-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -127,7 +127,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-migrations-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
@@ -160,7 +160,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     concurrency:
-      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      group: ci-check-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       # Single required check for branch protection and the deploy gate: fails unless every job succeeded.
