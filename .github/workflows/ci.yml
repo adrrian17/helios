@@ -11,16 +11,18 @@ permissions:
 
 # Concurrency lives on each job: a new push cancels stale checks, but never a deploy halfway through.
 jobs:
-  check:
-    name: Check
+  format:
+    name: Format
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     concurrency:
-      group: ci-${{ github.event.pull_request.number || github.sha }}
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
       cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       # Reads Node.js from package.json engines and Vite+ from the lockfile.
       - name: Setup Vite+
@@ -29,17 +31,149 @@ jobs:
           node-version-file: package.json
           cache: true
 
-      - name: Check unused code
-        run: vp run knip
+      - run: vp fmt --check
 
-      - name: Format, lint and typecheck
-        run: vp check
+  lint:
+    name: Lint and types
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
-      - name: Build
-        run: vp run -r build
+      # Reads Node.js from package.json engines and Vite+ from the lockfile.
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
 
-      - name: Test
-        run: vp run test
+      # Also typechecks: vite.config.ts sets lint.options.typeCheck.
+      - run: vp lint
+
+  knip:
+    name: Unused code
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Reads Node.js from package.json engines and Vite+ from the lockfile.
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
+
+      - run: vp run knip
+
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Reads Node.js from package.json engines and Vite+ from the lockfile.
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
+
+      - run: vp run -r build
+
+  test:
+    name: Test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Reads Node.js from package.json engines and Vite+ from the lockfile.
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
+
+      - run: vp run test
+
+  migrations:
+    name: Migrations up to date
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    concurrency:
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      # Reads Node.js from package.json engines and Vite+ from the lockfile.
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@250f29ce396baf5e8f24498e17c0dfdebabc26eb # v1
+        with:
+          node-version-file: package.json
+          cache: true
+
+      # drizzle-kit generate diffs the schema against the snapshots; it needs no database.
+      - run: vp run db:generate
+      - name: Fail if the schema has changes without a migration
+        run: |
+          changes="$(git status --porcelain -- packages/db/src/migrations)"
+          if [[ -n "$changes" ]]; then
+            echo "$changes"
+            echo "::error::Schema changed without a migration. Run pnpm db:generate locally and commit the result."
+            exit 1
+          fi
+
+  check:
+    name: Check
+    if: always()
+    needs: [format, lint, knip, build, test, migrations]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    concurrency:
+      group: ci-${{ github.job }}-${{ github.event.pull_request.number || github.sha }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      # Single required check for branch protection and the deploy gate: fails unless every job succeeded.
+      - name: Require every job to succeed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          for result in $RESULTS; do
+            if [[ "$result" != success ]]; then
+              echo "::error::A required job finished as '$result'."
+              exit 1
+            fi
+          done
 
   deploy:
     name: Deploy
