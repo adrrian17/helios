@@ -50,20 +50,20 @@ test.describe("desktop list", () => {
     await page.goto(`/projects/${prefix}/list`);
     await expect(rows(page)).toHaveText(titles("Charlie", "Alpha", "Bravo"));
 
-    await page.getByRole("button", { name: "Title" }).click();
+    await page.getByRole("button", { name: "Título" }).click();
     await expect(rows(page)).toHaveText(titles("Alpha", "Bravo", "Charlie"));
     await expect(
-      page.getByRole("columnheader", { name: "Title" })
+      page.getByRole("columnheader", { name: "Título" })
     ).toHaveAttribute("aria-sort", "ascending");
 
-    await page.getByRole("button", { name: "Title" }).click();
+    await page.getByRole("button", { name: "Título" }).click();
     await expect(rows(page)).toHaveText(titles("Charlie", "Bravo", "Alpha"));
 
-    await page.getByRole("button", { name: "Priority", exact: true }).click();
+    await page.getByRole("button", { name: "Prioridad", exact: true }).click();
     await expect(rows(page)).toHaveText(titles("Alpha", "Bravo", "Charlie"));
 
-    await page.getByRole("button", { name: "Priority filter" }).click();
-    await page.getByRole("option", { name: "Urgent" }).click();
+    await page.getByRole("button", { name: "Filtro de prioridad" }).click();
+    await page.getByRole("option", { name: "Urgente" }).click();
     await page.keyboard.press("Escape");
     await expect(page).toHaveURL(/priority=/u);
     await expect(rows(page)).toHaveText(titles("Alpha"));
@@ -71,24 +71,24 @@ test.describe("desktop list", () => {
     await page.reload();
     await expect(rows(page)).toHaveText(titles("Alpha"));
 
-    await page.getByRole("link", { name: "Board" }).click();
+    await page.getByRole("link", { name: "Tablero" }).click();
     await expect(page).toHaveURL(/\/board\?.*priority=/u);
-    await expect(column(page, "Backlog").getByRole("link")).toHaveText(
+    await expect(column(page, "Pendiente").getByRole("link")).toHaveText(
       titles("Alpha")
     );
 
-    await page.getByRole("button", { name: "Clear filters" }).click();
+    await page.getByRole("button", { name: "Quitar filtros" }).click();
     await expect(page).not.toHaveURL(/priority=/u);
     // Sorting the List never moved anything: the Board keeps creation order.
-    await expect(column(page, "Backlog").getByRole("link")).toHaveText(
+    await expect(column(page, "Pendiente").getByRole("link")).toHaveText(
       titles("Charlie", "Alpha", "Bravo")
     );
 
-    await page.getByRole("link", { name: "List" }).click();
+    await page.getByRole("link", { name: "Lista" }).click();
     // The Board's own filter bar stays up until the List has loaded; wait for the List's.
     await expect(rows(page)).toHaveText(titles("Charlie", "Alpha", "Bravo"));
-    await page.getByRole("button", { name: "Assignee filter" }).click();
-    await page.getByRole("option", { name: "Unassigned" }).click();
+    await page.getByRole("button", { name: "Filtro de responsable" }).click();
+    await page.getByRole("option", { name: "Sin responsable" }).click();
     await page.keyboard.press("Escape");
     await expect(rows(page)).toHaveText(titles("Charlie", "Bravo"));
 
@@ -116,9 +116,9 @@ test.describe("desktop list", () => {
       await create("Low backlog", { priority: "low" }),
       await create("Urgent started", {
         priority: "urgent",
-        stateId: project.stateId("In Progress"),
+        stateId: project.stateId("En curso"),
       }),
-      await create("Already done", { stateId: project.stateId("Done") }),
+      await create("Already done", { stateId: project.stateId("Completada") }),
       await create("Just an idea", { stateId: project.stateId("Ideas") }),
     ];
 
@@ -142,7 +142,7 @@ test.describe("desktop list", () => {
     await archiveProject(page, prefix);
     await page.goto("/my-issues");
     await expect(
-      page.getByRole("heading", { name: "My Issues" })
+      page.getByRole("heading", { name: "Mis tareas" })
     ).toBeVisible();
     await expect(group).toBeHidden();
   });
@@ -158,15 +158,15 @@ test.describe("desktop list", () => {
 
     await page.goto(`/projects/${prefix}/list`);
     await expect(
-      page.getByRole("columnheader", { name: "Created" })
+      page.getByRole("columnheader", { name: "Creada" })
     ).toBeHidden();
-    await page.getByRole("button", { name: /^Sort: /u }).click();
-    await page.getByRole("menuitemradio", { name: "Created" }).click();
+    await page.getByRole("button", { name: /^Orden: /u }).click();
+    await page.getByRole("menuitemradio", { name: "Creada" }).click();
     await expect(page).toHaveURL(/sort=created/u);
     await page.keyboard.press("Escape");
 
     await page.setViewportSize({ width: 1280, height: 800 });
-    await expect(page.getByRole("button", { name: /^Sort: /u })).toBeHidden();
+    await expect(page.getByRole("button", { name: /^Orden: /u })).toBeHidden();
 
     await archiveProject(page, prefix);
   });
@@ -193,14 +193,18 @@ test.describe("phone list", () => {
     await page.goto(`/projects/${prefix}/list`);
 
     await Promise.all(
-      ["ID", "Title", "Priority", "Assignee"].map(async (name) => {
-        await expect(page.getByRole("columnheader", { name })).toBeVisible();
+      ["ID", "Título", "Prioridad", "Responsable"].map(async (name) => {
+        await expect(
+          page.getByRole("columnheader", { name, exact: true })
+        ).toBeVisible();
       })
     );
 
     await Promise.all(
-      ["State", "Created", "Updated"].map(async (name) => {
-        await expect(page.getByRole("columnheader", { name })).toBeHidden();
+      ["Estado", "Creada", "Actualizada"].map(async (name) => {
+        await expect(
+          page.getByRole("columnheader", { name, exact: true })
+        ).toBeHidden();
       })
     );
 
@@ -221,16 +225,16 @@ test.describe("phone list", () => {
     await page.setViewportSize({ width: 360, height: 740 });
 
     await page.goto(`/projects/${prefix}/list`);
-    await page.getByRole("button", { name: "Assignee filter" }).click();
-    await page.getByRole("option", { name: "Unassigned" }).click();
+    await page.getByRole("button", { name: "Filtro de responsable" }).click();
+    await page.getByRole("option", { name: "Sin responsable" }).click();
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Priority filter" }).click();
-    await page.getByRole("option", { name: "Urgent" }).click();
+    await page.getByRole("button", { name: "Filtro de prioridad" }).click();
+    await page.getByRole("option", { name: "Urgente" }).click();
     await page.keyboard.press("Escape");
 
-    await expect(page.getByRole("button", { name: /^Sort: /u })).toBeInViewport(
-      { ratio: 1 }
-    );
+    await expect(
+      page.getByRole("button", { name: /^Orden: /u })
+    ).toBeInViewport({ ratio: 1 });
 
     await archiveProject(page, prefix);
   });
@@ -247,24 +251,24 @@ test.describe("phone list", () => {
     await api.issues.create({
       projectId: project.id,
       title: DONE,
-      stateId: project.stateId("Done"),
+      stateId: project.stateId("Completada"),
     });
     await api.issues.create({ projectId: project.id, title: WAITING });
 
     await page.goto(`/projects/${prefix}/list`);
     await expect(rows(page)).toHaveText(titles(DONE, WAITING));
 
-    await page.getByRole("button", { name: /^Sort: Identifier/u }).click();
-    await page.getByRole("menuitemradio", { name: "Workflow State" }).click();
+    await page.getByRole("button", { name: /^Orden: Identificador/u }).click();
+    await page.getByRole("menuitemradio", { name: "Estado" }).click();
     await expect(page).toHaveURL(/sort=state/u);
     await expect(rows(page)).toHaveText(titles(WAITING, DONE));
 
     // The menu stays open, so the field and the order are chosen in one go.
-    await page.getByRole("menuitemradio", { name: "Descending" }).click();
+    await page.getByRole("menuitemradio", { name: "Descendente" }).click();
     await expect(rows(page)).toHaveText(titles(DONE, WAITING));
     await page.keyboard.press("Escape");
     await expect(
-      page.getByRole("button", { name: "Sort: Workflow State, descending" })
+      page.getByRole("button", { name: "Orden: Estado, descendente" })
     ).toBeVisible();
 
     await archiveProject(page, prefix);

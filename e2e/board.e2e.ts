@@ -13,8 +13,15 @@ import {
   uniquePrefix,
 } from "./helpers";
 
-const IN_PROGRESS = "In Progress";
-const DEFAULT_STATES = ["Ideas", "Backlog", IN_PROGRESS, "Done", "Cancelled"];
+const IN_PROGRESS = "En curso";
+
+const DEFAULT_STATES = [
+  "Ideas",
+  "Pendiente",
+  IN_PROGRESS,
+  "Completada",
+  "Cancelada",
+];
 
 const dragTo = async (
   page: Page,
@@ -61,14 +68,14 @@ test.describe("desktop board", () => {
       DEFAULT_STATES
     );
 
-    await addIssue(page, "Backlog", "Write the onboarding guide");
-    await expect(card(column(page, "Backlog"), `${prefix}-1`)).toBeVisible();
-    await addIssue(page, "Backlog", "Fix the login redirect");
-    await addIssue(page, "Backlog", "Plan the launch");
+    await addIssue(page, "Pendiente", "Write the onboarding guide");
+    await expect(card(column(page, "Pendiente"), `${prefix}-1`)).toBeVisible();
+    await addIssue(page, "Pendiente", "Fix the login redirect");
+    await addIssue(page, "Pendiente", "Plan the launch");
 
     const inProgress = await column(page, IN_PROGRESS).boundingBox();
     const firstMove = moveSaved(page);
-    await dragTo(page, card(column(page, "Backlog"), `${prefix}-1`), {
+    await dragTo(page, card(column(page, "Pendiente"), `${prefix}-1`), {
       x: (inProgress?.x ?? 0) + 100,
       y: (inProgress?.y ?? 0) + 60,
     });
@@ -76,16 +83,16 @@ test.describe("desktop board", () => {
     await firstMove;
 
     const second = await card(
-      column(page, "Backlog"),
+      column(page, "Pendiente"),
       `${prefix}-2`
     ).boundingBox();
 
     const secondMove = moveSaved(page);
-    await dragTo(page, card(column(page, "Backlog"), `${prefix}-3`), {
+    await dragTo(page, card(column(page, "Pendiente"), `${prefix}-3`), {
       x: (second?.x ?? 0) + 40,
       y: (second?.y ?? 0) + 4,
     });
-    await expect(column(page, "Backlog").getByRole("listitem")).toHaveText([
+    await expect(column(page, "Pendiente").getByRole("listitem")).toHaveText([
       new RegExp(`${prefix}-3`, "u"),
       new RegExp(`${prefix}-2`, "u"),
     ]);
@@ -93,7 +100,7 @@ test.describe("desktop board", () => {
     await secondMove;
     await page.reload();
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
-    await expect(column(page, "Backlog").getByRole("listitem")).toHaveText([
+    await expect(column(page, "Pendiente").getByRole("listitem")).toHaveText([
       new RegExp(`${prefix}-3`, "u"),
       new RegExp(`${prefix}-2`, "u"),
     ]);
@@ -108,9 +115,9 @@ test.describe("desktop board", () => {
     const prefix = uniquePrefix();
     await signIn(page, request, adminEmail);
     await createProject(page, false, `Keys ${prefix}`, prefix);
-    await addIssue(page, "Backlog", "Keyboard move");
+    await addIssue(page, "Pendiente", "Keyboard move");
 
-    await card(column(page, "Backlog"), `${prefix}-1`).focus();
+    await card(column(page, "Pendiente"), `${prefix}-1`).focus();
     await page.keyboard.press("Space");
     await page.keyboard.press("ArrowRight");
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeFocused();
@@ -128,7 +135,7 @@ test.describe("desktop board", () => {
 
     await page.keyboard.press("Space");
     await page.keyboard.press("ArrowRight");
-    await expect(card(column(page, "Done"), `${prefix}-1`)).toBeFocused();
+    await expect(card(column(page, "Completada"), `${prefix}-1`)).toBeFocused();
     await page.keyboard.press("Escape");
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeFocused();
 
@@ -137,10 +144,10 @@ test.describe("desktop board", () => {
     const savedAgain = moveSaved(page);
     await page.keyboard.press("Space");
     await savedAgain;
-    await expect(card(column(page, "Done"), `${prefix}-1`)).toBeFocused();
+    await expect(card(column(page, "Completada"), `${prefix}-1`)).toBeFocused();
 
     await page.reload();
-    await expect(card(column(page, "Done"), `${prefix}-1`)).toBeVisible();
+    await expect(card(column(page, "Completada"), `${prefix}-1`)).toBeVisible();
 
     await archiveProject(page, prefix);
   });
@@ -160,20 +167,25 @@ test.describe("board composer", () => {
     await page.goto(
       `/projects/${prefix}/board?priority=${encodeURIComponent(JSON.stringify(["urgent"]))}`
     );
-    const backlog = column(page, "Backlog");
-    const add = backlog.getByRole("button", { name: "Add Issue", exact: true });
+    const backlog = column(page, "Pendiente");
+
+    const add = backlog.getByRole("button", {
+      name: "Añadir tarea",
+      exact: true,
+    });
+
     await add.click();
-    const input = backlog.getByLabel("New Issue title in Backlog");
+    const input = backlog.getByLabel("Título de la nueva tarea en Pendiente");
     await input.fill("Hidden by filters");
     await input.press("Enter");
     await expect(
-      page.getByText(`${prefix}-1 created. The current filters hide it.`)
+      page.getByText(`${prefix}-1 creada. Los filtros actuales la ocultan.`)
     ).toBeVisible();
 
     await input.press("Escape");
     await expect(add).toBeFocused();
 
-    await page.getByRole("button", { name: "Open", exact: true }).click();
+    await page.getByRole("button", { name: "Abrir", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/issue/${prefix}-1$`, "u"));
 
     await page.goto(`/projects/${prefix}/board`);
@@ -184,7 +196,9 @@ test.describe("board composer", () => {
     await add.click();
     await input.fill("Added offline");
     await input.press("Enter");
-    await expect(page.getByText(/can’t reach its server/u)).toBeVisible();
+    await expect(
+      page.getByText(/no puede conectarse con su servidor/u)
+    ).toBeVisible();
     await page.unroute(`${API_URL}/rpc/issues/board`);
 
     const reloaded = page.waitForResponse(
@@ -192,7 +206,7 @@ test.describe("board composer", () => {
         response.url().includes("/rpc/issues/board") && response.ok()
     );
 
-    await page.getByRole("button", { name: "Retry" }).click();
+    await page.getByRole("button", { name: "Reintentar" }).click();
     await reloaded;
     await expect(card(backlog, `${prefix}-2`)).toBeVisible();
 
@@ -211,7 +225,7 @@ test.describe("phone board", () => {
     await signIn(page, request, adminEmail);
 
     await openNavigation(page, true);
-    await expect(page.getByRole("button", { name: "Account" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Cuenta" })).toBeVisible();
     await page.keyboard.press("Escape");
 
     await createProject(page, true, `Phone ${prefix}`, prefix);
@@ -228,18 +242,18 @@ test.describe("phone board", () => {
       gestureSourceType: "touch",
       speed: 1200,
     });
-    await expect(indicator).toContainText("Backlog");
+    await expect(indicator).toContainText("Pendiente");
 
-    await addIssue(page, "Backlog", "Call the venue");
-    await page.getByRole("button", { name: `Move ${prefix}-1 to` }).click();
+    await addIssue(page, "Pendiente", "Call the venue");
+    await page.getByRole("button", { name: `Mover ${prefix}-1 a` }).click();
     const moved = moveSaved(page);
     await page.getByRole("menuitem", { name: IN_PROGRESS }).click();
     await moved;
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeAttached();
 
     await page.reload();
-    await page.getByRole("button", { name: "Next Workflow State" }).click();
-    await page.getByRole("button", { name: "Next Workflow State" }).click();
+    await page.getByRole("button", { name: "Estado siguiente" }).click();
+    await page.getByRole("button", { name: "Estado siguiente" }).click();
     await expect(indicator).toContainText(IN_PROGRESS);
     await expect(card(column(page, IN_PROGRESS), `${prefix}-1`)).toBeVisible();
 

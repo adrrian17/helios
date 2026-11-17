@@ -65,10 +65,10 @@ export const MarkdownEditor = ({
   <Tabs defaultValue="write">
     <TabsList variant="line" className="h-7 max-md:h-auto">
       <TabsTrigger value="write" className="max-md:min-h-11">
-        Write
+        Escribir
       </TabsTrigger>
       <TabsTrigger value="preview" className="max-md:min-h-11">
-        Preview
+        Vista previa
       </TabsTrigger>
     </TabsList>
     <TabsContent value="write">
@@ -98,7 +98,9 @@ export const MarkdownEditor = ({
     <TabsContent value="preview">
       <div className="min-h-24 rounded-lg border px-2.5 py-2">
         {value.trim() === "" ? (
-          <p className="text-muted-foreground text-sm">Nothing to preview.</p>
+          <p className="text-muted-foreground text-sm">
+            Nada que previsualizar.
+          </p>
         ) : (
           <Markdown>{value}</Markdown>
         )}

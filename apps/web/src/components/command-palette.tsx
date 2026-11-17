@@ -25,7 +25,6 @@ import type { LucideIcon } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 
 import { StateIcon } from "@/components/issue-meta";
-import { ProjectMark } from "@/components/project-mark";
 import { orpc } from "@/utils/orpc";
 import { keysOf, shortcuts } from "@/utils/shortcuts";
 import { useMe } from "@/utils/use-me";
@@ -82,15 +81,17 @@ const PaletteBody = ({
     {
       id: "create",
       label:
-        current === undefined ? "New Issue…" : `New Issue in ${current.name}…`,
-      keywords: "create add",
+        current === undefined
+          ? "Nueva tarea…"
+          : `Nueva tarea en ${current.name}…`,
+      keywords: "crear añadir agregar create add",
       icon: PlusIcon,
       keys: keysOf(shortcuts.createIssue),
       run: onCreateIssue,
     },
     {
       id: "my-issues",
-      label: "Go to My Issues",
+      label: "Ir a Mis tareas",
       icon: CircleUserRoundIcon,
       run: () => {
         go(async () => {
@@ -100,7 +101,7 @@ const PaletteBody = ({
     },
     {
       id: "labels",
-      label: "Go to Labels",
+      label: "Ir a Etiquetas",
       icon: TagIcon,
       run: () => {
         go(async () => {
@@ -112,7 +113,7 @@ const PaletteBody = ({
       ? [
           {
             id: "members",
-            label: "Go to Members",
+            label: "Ir a Miembros",
             icon: UsersIcon,
             run: () => {
               go(async () => {
@@ -126,8 +127,8 @@ const PaletteBody = ({
       ? [
           {
             id: "shortcuts",
-            label: "Keyboard shortcuts",
-            keywords: "help keys",
+            label: "Atajos de teclado",
+            keywords: "ayuda teclas",
             icon: KeyboardIcon,
             keys: keysOf(shortcuts.help),
             run: onShowShortcuts,
@@ -164,7 +165,7 @@ const PaletteBody = ({
 
   const issueGroup =
     foundIssues.length > 0 ? (
-      <CommandGroup heading="Issues">
+      <CommandGroup heading="Tareas">
         {foundIssues.map((issue) => (
           <CommandItem
             key={issue.id}
@@ -196,14 +197,14 @@ const PaletteBody = ({
       value={highlighted}
       onValueChange={setSelected}
       loop
-      label="Command palette"
+      label="Paleta de comandos"
       className="max-md:h-full"
     >
       <div className="flex items-center gap-1">
         <div className="min-w-0 flex-1">
           <CommandInput
-            placeholder="Search Issues, Projects and actions…"
-            aria-label="Search Issues, Projects and actions"
+            placeholder="Buscar tareas, proyectos y acciones…"
+            aria-label="Buscar tareas, proyectos y acciones"
             value={search}
             onValueChange={(next) => {
               setSearch(next);
@@ -211,17 +212,19 @@ const PaletteBody = ({
             }}
           />
         </div>
-        {searching ? <Spinner aria-label="Searching" className="mx-1" /> : null}
+        {searching ? <Spinner aria-label="Buscando" className="mx-1" /> : null}
         <Button variant="ghost" className="md:hidden" onClick={onClose}>
-          Cancel
+          Cancelar
         </Button>
       </div>
       <CommandList className="max-md:max-h-none max-md:flex-1 md:max-h-[min(24rem,60dvh)]">
         {searching && foundIssues.length === 0 ? null : (
-          <CommandEmpty>No Issues, Projects or actions match.</CommandEmpty>
+          <CommandEmpty>
+            Ninguna tarea, proyecto o acción coincide.
+          </CommandEmpty>
         )}
         {searchFailed ? (
-          <CommandGroup heading="Issues">
+          <CommandGroup heading="Tareas">
             <CommandItem
               value="issue-search-retry"
               onSelect={() => {
@@ -229,14 +232,16 @@ const PaletteBody = ({
               }}
             >
               <CircleAlertIcon className="text-destructive" />
-              <span className="truncate">Couldn’t search Issues.</span>
-              <CommandShortcut>Retry</CommandShortcut>
+              <span className="truncate">
+                No se pudieron buscar las tareas.
+              </span>
+              <CommandShortcut>Reintentar</CommandShortcut>
             </CommandItem>
           </CommandGroup>
         ) : null}
         {issueGroup}
         {shownActions.length > 0 ? (
-          <CommandGroup heading="Actions">
+          <CommandGroup heading="Acciones">
             {shownActions.map((action) => (
               <CommandItem
                 key={action.id}
@@ -259,7 +264,7 @@ const PaletteBody = ({
           </CommandGroup>
         ) : null}
         {shownProjects.length > 0 ? (
-          <CommandGroup heading="Projects">
+          <CommandGroup heading="Proyectos">
             {shownProjects.map((project) => (
               <CommandItem
                 key={project.id}
@@ -273,7 +278,6 @@ const PaletteBody = ({
                   });
                 }}
               >
-                <ProjectMark project={project} />
                 <span className="truncate">{project.name}</span>
                 <CommandShortcut>
                   <span className="font-mono tracking-normal">
@@ -308,8 +312,8 @@ export const CommandPalette = ({
         onClose();
       }
     }}
-    title="Command palette"
-    description="Search Issues by Identifier or title, jump to a Project, or run an action."
+    title="Paleta de comandos"
+    description="Busca tareas por identificador o título, ve a un proyecto o ejecuta una acción."
     className="max-md:top-0 sm:max-w-xl"
   >
     <PaletteBody onClose={onClose} {...body} />

@@ -17,7 +17,9 @@ export const memberProcedure = o.use(async ({ context, next }) => {
         });
 
   if (!current) {
-    throw new ORPCError("UNAUTHORIZED");
+    throw new ORPCError("UNAUTHORIZED", {
+      message: "Inicia sesión para continuar.",
+    });
   }
 
   return await next({ context: { member: current } });
@@ -25,7 +27,9 @@ export const memberProcedure = o.use(async ({ context, next }) => {
 
 export const adminProcedure = memberProcedure.use(async ({ context, next }) => {
   if (context.member.role !== "admin") {
-    throw new ORPCError("FORBIDDEN");
+    throw new ORPCError("FORBIDDEN", {
+      message: "Solo un administrador puede hacer esto.",
+    });
   }
 
   return await next();

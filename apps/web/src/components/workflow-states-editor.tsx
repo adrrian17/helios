@@ -44,11 +44,11 @@ import { describeError, orpc } from "@/utils/orpc";
 import { useEditorMenuFocus, useReturnFocus } from "@/utils/use-return-focus";
 
 const categoryHints: Record<StateCategory, string> = {
-  ideas: "Not committed to; may never be done.",
-  backlog: "Accepted, not yet started. New Issues land in the first one.",
-  started: "Being worked on.",
-  completed: "Done.",
-  cancelled: "Will not be done.",
+  ideas: "Sin compromiso; puede que nunca se haga.",
+  backlog: "Aceptada, sin empezar. Las tareas nuevas van al primero.",
+  started: "En marcha.",
+  completed: "Hecha.",
+  cancelled: "No se hará.",
 };
 
 const StateNameForm = ({
@@ -102,7 +102,7 @@ const StateNameForm = ({
         {submitLabel}
       </Button>
       <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
-        Cancel
+        Cancelar
       </Button>
     </form>
   );
@@ -140,10 +140,10 @@ const DeleteStateDialog = ({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete {state?.name}?</DialogTitle>
+          <DialogTitle>¿Eliminar {state?.name}?</DialogTitle>
           <DialogDescription>
-            Its Issues move to the end of the Workflow State you choose, and
-            each move is recorded in their Activity.
+            Sus tareas pasan al final del estado que elijas y cada cambio queda
+            registrado en su actividad.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -159,7 +159,7 @@ const DeleteStateDialog = ({
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="destination-state">
-                Move its Issues to
+                Mover sus tareas a
               </FieldLabel>
               <Select
                 items={items}
@@ -192,7 +192,7 @@ const DeleteStateDialog = ({
           </FieldGroup>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              Cancelar
             </Button>
             <Button
               type="submit"
@@ -200,7 +200,7 @@ const DeleteStateDialog = ({
               disabled={remove.isPending || chosen === null}
             >
               {remove.isPending ? <Spinner data-icon="inline-start" /> : null}
-              Delete Workflow State
+              Eliminar estado
             </Button>
           </DialogFooter>
         </form>
@@ -239,9 +239,9 @@ const StateRow = ({
       <StateIcon category={state.category} />
       {renaming ? (
         <StateNameForm
-          label={`New name for ${state.name}`}
+          label={`Nuevo nombre de ${state.name}`}
           initial={state.name}
-          submitLabel="Save"
+          submitLabel="Guardar"
           pending={rename.isPending}
           onSubmit={(name) => {
             rename.mutate({ id: state.id, name });
@@ -258,7 +258,7 @@ const StateRow = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Move ${state.name} up`}
+                aria-label={`Subir ${state.name}`}
                 disabled={above.length === 0 || move.isPending}
                 onClick={() => {
                   move.mutate({
@@ -272,7 +272,7 @@ const StateRow = ({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Move ${state.name} down`}
+                aria-label={`Bajar ${state.name}`}
                 disabled={below === undefined || move.isPending}
                 onClick={() => {
                   if (below !== undefined) {
@@ -291,7 +291,7 @@ const StateRow = ({
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={`More actions for ${state.name}`}
+                  aria-label={`Más acciones para ${state.name}`}
                 />
               }
             >
@@ -310,11 +310,11 @@ const StateRow = ({
                   }}
                 >
                   <PencilIcon />
-                  Rename
+                  Renombrar
                 </DropdownMenuItem>
                 <DropdownMenuItem variant="destructive" onClick={onDelete}>
                   <TrashIcon />
-                  Delete…
+                  Eliminar…
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -363,13 +363,13 @@ const CategoryGroup = ({
           ref={addButton}
           variant="ghost"
           size="sm"
-          aria-label={`Add a Workflow State to ${label}`}
+          aria-label={`Añadir un estado a ${label}`}
           onClick={() => {
             setAdding(true);
           }}
         >
           <PlusIcon data-icon="inline-start" />
-          Add
+          Añadir
         </Button>
       </div>
       <ul className="divide-y border-t">
@@ -388,9 +388,9 @@ const CategoryGroup = ({
           <li className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-4">
             <StateIcon category={category} />
             <StateNameForm
-              label={`Name of the new ${label} Workflow State`}
+              label={`Nombre del nuevo estado de categoría ${label}`}
               initial=""
-              submitLabel="Add"
+              submitLabel="Añadir"
               pending={add.isPending}
               onSubmit={(name) => {
                 add.mutate({ projectId, name, category });
@@ -403,7 +403,7 @@ const CategoryGroup = ({
         ) : null}
         {states.length === 0 && !adding ? (
           <li className="text-muted-foreground py-3 pl-4 text-sm">
-            No Workflow States in {label}.
+            No hay estados en {label}.
           </li>
         ) : null}
       </ul>
@@ -417,7 +417,7 @@ export const WorkflowStatesEditor = ({ project }: { project: Project }) => {
   return (
     <>
       <ul
-        aria-label="Workflow States by State Category"
+        aria-label="Estados por categoría de estado"
         className="bg-card divide-y overflow-hidden rounded-lg border"
       >
         {categories.map(({ value, label }) => (

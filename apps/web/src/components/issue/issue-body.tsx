@@ -42,7 +42,7 @@ export const IssueTitle = () => {
   return (
     <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
       <textarea
-        aria-label="Title"
+        aria-label="Título"
         rows={1}
         maxLength={limits.title}
         className="focus-visible:bg-muted/40 focus-visible:ring-ring -mx-1 field-sizing-content w-full resize-none rounded-md bg-transparent px-1 py-0.5 text-pretty outline-none focus-visible:ring-2"
@@ -92,11 +92,11 @@ export const IssueDescription = () => {
     };
 
     return (
-      <section aria-label="Description" className="flex flex-col gap-2">
+      <section aria-label="Descripción" className="flex flex-col gap-2">
         <MarkdownEditor
-          label="Description"
+          label="Descripción"
           autoFocus
-          placeholder="Add a description. Markdown works: **bold**, - lists, `code`, [links](https://…)."
+          placeholder="Añade una descripción. Puedes usar Markdown: **negrita**, - listas, `código`, [enlaces](https://…)."
           value={draft}
           onChange={setDraft}
           onSubmit={save}
@@ -106,7 +106,7 @@ export const IssueDescription = () => {
         />
         <div className="flex items-center justify-end gap-1.5">
           <span className="text-muted-foreground mr-auto text-xs max-md:hidden">
-            Markdown supported · {submitKeys()} to save
+            Compatible con Markdown · {submitKeys()} para guardar
           </span>
           <Button
             variant="ghost"
@@ -115,11 +115,11 @@ export const IssueDescription = () => {
               setDraft(null);
             }}
           >
-            Cancel
+            Cancelar
           </Button>
           <Button size="sm" disabled={update.isPending} onClick={save}>
             {update.isPending ? <Spinner data-icon="inline-start" /> : null}
-            Save
+            Guardar
           </Button>
         </div>
       </section>
@@ -136,20 +136,20 @@ export const IssueDescription = () => {
           setDraft("");
         }}
       >
-        Add a description…
+        Añadir una descripción…
       </Button>
     );
   }
 
   return (
-    <section aria-label="Description" className="group/description relative">
+    <section aria-label="Descripción" className="group/description relative">
       <Markdown className="pr-10">{issue.description}</Markdown>
       <span className="absolute top-0 right-0 md:opacity-0 md:group-hover/description:opacity-100 md:focus-within:opacity-100">
         <Button
           ref={opener}
           variant="muted"
           size="icon-sm"
-          aria-label="Edit description"
+          aria-label="Editar descripción"
           onClick={() => {
             setDraft(issue.description);
           }}

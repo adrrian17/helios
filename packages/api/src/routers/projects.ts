@@ -13,6 +13,8 @@ import {
   keyAfter,
 } from "./shared";
 
+const PROJECT = "el proyecto";
+
 const projectColumns = {
   id: true,
   name: true,
@@ -34,7 +36,7 @@ const setArchivedAt = async (db: Database, id: string, at: Date | null) => {
     .where(eq(project.id, id))
     .returning({ id: project.id });
 
-  found(updated, "Project");
+  found(updated, PROJECT);
 };
 
 export const projectsRouter = {
@@ -61,7 +63,7 @@ export const projectsRouter = {
             },
           },
         }),
-        "Project"
+        PROJECT
       );
 
       const { workflowStates, ...rest } = row;
@@ -92,7 +94,7 @@ export const projectsRouter = {
               }))
             ),
           ]),
-        `The prefix ${prefix} is already used by another Project.`
+        `El prefijo ${prefix} ya lo usa otro proyecto.`
       );
 
       return { id, name, prefix };
@@ -108,7 +110,7 @@ export const projectsRouter = {
         .where(eq(project.id, id))
         .returning({ id: project.id });
 
-      found(renamed, "Project");
+      found(renamed, PROJECT);
     }),
 
   archive: adminProcedure

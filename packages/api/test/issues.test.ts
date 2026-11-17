@@ -77,7 +77,7 @@ describe("Identifiers", () => {
       title: "Ship it",
       description: "**Now**",
       priority: "high",
-      state: { name: "Backlog", category: "backlog" },
+      state: { name: "Pendiente", category: "backlog" },
       project: { prefix: "HEL" },
       creator: { id: creatorId },
       assignee: null,
@@ -100,7 +100,7 @@ describe("creating Issues", () => {
       name: "Triage",
       category: "backlog",
     });
-    const started = stateNamed(project, "In Progress");
+    const started = stateNamed(project, "En curso");
 
     await admin.issues.create({ projectId: project.id, title: "A" });
     await admin.issues.create({ projectId: project.id, title: "B" });
@@ -111,9 +111,9 @@ describe("creating Issues", () => {
     });
 
     await expect(columnTitles(admin, project.id)).resolves.toMatchObject({
-      Backlog: ["A", "B"],
+      Pendiente: ["A", "B"],
       Triage: [],
-      "In Progress": ["C"],
+      "En curso": ["C"],
     });
   });
 
@@ -139,8 +139,8 @@ describe("manual ordering", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const backlog = stateNamed(project, "Backlog");
-    const started = stateNamed(project, "In Progress");
+    const backlog = stateNamed(project, "Pendiente");
+    const started = stateNamed(project, "En curso");
 
     const create = async (title: string) =>
       await admin.issues.create({ projectId: project.id, title });
@@ -166,7 +166,7 @@ describe("manual ordering", () => {
     await move(a, backlog.id, c);
 
     await expect(columnTitles(admin, project.id)).resolves.toMatchObject({
-      Backlog: ["D", "B", "C", "A"],
+      Pendiente: ["D", "B", "C", "A"],
     });
 
     await move(b, started.id, null);
@@ -174,8 +174,8 @@ describe("manual ordering", () => {
     await move(d, started.id, b);
 
     await expect(columnTitles(admin, project.id)).resolves.toMatchObject({
-      Backlog: ["A"],
-      "In Progress": ["B", "D", "C"],
+      Pendiente: ["A"],
+      "En curso": ["B", "D", "C"],
     });
   });
 
@@ -183,7 +183,7 @@ describe("manual ordering", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const backlog = stateNamed(project, "Backlog");
+    const backlog = stateNamed(project, "Pendiente");
 
     const mover = await admin.issues.create({
       projectId: project.id,
@@ -205,7 +205,7 @@ describe("manual ordering", () => {
     });
 
     await expect(columnTitles(admin, project.id)).resolves.toMatchObject({
-      Backlog: [expect.any(String), expect.any(String), "mover"],
+      Pendiente: [expect.any(String), expect.any(String), "mover"],
     });
   });
 
@@ -213,7 +213,7 @@ describe("manual ordering", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const backlog = stateNamed(project, "Backlog");
+    const backlog = stateNamed(project, "Pendiente");
 
     const top = await admin.issues.create({
       projectId: project.id,
@@ -235,7 +235,7 @@ describe("manual ordering", () => {
     }
 
     await expect(columnTitles(admin, project.id)).resolves.toMatchObject({
-      Backlog: expected,
+      Pendiente: expected,
     });
   });
 
@@ -243,7 +243,7 @@ describe("manual ordering", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const started = stateNamed(project, "In Progress");
+    const started = stateNamed(project, "En curso");
     const a = await admin.issues.create({ projectId: project.id, title: "A" });
     const b = await admin.issues.create({ projectId: project.id, title: "B" });
 
@@ -261,8 +261,8 @@ describe("Activity", () => {
     const ada = await addMember(harness, admin, "ada@helios.test");
     await ada.client.workspace.setDisplayName({ name: "Ada" });
     const bug = await admin.labels.create({ name: "Bug", color: "#ff0000" });
-    const started = stateNamed(project, "In Progress");
-    const done = stateNamed(project, "Done");
+    const started = stateNamed(project, "En curso");
+    const done = stateNamed(project, "Completada");
 
     const { id, identifier } = await admin.issues.create({
       projectId: project.id,
@@ -281,9 +281,13 @@ describe("Activity", () => {
     await expect(activityOf(admin, identifier)).resolves.toStrictEqual([
       { kind: "created", oldValue: null, newValue: null },
       { kind: "title_changed", oldValue: "Old title", newValue: "New title" },
-      { kind: "state_changed", oldValue: "Backlog", newValue: "In Progress" },
-      { kind: "state_changed", oldValue: "In Progress", newValue: "Done" },
-      { kind: "priority_changed", oldValue: "No priority", newValue: "Urgent" },
+      { kind: "state_changed", oldValue: "Pendiente", newValue: "En curso" },
+      { kind: "state_changed", oldValue: "En curso", newValue: "Completada" },
+      {
+        kind: "priority_changed",
+        oldValue: "Sin prioridad",
+        newValue: "Urgente",
+      },
       { kind: "assignee_changed", oldValue: null, newValue: "Ada" },
       { kind: "assignee_changed", oldValue: "Ada", newValue: null },
       { kind: "label_added", oldValue: null, newValue: "Bug" },
@@ -295,7 +299,7 @@ describe("Activity", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const backlog = stateNamed(project, "Backlog");
+    const backlog = stateNamed(project, "Pendiente");
 
     const { id, identifier } = await admin.issues.create({
       projectId: project.id,
@@ -389,7 +393,7 @@ describe("Board and List", () => {
       adaOrUnassigned: ["Ada's", "Nobody's"],
       bug: ["Ada's"],
       low: ["Nobody's"],
-      lowOnBoard: ["Backlog: Nobody's"],
+      lowOnBoard: ["Pendiente: Nobody's"],
     });
   });
 
@@ -397,7 +401,7 @@ describe("Board and List", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const done = stateNamed(project, "Done");
+    const done = stateNamed(project, "Completada");
     await admin.issues.create({
       projectId: project.id,
       title: "b",
@@ -491,13 +495,13 @@ describe("My Issues", () => {
     await create(alpha, "low backlog", { priority: "low" });
     await create(alpha, "urgent started", {
       priority: "urgent",
-      state: "In Progress",
+      state: "En curso",
     });
     await create(alpha, "no priority");
     await create(zeta, "zeta high", { priority: "high" });
     await create(alpha, "idea", { state: "Ideas" });
-    await create(alpha, "done", { state: "Done" });
-    await create(alpha, "cancelled", { state: "Cancelled" });
+    await create(alpha, "done", { state: "Completada" });
+    await create(alpha, "cancelled", { state: "Cancelada" });
     const { id: adminId } = await admin.me();
     await create(alpha, "someone else's", { assigneeId: adminId });
     await create(old, "archived");

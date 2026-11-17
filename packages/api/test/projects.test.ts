@@ -20,10 +20,10 @@ describe("Projects", () => {
       project.states.map(({ name, category }) => ({ name, category }))
     ).toStrictEqual([
       { name: "Ideas", category: "ideas" },
-      { name: "Backlog", category: "backlog" },
-      { name: "In Progress", category: "started" },
-      { name: "Done", category: "completed" },
-      { name: "Cancelled", category: "cancelled" },
+      { name: "Pendiente", category: "backlog" },
+      { name: "En curso", category: "started" },
+      { name: "Completada", category: "completed" },
+      { name: "Cancelada", category: "cancelled" },
     ]);
   });
 
@@ -130,11 +130,11 @@ describe("Workflow States", () => {
     expect(states.map((state) => state.name)).toStrictEqual([
       "Ideas",
       "Maybe",
-      "Backlog",
+      "Pendiente",
       "In Review",
-      "In Progress",
-      "Done",
-      "Cancelled",
+      "En curso",
+      "Completada",
+      "Cancelada",
     ]);
   });
 
@@ -145,8 +145,8 @@ describe("Workflow States", () => {
 
     await expect(
       admin.workflowStates.move({
-        id: stateNamed(project, "Done").id,
-        afterId: stateNamed(project, "Backlog").id,
+        id: stateNamed(project, "Completada").id,
+        afterId: stateNamed(project, "Pendiente").id,
       })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
@@ -155,7 +155,7 @@ describe("Workflow States", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const started = stateNamed(project, "In Progress");
+    const started = stateNamed(project, "En curso");
 
     const already = await admin.issues.create({
       projectId: project.id,
@@ -199,10 +199,10 @@ describe("Workflow States", () => {
       }))
     ).toStrictEqual([
       { state: "Ideas", issues: [] },
-      { state: "Backlog", issues: [] },
-      { state: "In Progress", issues: [already.id, first.id, second.id] },
-      { state: "Done", issues: [] },
-      { state: "Cancelled", issues: [] },
+      { state: "Pendiente", issues: [] },
+      { state: "En curso", issues: [already.id, first.id, second.id] },
+      { state: "Completada", issues: [] },
+      { state: "Cancelada", issues: [] },
     ]);
 
     const { timeline } = await admin.issues.get({
@@ -213,7 +213,7 @@ describe("Workflow States", () => {
       type: "activity",
       kind: "state_changed",
       oldValue: "In Review",
-      newValue: "In Progress",
+      newValue: "En curso",
     });
   });
 
@@ -221,7 +221,7 @@ describe("Workflow States", () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
-    const backlog = stateNamed(project, "Backlog");
+    const backlog = stateNamed(project, "Pendiente");
     const ideas = stateNamed(project, "Ideas");
 
     await expect(
@@ -240,7 +240,7 @@ describe("Workflow States", () => {
 
     const { states } = await admin.projects.get({ prefix: "HEL" });
     expect(states.map((state) => state.name)).toContain("Triage");
-    expect(states.map((state) => state.name)).not.toContain("Backlog");
+    expect(states.map((state) => state.name)).not.toContain("Pendiente");
   });
 
   it("refuses a destination that is the same state or in another Project", async () => {
@@ -248,7 +248,7 @@ describe("Workflow States", () => {
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin, "HEL");
     const other = await createProject(admin, "OTH");
-    const done = stateNamed(project, "Done");
+    const done = stateNamed(project, "Completada");
 
     await expect(
       admin.workflowStates.delete({ id: done.id, destinationId: done.id })
@@ -256,7 +256,7 @@ describe("Workflow States", () => {
     await expect(
       admin.workflowStates.delete({
         id: done.id,
-        destinationId: stateNamed(other, "Done").id,
+        destinationId: stateNamed(other, "Completada").id,
       })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });

@@ -33,11 +33,11 @@ const NoProjects = () => {
             <EmptyMedia variant="icon">
               <FolderKanbanIcon />
             </EmptyMedia>
-            <EmptyTitle>No Projects yet</EmptyTitle>
+            <EmptyTitle>Aún no hay proyectos</EmptyTitle>
             <EmptyDescription>
               {me.role === "admin"
-                ? "Create a Project to get a board for your team’s Issues."
-                : "Projects appear in the sidebar once an Admin creates one."}
+                ? "Crea un proyecto para tener un tablero con las tareas de tu equipo."
+                : "Los proyectos aparecen en la barra lateral cuando un administrador crea uno."}
             </EmptyDescription>
           </EmptyHeader>
           {me.role === "admin" ? (
@@ -48,7 +48,7 @@ const NoProjects = () => {
                 }}
               >
                 <PlusIcon data-icon="inline-start" />
-                New Project
+                Nuevo proyecto
               </Button>
               <CreateProjectDialog open={creating} onOpenChange={setCreating} />
             </EmptyContent>

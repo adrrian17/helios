@@ -9,7 +9,7 @@ import { memberProcedure } from "../index";
 import { found, idInput, requireIssue } from "./shared";
 
 const findComment = async (db: Database, id: string) =>
-  found(await db.query.comment.findFirst({ where: { id } }), "Comment");
+  found(await db.query.comment.findFirst({ where: { id } }), "el comentario");
 
 export const commentsRouter = {
   add: memberProcedure
@@ -22,7 +22,7 @@ export const commentsRouter = {
         .values({ ...input, authorId: author.userId })
         .returning({ id: comment.id });
 
-      return found(added, "Comment");
+      return found(added, "el comentario");
     }),
 
   /** Only the author may edit a Comment; the edit marks it as edited. */
@@ -33,7 +33,7 @@ export const commentsRouter = {
 
       if (existing.authorId !== self.userId) {
         throw new ORPCError("FORBIDDEN", {
-          message: "You can only edit your own Comments.",
+          message: "Solo puedes editar tus propios comentarios.",
         });
       }
 
@@ -51,7 +51,7 @@ export const commentsRouter = {
 
       if (existing.authorId !== self.userId && self.role !== "admin") {
         throw new ORPCError("FORBIDDEN", {
-          message: "You can only delete your own Comments.",
+          message: "Solo puedes eliminar tus propios comentarios.",
         });
       }
 

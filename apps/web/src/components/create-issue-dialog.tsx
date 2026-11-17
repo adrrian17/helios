@@ -29,7 +29,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { ProjectMark } from "@/components/project-mark";
 import type { ProjectSummary } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 
@@ -73,12 +72,12 @@ const CreateIssueForm = ({
     return (
       <>
         <p className="text-muted-foreground">
-          There is no active Project to add it to yet. An Admin can create one
-          from the sidebar.
+          Aún no hay ningún proyecto activo donde añadirla. Un administrador
+          puede crear uno desde la barra lateral.
         </p>
         <DialogFooter>
           <Button variant="outline" onClick={onDone}>
-            Close
+            Cerrar
           </Button>
         </DialogFooter>
       </>
@@ -108,9 +107,9 @@ const CreateIssueForm = ({
             onSuccess: ({ identifier }) => {
               onDraftChange(EMPTY_DRAFT);
               onDone();
-              toast.success(`${identifier} created.`, {
+              toast.success(`${identifier} creada.`, {
                 action: {
-                  label: "Open",
+                  label: "Abrir",
                   onClick: () => {
                     void navigate({
                       to: "/issue/$identifier",
@@ -126,7 +125,7 @@ const CreateIssueForm = ({
     >
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="new-issue-project">Project</FieldLabel>
+          <FieldLabel htmlFor="new-issue-project">Proyecto</FieldLabel>
           <Select
             items={items}
             value={projectId}
@@ -142,10 +141,7 @@ const CreateIssueForm = ({
                   const project = projects.find(({ id }) => id === value);
 
                   return project ? (
-                    <>
-                      <ProjectMark project={project} />
-                      <span className="truncate">{project.name}</span>
-                    </>
+                    <span className="truncate">{project.name}</span>
                   ) : null;
                 }}
               </SelectValue>
@@ -154,7 +150,6 @@ const CreateIssueForm = ({
               <SelectGroup>
                 {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
-                    <ProjectMark project={project} />
                     {project.name}
                   </SelectItem>
                 ))}
@@ -163,15 +158,15 @@ const CreateIssueForm = ({
           </Select>
         </Field>
         <Field data-invalid={titleInvalid || undefined}>
-          <FieldLabel htmlFor="new-issue-title">Title</FieldLabel>
+          <FieldLabel htmlFor="new-issue-title">Título</FieldLabel>
           <Input
             ref={titleRef}
             id="new-issue-title"
             autoComplete="off"
             maxLength={limits.title}
-            placeholder="What needs doing?"
+            placeholder="¿Qué hay que hacer?"
             aria-invalid={titleInvalid || undefined}
-            // The dialog closes on success, so nothing typed after Create may be lost.
+            // The dialog closes on success, so nothing typed after submitting may be lost.
             readOnly={create.isPending}
             value={title}
             onChange={(event) => {
@@ -180,17 +175,17 @@ const CreateIssueForm = ({
             }}
           />
           {titleInvalid ? (
-            <FieldError>Give the Issue a title.</FieldError>
+            <FieldError>Ponle un título a la tarea.</FieldError>
           ) : null}
         </Field>
       </FieldGroup>
       <DialogFooter>
         <Button variant="outline" type="button" onClick={onDone}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit" disabled={create.isPending}>
           {create.isPending ? <Spinner data-icon="inline-start" /> : null}
-          Create Issue
+          Crear tarea
         </Button>
       </DialogFooter>
     </form>
@@ -232,13 +227,13 @@ export const CreateIssueDialog = ({
     >
       <DialogContent initialFocus={titleRef}>
         <DialogHeader>
-          <DialogTitle>New Issue</DialogTitle>
+          <DialogTitle>Nueva tarea</DialogTitle>
           <DialogDescription>
-            It lands in the Project’s first backlog Workflow State.
+            Se añade al primer estado de categoría Pendiente del proyecto.
           </DialogDescription>
         </DialogHeader>
         {projects.data === undefined ? (
-          <Spinner aria-label="Loading Projects" className="mx-auto my-4" />
+          <Spinner aria-label="Cargando proyectos" className="mx-auto my-4" />
         ) : (
           <CreateIssueForm
             projects={projects.data}

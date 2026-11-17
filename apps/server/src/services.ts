@@ -8,14 +8,14 @@ import { log } from "evlog";
 import { ENV } from "./env.server";
 
 const magicLinkText = (url: string) =>
-  `Open this link to sign in to Helios:\n\n${url}\n\nIt works once and expires in 5 minutes. If you did not ask for it, ignore this email.`;
+  `Abre este enlace para iniciar sesión en Helios:\n\n${url}\n\nFunciona una sola vez y caduca en 5 minutos. Si no lo pediste, ignora este correo.`;
 
 const emailMailer: Mailer = {
   sendMagicLink: async (to, url) => {
     await ENV.EMAIL.send({
       from: ENV.EMAIL_FROM,
       to,
-      subject: "Sign in to Helios",
+      subject: "Inicia sesión en Helios",
       text: magicLinkText(url),
     });
   },

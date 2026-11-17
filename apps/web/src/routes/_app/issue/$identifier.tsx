@@ -25,6 +25,8 @@ import {
   ChevronRightIcon,
   LinkIcon,
   MoreHorizontalIcon,
+  PanelRightCloseIcon,
+  PanelRightOpenIcon,
   TrashIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -39,11 +41,29 @@ import type { IssuePicker } from "@/components/issue/issue-properties";
 import { IssueTimeline } from "@/components/issue/issue-timeline";
 import { useIssue, useIssueOptions } from "@/components/issue/use-issue";
 import { PageHeader } from "@/components/page-header";
-import { ProjectMark } from "@/components/project-mark";
 import { NotFound } from "@/components/route-states";
 import { orpc } from "@/utils/orpc";
 import { useShortcut } from "@/utils/shortcuts";
 import { useMediaQuery } from "@/utils/use-media-query";
+
+const RAIL_ID = "issue-properties";
+const RAIL_KEY = "helios:issue-rail";
+
+const rememberedRailOpen = () => {
+  try {
+    return localStorage.getItem(RAIL_KEY) !== "closed";
+  } catch {
+    return true;
+  }
+};
+
+const rememberRailOpen = (open: boolean) => {
+  try {
+    localStorage.setItem(RAIL_KEY, open ? "open" : "closed");
+  } catch {
+    // Storage is blocked (private mode, policy): the rail stays open by default.
+  }
+};
 
 const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
   const issue = useIssue();
@@ -65,7 +85,7 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
       params: { prefix: issue.project.prefix },
     });
     queryClient.removeQueries({ queryKey: issueKey });
-    toast.success(`${issue.identifier} deleted.`);
+    toast.success(`${issue.identifier} eliminada.`);
     await queryClient.invalidateQueries();
   };
 
@@ -74,7 +94,11 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <Button variant="ghost" size="icon-sm" aria-label="Issue actions" />
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Acciones de la tarea"
+            />
           }
         >
           <MoreHorizontalIcon />
@@ -83,18 +107,18 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
           <DropdownMenuGroup>
             <DropdownMenuItem onClick={onMoveTo}>
               <ArrowRightLeftIcon />
-              Move to…
+              Mover a…
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
                 void navigator.clipboard
                   .writeText(window.location.href)
-                  .then(() => toast.success("Link copied."))
-                  .catch(() => toast.error("Couldn’t copy the link."));
+                  .then(() => toast.success("Enlace copiado."))
+                  .catch(() => toast.error("No se pudo copiar el enlace."));
               }}
             >
               <LinkIcon />
-              Copy link
+              Copiar enlace
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -103,17 +127,17 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
               variant="destructive"
               onClick={() => {
                 setConfirm({
-                  title: `Delete ${issue.identifier}?`,
+                  title: `¿Eliminar ${issue.identifier}?`,
                   description:
-                    "Its Checklist, Comments and Activity go with it, and its number is never reused. To keep a record, move it to a cancelled Workflow State instead.",
-                  confirmLabel: "Delete Issue",
+                    "Su checklist, sus comentarios y su actividad se eliminan con ella, y su número no se vuelve a usar. Para conservar un registro, muévela a un estado de categoría Cancelada.",
+                  confirmLabel: "Eliminar tarea",
                   destructive: true,
                   onConfirm: deleteIssue,
                 });
               }}
             >
               <TrashIcon />
-              Delete Issue…
+              Eliminar tarea…
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
@@ -131,6 +155,8 @@ const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
 const IssuePage = () => {
   const issue = useIssue();
   const wide = useMediaQuery("(min-width: 64rem)");
+  const [railOpen, setRailOpen] = useState(rememberedRailOpen);
+  const showRail = wide && railOpen;
   // Which picker is open; kept here so S, P and A can open one by name.
   const [openPicker, setOpenPicker] = useState<IssuePicker | null>(null);
 
@@ -163,15 +189,34 @@ const IssuePage = () => {
     <>
       <PageHeader
         actions={
-          <IssueActions
-            onMoveTo={() => {
-              setOpenPicker("state");
-            }}
-          />
+          <>
+            {wide ? (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={
+                  railOpen ? "Ocultar propiedades" : "Mostrar propiedades"
+                }
+                aria-expanded={railOpen}
+                aria-controls={RAIL_ID}
+                onClick={() => {
+                  setRailOpen(!railOpen);
+                  rememberRailOpen(!railOpen);
+                }}
+              >
+                {railOpen ? <PanelRightCloseIcon /> : <PanelRightOpenIcon />}
+              </Button>
+            ) : null}
+            <IssueActions
+              onMoveTo={() => {
+                setOpenPicker("state");
+              }}
+            />
+          </>
         }
       >
         <nav
-          aria-label="Breadcrumb"
+          aria-label="Ruta de navegación"
           className="flex min-w-0 items-center gap-1.5"
         >
           <Link
@@ -179,7 +224,6 @@ const IssuePage = () => {
             params={{ prefix: project.prefix }}
             className="text-muted-foreground hover:text-foreground focus-visible:ring-ring flex min-w-0 items-center gap-2 rounded-sm text-sm outline-none focus-visible:ring-3 max-sm:min-h-11"
           >
-            <ProjectMark project={project} className="size-5 max-md:hidden" />
             <span className="truncate">{project.name}</span>
           </Link>
           <ChevronRightIcon
@@ -202,12 +246,12 @@ const IssuePage = () => {
             className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10"
           >
             <IssueTitle />
-            {wide ? null : properties("summary")}
+            {showRail ? null : properties("summary")}
             <IssueDescription />
             <IssueChecklist />
-            {wide ? null : (
+            {showRail ? null : (
               <section
-                aria-label="Properties"
+                aria-label="Propiedades"
                 className="bg-card rounded-lg border p-2"
               >
                 {properties("details")}
@@ -216,9 +260,10 @@ const IssuePage = () => {
             <IssueTimeline />
           </div>
         </main>
-        {wide ? (
+        {showRail ? (
           <aside
-            aria-label="Properties"
+            id={RAIL_ID}
+            aria-label="Propiedades"
             className="bg-sidebar/40 w-80 shrink-0 overflow-y-auto border-l px-4 py-6"
           >
             {properties("rail")}
@@ -236,7 +281,7 @@ const IssueSkeleton = () => (
     </PageHeader>
     <output
       aria-busy="true"
-      aria-label="Loading Issue"
+      aria-label="Cargando tarea"
       className="flex min-h-0 flex-1"
     >
       <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 px-4 py-6 md:px-10 md:py-10">
@@ -290,12 +335,12 @@ export const Route = createFileRoute("/_app/issue/$identifier")({
       {
         title:
           match.status === "notFound"
-            ? "Not found"
-            : (loaderData?.title ?? "Issue"),
+            ? "No encontrado"
+            : (loaderData?.title ?? "Tarea"),
       },
     ],
   }),
   pendingComponent: IssueSkeleton,
-  notFoundComponent: () => <NotFound what="Issue" />,
+  notFoundComponent: () => <NotFound title="Tarea no encontrada" />,
   component: IssuePage,
 });

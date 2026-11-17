@@ -59,7 +59,7 @@ export const IssueCardBody = ({
             <PriorityIcon priority={issue.priority} labelled={false} />
           </TooltipTrigger>
           <TooltipContent>
-            Priority: {priorityLabels[issue.priority]}
+            Prioridad: {priorityLabels[issue.priority]}
           </TooltipContent>
         </Tooltip>
         <span className="font-mono tabular-nums">{issue.identifier}</span>
@@ -67,13 +67,13 @@ export const IssueCardBody = ({
         {issue.assignee === null ? (
           <>
             <UnassignedAvatar />
-            <span className="sr-only">Unassigned</span>
+            <span className="sr-only">Sin responsable</span>
           </>
         ) : (
           <>
             <MemberAvatar member={issue.assignee} />
             <span className="sr-only">
-              Assigned to {issue.assignee.displayName}
+              Asignada a {issue.assignee.displayName}
             </span>
           </>
         )}
@@ -82,7 +82,7 @@ export const IssueCardBody = ({
         {issue.title}
       </p>
       <span className="sr-only">
-        Priority: {priorityLabels[issue.priority]}
+        Prioridad: {priorityLabels[issue.priority]}
       </span>
       {issue.checklist.total === 0 && issue.labels.length === 0 ? null : (
         <div className="flex flex-wrap items-center gap-1">
@@ -123,7 +123,7 @@ const MoveToMenu = ({
         <Button
           variant="muted"
           size="icon-sm"
-          aria-label={`Move ${issue.identifier} to`}
+          aria-label={`Mover ${issue.identifier} a`}
           className="absolute top-0.5 right-0.5 md:hidden"
         />
       }
@@ -132,7 +132,7 @@ const MoveToMenu = ({
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" className="min-w-48">
       <DropdownMenuGroup>
-        <DropdownMenuLabel>Move to</DropdownMenuLabel>
+        <DropdownMenuLabel>Mover a</DropdownMenuLabel>
         {states.map((state) => (
           <DropdownMenuItem
             key={state.id}

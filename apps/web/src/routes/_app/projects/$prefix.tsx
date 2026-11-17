@@ -13,7 +13,6 @@ import {
 import { ArchiveIcon, KanbanIcon, ListIcon, SettingsIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
-import { ProjectMark } from "@/components/project-mark";
 import { NotFound } from "@/components/route-states";
 import { filterSearchSchema } from "@/utils/filters";
 import type { FilterSearch } from "@/utils/filters";
@@ -49,7 +48,7 @@ const ProjectLayout = () => {
             <Link
               to="/projects/$prefix/settings"
               params={{ prefix }}
-              aria-label="Project settings"
+              aria-label="Configuración del proyecto"
               className={buttonVariants({ variant: "ghost", size: "icon-sm" })}
               activeProps={{ "aria-current": "page", className: "bg-muted" }}
             >
@@ -58,19 +57,15 @@ const ProjectLayout = () => {
           ) : null
         }
       >
-        <ProjectMark project={project} className="size-5 max-md:hidden" />
         <h1 className="min-w-0 truncate text-sm font-medium">{project.name}</h1>
-        <Badge variant="outline" className="max-sm:hidden">
-          <span className="font-mono">{project.prefix}</span>
-        </Badge>
         {project.archivedAt === null ? null : (
           <Badge variant="secondary">
             <ArchiveIcon data-icon="inline-start" />
-            Archived
+            Archivado
           </Badge>
         )}
         <nav
-          aria-label="Project views"
+          aria-label="Vistas del proyecto"
           className={cn(
             "ml-1 flex items-center gap-0.5 md:ml-3",
             onSettings && "max-md:hidden"
@@ -83,7 +78,7 @@ const ProjectLayout = () => {
             className={VIEW_LINK}
           >
             <KanbanIcon />
-            <span className="max-md:sr-only">Board</span>
+            <span className="max-md:sr-only">Tablero</span>
           </Link>
           <Link
             to="/projects/$prefix/list"
@@ -92,7 +87,7 @@ const ProjectLayout = () => {
             className={VIEW_LINK}
           >
             <ListIcon />
-            <span className="max-md:sr-only">List</span>
+            <span className="max-md:sr-only">Lista</span>
           </Link>
         </nav>
       </PageHeader>
@@ -122,7 +117,7 @@ export const Route = createFileRoute("/_app/projects/$prefix")({
     }
   },
   head: ({ match }) =>
-    match.status === "notFound" ? { meta: [{ title: "Not found" }] } : {},
+    match.status === "notFound" ? { meta: [{ title: "No encontrado" }] } : {},
   component: ProjectLayout,
-  notFoundComponent: () => <NotFound what="Project" />,
+  notFoundComponent: () => <NotFound title="Proyecto no encontrado" />,
 });

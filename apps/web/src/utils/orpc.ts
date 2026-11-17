@@ -32,12 +32,20 @@ const isClientError = (error: Error) =>
 export const describeError = (error: Error) => {
   // fetch rejects with a TypeError when the server cannot be reached at all.
   if (error instanceof TypeError) {
-    return "Helios can’t reach its server. Check your connection, then try again.";
+    return "Helios no puede conectarse con su servidor. Revisa tu conexión e inténtalo de nuevo.";
   }
 
   // Server faults carry developer wording; the 4xx messages are written for Members.
   if (error instanceof ORPCError && error.status >= SERVER_ERROR_MIN) {
-    return "Something went wrong on Helios’s side. Try again.";
+    return "Algo salió mal en Helios. Inténtalo de nuevo.";
+  }
+
+  // oRPC words a failed input check in English; the forms catch most of them first.
+  if (
+    error instanceof ORPCError &&
+    error.message === "Input validation failed"
+  ) {
+    return "Revisa los datos e inténtalo de nuevo.";
   }
 
   return error.message;
@@ -76,7 +84,7 @@ const createQueryClient = (): QueryClient => {
 
         toast.error(describeError(error), {
           action: {
-            label: "Retry",
+            label: "Reintentar",
             onClick: () => {
               // Invalidating alone leaves an errored query idle; Retry must send a request.
               void client.refetchQueries({

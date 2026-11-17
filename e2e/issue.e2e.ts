@@ -14,8 +14,8 @@ import {
 } from "./helpers";
 
 const WRITE_TESTS = "Write tests";
-const IN_PROGRESS_STATE = "Workflow State: In Progress";
-const ACTIVITY = "Activity and Comments";
+const IN_PROGRESS_STATE = "Estado: En curso";
+const ACTIVITY = "Actividad y comentarios";
 const SEND = "ControlOrMeta+Enter";
 
 test.describe("issue view", () => {
@@ -36,19 +36,21 @@ test.describe("issue view", () => {
 
     await page.goto(`/issue/${issue.identifier}`);
 
-    await page.getByRole("button", { name: "Workflow State: Backlog" }).click();
-    await page.getByRole("option", { name: "In Progress" }).click();
+    await page.getByRole("button", { name: "Estado: Pendiente" }).click();
+    await page.getByRole("option", { name: "En curso" }).click();
     await expect(
       page.getByRole("button", { name: IN_PROGRESS_STATE })
     ).toBeVisible();
 
-    await page.getByRole("button", { name: "Priority: No priority" }).click();
-    await page.getByRole("option", { name: "High" }).click();
+    await page
+      .getByRole("button", { name: "Prioridad: Sin prioridad" })
+      .click();
+    await page.getByRole("option", { name: "Alta" }).click();
     await expect(
-      page.getByRole("button", { name: "Priority: High" })
+      page.getByRole("button", { name: "Prioridad: Alta" })
     ).toBeVisible();
 
-    const newItem = page.getByLabel("New Checklist item");
+    const newItem = page.getByLabel("Nuevo elemento del checklist");
     await newItem.fill(WRITE_TESTS);
     await newItem.press("Enter");
     await expect(
@@ -62,9 +64,9 @@ test.describe("issue view", () => {
 
     const comment = `Looks good ${uniqueId()}`;
     await page
-      .getByRole("textbox", { name: "Comment", exact: true })
+      .getByRole("textbox", { name: "Comentario", exact: true })
       .fill(comment);
-    await page.getByRole("button", { name: "Comment", exact: true }).click();
+    await page.getByRole("button", { name: "Comentar", exact: true }).click();
     await expect(page.getByRole("article")).toContainText(comment);
 
     await page.reload();
@@ -73,7 +75,7 @@ test.describe("issue view", () => {
       page.getByRole("button", { name: IN_PROGRESS_STATE })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Priority: High" })
+      page.getByRole("button", { name: "Prioridad: Alta" })
     ).toBeVisible();
     await expect(
       page.getByRole("checkbox", { name: WRITE_TESTS })
@@ -83,15 +85,13 @@ test.describe("issue view", () => {
     ).not.toBeChecked();
     await expect(page.getByText("1/2")).toBeVisible();
     await expect(
-      page.getByRole("article", { name: /Comment by/u })
+      page.getByRole("article", { name: /Comentario de/u })
     ).toContainText(comment);
 
     const activity = page.getByRole("list", { name: ACTIVITY });
+    await expect(activity).toContainText("la movió de Pendiente a En curso");
     await expect(activity).toContainText(
-      "moved it from Backlog to In Progress"
-    );
-    await expect(activity).toContainText(
-      "changed Priority from No priority to High"
+      "cambió la prioridad de Sin prioridad a Alta"
     );
 
     await archiveProject(page, prefix);
@@ -119,27 +119,30 @@ test.describe("issue view", () => {
     await page.goto(`/issue/${first.identifier}`);
     const activity = page.getByRole("list", { name: ACTIVITY });
 
-    const title = page.getByRole("textbox", { name: "Title" });
+    const title = page.getByRole("textbox", { name: "Título" });
     await title.fill("New name");
     await title.press("Enter");
     await expect(activity).toContainText(
-      "renamed the Issue from Old name to New name"
+      "renombró la tarea de Old name a New name"
     );
 
-    await page.getByRole("heading", { name: "Activity" }).click();
+    await page.getByRole("heading", { name: "Actividad" }).click();
     await page.keyboard.press("s");
-    await expect(page.getByRole("option", { name: "Backlog" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    );
-    await page.keyboard.press("Enter");
-    await expect(page.getByRole("combobox", { name: "Move to" })).toBeHidden();
     await expect(
-      page.getByRole("button", { name: "Workflow State: Backlog" })
+      page.getByRole("option", { name: "Pendiente" })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("combobox", { name: "Mover a" })).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Estado: Pendiente" })
     ).toBeVisible();
-    await expect(activity).not.toContainText("moved it");
+    await expect(activity).not.toContainText("la movió");
 
-    const comment = page.getByRole("textbox", { name: "Comment", exact: true });
+    const comment = page.getByRole("textbox", {
+      name: "Comentario",
+      exact: true,
+    });
+
     const once = `Only once ${uniqueId()}`;
     await comment.fill(once);
     await comment.press(SEND);
@@ -152,7 +155,7 @@ test.describe("issue view", () => {
 
     await comment.fill("A draft for the first Issue");
     await page.keyboard.press("ControlOrMeta+k");
-    const palette = page.getByRole("dialog", { name: "Command palette" });
+    const palette = page.getByRole("dialog", { name: "Paleta de comandos" });
     await palette.getByRole("combobox").fill(second.identifier);
     await expect(palette.getByRole("option").first()).toContainText(
       second.identifier
@@ -187,7 +190,11 @@ test.describe("issue view", () => {
       held.push(route);
     });
 
-    const comment = page.getByRole("textbox", { name: "Comment", exact: true });
+    const comment = page.getByRole("textbox", {
+      name: "Comentario",
+      exact: true,
+    });
+
     const first = `Sent first ${uniqueId()}`;
     await comment.fill(first);
     await comment.press(SEND);
@@ -203,10 +210,12 @@ test.describe("issue view", () => {
       await route.abort();
     });
 
-    const title = page.getByRole("textbox", { name: "Title" });
+    const title = page.getByRole("textbox", { name: "Título" });
     await title.fill("Typed offline");
     await title.press("Enter");
-    await expect(page.getByText(/can’t reach its server/u)).toBeVisible();
+    await expect(
+      page.getByText(/no puede conectarse con su servidor/u)
+    ).toBeVisible();
     await expect(title).toHaveValue("Typed offline");
 
     await page.unroute(`${API_URL}/rpc/issues/update`);
@@ -226,14 +235,14 @@ test.describe("issue view", () => {
       });
     });
     await title.press("Enter");
-    await expect(page.getByText(/went wrong on Helios’s side/u)).toBeVisible();
+    await expect(page.getByText(/Algo salió mal en Helios/u)).toBeVisible();
     await page.unroute(`${API_URL}/rpc/issues/update`);
     await title.press("Enter");
     await expect(page.getByRole("list", { name: ACTIVITY })).toContainText(
-      "renamed the Issue from Slow network to Typed offline"
+      "renombró la tarea de Slow network a Typed offline"
     );
 
-    const newItem = page.getByLabel("New Checklist item");
+    const newItem = page.getByLabel("Nuevo elemento del checklist");
     await newItem.fill("Step one");
     await newItem.press("Enter");
     await expect(
@@ -242,7 +251,7 @@ test.describe("issue view", () => {
     await page.route(`${API_URL}/rpc/checklist/update`, async (route) => {
       await route.abort();
     });
-    const editStep = page.getByLabel("Edit Step one");
+    const editStep = page.getByLabel("Editar Step one");
     await page.getByRole("button", { name: "Step one", exact: true }).click();
     await editStep.fill("Renamed offline");
     await editStep.press("Enter");
@@ -272,9 +281,9 @@ test.describe("issue view", () => {
     });
 
     await page.goto(`/issue/${issue.identifier}`);
-    await page.getByRole("button", { name: "Add a description…" }).click();
+    await page.getByRole("button", { name: "Añadir una descripción…" }).click();
     await page
-      .getByRole("textbox", { name: "Description" })
+      .getByRole("textbox", { name: "Descripción" })
       .fill(
         [
           "**Bold** and a [link](https://example.com).",
@@ -286,9 +295,9 @@ test.describe("issue view", () => {
           "[trap](javascript:alert('link'))",
         ].join("\n")
       );
-    await page.getByRole("button", { name: "Save" }).click();
+    await page.getByRole("button", { name: "Guardar" }).click();
 
-    const description = page.getByRole("region", { name: "Description" });
+    const description = page.getByRole("region", { name: "Descripción" });
     await expect(description.locator("strong")).toHaveText("Bold");
     await page.reload();
     await expect(description.locator("strong")).toHaveText("Bold");
@@ -317,25 +326,25 @@ test.describe("labels", () => {
     await signIn(page, request, adminEmail);
     await page.goto("/labels");
 
-    await page.getByLabel("Name").fill(name);
-    await page.getByRole("button", { name: "Create Label" }).click();
-    await expect(page.getByRole("list", { name: "Labels" })).toContainText(
+    await page.getByLabel("Nombre").fill(name);
+    await page.getByRole("button", { name: "Crear etiqueta" }).click();
+    await expect(page.getByRole("list", { name: "Etiquetas" })).toContainText(
       name
     );
 
-    await page.getByLabel("Name").fill(name.toUpperCase());
-    await page.getByRole("button", { name: "Create Label" }).click();
-    await expect(page.getByText("already exists")).toBeVisible();
+    await page.getByLabel("Nombre").fill(name.toUpperCase());
+    await page.getByRole("button", { name: "Crear etiqueta" }).click();
+    await expect(page.getByText("Ya existe una etiqueta")).toBeVisible();
 
-    await page.getByRole("button", { name: `Actions for ${name}` }).click();
-    await page.getByRole("menuitem", { name: "Delete…" }).click();
+    await page.getByRole("button", { name: `Acciones para ${name}` }).click();
+    await page.getByRole("menuitem", { name: "Eliminar…" }).click();
     await page
       .getByRole("alertdialog")
-      .getByRole("button", { name: "Delete Label" })
+      .getByRole("button", { name: "Eliminar etiqueta" })
       .click();
-    await expect(page.getByRole("list", { name: "Labels" })).not.toContainText(
-      name
-    );
+    await expect(
+      page.getByRole("list", { name: "Etiquetas" })
+    ).not.toContainText(name);
   });
 });
 
@@ -356,9 +365,9 @@ test.describe("phone issue view", () => {
     });
 
     await page.goto(`/issue/${issue.identifier}`);
-    await page.getByRole("button", { name: "Issue actions" }).click();
-    await page.getByRole("menuitem", { name: "Move to…" }).click();
-    await page.getByRole("option", { name: "In Progress" }).click();
+    await page.getByRole("button", { name: "Acciones de la tarea" }).click();
+    await page.getByRole("menuitem", { name: "Mover a…" }).click();
+    await page.getByRole("option", { name: "En curso" }).click();
     await expect(
       page.getByRole("button", { name: IN_PROGRESS_STATE })
     ).toBeVisible();
@@ -400,7 +409,7 @@ test.describe("phone issue view", () => {
     await page.goto(`/issue/${issue.identifier}`);
 
     await Promise.all(
-      [/^Priority:/u, /^Assignee:/u].map(async (name) => {
+      [/^Prioridad:/u, /^Responsable:/u].map(async (name) => {
         const chip = page.getByRole("button", { name });
         await expect(chip, `${String(name)} is on screen`).toBeInViewport({
           ratio: 1,

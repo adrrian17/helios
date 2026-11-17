@@ -85,7 +85,7 @@ const AssigneeValue = ({
         assignee === null && "text-muted-foreground"
       )}
     >
-      {assignee?.displayName ?? "Unassigned"}
+      {assignee?.displayName ?? "Sin responsable"}
     </span>
   </>
 );
@@ -168,7 +168,7 @@ const LabelsField = ({
         </span>
       ))}
       <Picker
-        label="Change Labels"
+        label="Cambiar etiquetas"
         multiple
         open={open}
         onOpenChange={onOpenChange}
@@ -184,7 +184,7 @@ const LabelsField = ({
           }
         }}
         onCreate={{
-          noun: "Label",
+          noun: "etiqueta",
           create: (name) => {
             create.mutate({ name, color: nextLabelColor(all.length) });
           },
@@ -193,10 +193,14 @@ const LabelsField = ({
           issue.labels.length === 0 ? (
             <Button variant="property">
               <PlusIcon data-icon="inline-start" />
-              <span className="text-muted-foreground">Add Label</span>
+              <span className="text-muted-foreground">Añadir etiqueta</span>
             </Button>
           ) : (
-            <Button variant="muted" size="icon-xs" aria-label="Change Labels">
+            <Button
+              variant="muted"
+              size="icon-xs"
+              aria-label="Cambiar etiquetas"
+            >
               <PlusIcon />
             </Button>
           )
@@ -212,10 +216,10 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
   if (compact) {
     return (
       <div className="text-muted-foreground pt-1 text-xs text-pretty">
-        <dt className="sr-only">History</dt>
+        <dt className="sr-only">Historial</dt>
         <dd>
-          Created by {issue.creator.displayName} on{" "}
-          {formatDate(issue.createdAt)} · Updated{" "}
+          Creada por {issue.creator.displayName} el{" "}
+          {formatDate(issue.createdAt)} · Actualizada{" "}
           <RelativeTime date={issue.updatedAt} />
         </dd>
       </div>
@@ -224,7 +228,7 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
 
   return (
     <>
-      <Row term="Created by">
+      <Row term="Creada por">
         <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
           <MemberAvatar member={issue.creator} />
           <span className="min-w-0 [overflow-wrap:anywhere]">
@@ -232,10 +236,10 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
           </span>
         </span>
       </Row>
-      <Row term="Created">
+      <Row term="Creada">
         <span className="px-2.5 text-sm">{formatDate(issue.createdAt)}</span>
       </Row>
-      <Row term="Updated">
+      <Row term="Actualizada">
         <RelativeTime date={issue.updatedAt} className="px-2.5 text-sm" />
       </Row>
     </>
@@ -289,7 +293,7 @@ export const IssueProperties = ({
 
   const details = (
     <>
-      <Row term="Labels">
+      <Row term="Etiquetas">
         <LabelsField {...pickerProps("labels")} />
       </Row>
       <IssueMetadata compact={layout === "details"} />
@@ -319,9 +323,9 @@ export const IssueProperties = ({
 
   return (
     <dl className={list}>
-      <Row term="Workflow State" chip={chip}>
+      <Row term="Estado" chip={chip}>
         <Picker
-          label="Move to"
+          label="Mover a"
           {...pickerProps("state")}
           options={stateOptions(states)}
           selected={[state.id]}
@@ -332,7 +336,7 @@ export const IssueProperties = ({
             <Button
               variant={variant}
               className={width}
-              aria-label={`Workflow State: ${state.name}`}
+              aria-label={`Estado: ${state.name}`}
             >
               <StateIcon category={state.category} />
               <span className="truncate">{state.name}</span>
@@ -341,9 +345,9 @@ export const IssueProperties = ({
           }
         />
       </Row>
-      <Row term="Priority" chip={chip}>
+      <Row term="Prioridad" chip={chip}>
         <Picker
-          label="Change Priority"
+          label="Cambiar prioridad"
           {...pickerProps("priority")}
           options={priorityOptions}
           selected={[priority]}
@@ -358,7 +362,7 @@ export const IssueProperties = ({
             <Button
               variant={variant}
               className={width}
-              aria-label={`Priority: ${priorityLabels[priority]}`}
+              aria-label={`Prioridad: ${priorityLabels[priority]}`}
             >
               <PriorityIcon priority={priority} labelled={false} />
               <span className="truncate">{priorityLabels[priority]}</span>
@@ -367,10 +371,10 @@ export const IssueProperties = ({
           }
         />
       </Row>
-      <Row term="Assignee" chip={chip}>
+      <Row term="Responsable" chip={chip}>
         <Tooltip>
           <Picker
-            label="Assign to"
+            label="Asignar a"
             {...pickerProps("assignee")}
             options={assigneeOptions(assignable)}
             selected={[assignee?.id ?? UNASSIGNED]}
@@ -390,7 +394,7 @@ export const IssueProperties = ({
                       // The rail has room, so an email-only name wraps instead of being cut.
                       !chip && "h-auto min-h-8 text-left whitespace-normal"
                     )}
-                    aria-label={`Assignee: ${assignee?.displayName ?? "Unassigned"}`}
+                    aria-label={`Responsable: ${assignee?.displayName ?? "Sin responsable"}`}
                   />
                 }
               >

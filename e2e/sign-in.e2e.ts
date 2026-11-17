@@ -10,10 +10,12 @@ test("the seeded Admin signs in with a magic link and signs out", async ({
   await page.goto("/");
   await expect(page).toHaveURL(/\/sign-in$/u);
 
-  await page.getByLabel("Email").fill(adminEmail);
-  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await page.getByLabel("Correo electrónico").fill(adminEmail);
+  await page
+    .getByRole("button", { name: "Enviarme un enlace de acceso" })
+    .click();
   await expect(page.getByRole("status")).toContainText(
-    "a sign-in link is on its way"
+    "enlace de acceso va en camino"
   );
   // Focus moves to the confirmation, so it is read out and not lost with the form.
   await expect(page.getByRole("status")).toBeFocused();
@@ -22,26 +24,28 @@ test("the seeded Admin signs in with a magic link and signs out", async ({
   await expect(page).not.toHaveURL(/\/sign-in/u);
 
   if (isMobile) {
-    await page.getByRole("button", { name: "Open navigation" }).click();
+    await page.getByRole("button", { name: "Abrir navegación" }).click();
   }
 
   // A failed sign-out keeps the session, so the app must not pretend it ended.
   await page.route("**/sign-out", async (route) => {
     await route.fulfill({ status: 500 });
   });
-  await page.getByRole("button", { name: "Account" }).click();
-  await page.getByRole("menuitem", { name: "Sign out" }).click();
-  await expect(page.getByText("Could not sign out. Try again.")).toBeVisible();
+  await page.getByRole("button", { name: "Cuenta" }).click();
+  await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
+  await expect(
+    page.getByText("No se pudo cerrar la sesión. Inténtalo de nuevo.")
+  ).toBeVisible();
   await expect(page).not.toHaveURL(/\/sign-in/u);
   await page.unroute("**/sign-out");
 
   if (isMobile) {
     await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Open navigation" }).click();
+    await page.getByRole("button", { name: "Abrir navegación" }).click();
   }
 
-  await page.getByRole("button", { name: "Account" }).click();
-  await page.getByRole("menuitem", { name: "Sign out" }).click();
+  await page.getByRole("button", { name: "Cuenta" }).click();
+  await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
   await expect(page).toHaveURL(/\/sign-in$/u);
 
   await page.goto("/");
@@ -55,11 +59,13 @@ test("an unknown email sees the same confirmation and gets no link", async ({
   const email = "stranger@helios.localhost";
   await page.goto("/sign-in");
 
-  await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await page.getByLabel("Correo electrónico").fill(email);
+  await page
+    .getByRole("button", { name: "Enviarme un enlace de acceso" })
+    .click();
 
   await expect(page.getByRole("status")).toContainText(
-    "a sign-in link is on its way"
+    "enlace de acceso va en camino"
   );
 
   const response = await request.get(`${API_URL}/dev/magic-link`, {

@@ -18,7 +18,7 @@ const SKELETON_COLUMNS = [
 const BoardSkeleton = () => (
   <output
     aria-busy="true"
-    aria-label="Loading board"
+    aria-label="Cargando tablero"
     className="flex min-h-0 flex-1 gap-3 overflow-hidden p-3"
   >
     {SKELETON_COLUMNS.map((column) => (
@@ -90,7 +90,7 @@ export const Route = createFileRoute("/_app/projects/$prefix/board")({
     rememberView(params.prefix, "board");
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.projectName ?? "Project"} · Board` }],
+    meta: [{ title: `${loaderData?.projectName ?? "Proyecto"} · Tablero` }],
   }),
   pendingComponent: BoardSkeleton,
   component: BoardPage,

@@ -16,7 +16,7 @@ export const limits = {
 
 export const prefixRule = {
   ...prefixLength,
-  message: `Use ${prefixLength.min} to ${prefixLength.max} uppercase letters.`,
+  message: `Usa de ${prefixLength.min} a ${prefixLength.max} letras mayúsculas.`,
 };
 
 const required = (max: number) => z.string().trim().min(1).max(max);
@@ -55,20 +55,20 @@ export const parseIdentifier = (identifier: string) => {
 
 /** The words for each Priority. Activity stores them, so history keeps the words used at the time. */
 export const priorityLabels: Record<Priority, string> = {
-  none: "No priority",
-  urgent: "Urgent",
-  high: "High",
-  medium: "Medium",
-  low: "Low",
+  none: "Sin prioridad",
+  urgent: "Urgente",
+  high: "Alta",
+  medium: "Media",
+  low: "Baja",
 };
 
 /** One Workflow State per State Category, so a new Project is usable at once. */
 export const defaultStates: { name: string; category: StateCategory }[] = [
   { name: "Ideas", category: "ideas" },
-  { name: "Backlog", category: "backlog" },
-  { name: "In Progress", category: "started" },
-  { name: "Done", category: "completed" },
-  { name: "Cancelled", category: "cancelled" },
+  { name: "Pendiente", category: "backlog" },
+  { name: "En curso", category: "started" },
+  { name: "Completada", category: "completed" },
+  { name: "Cancelada", category: "cancelled" },
 ];
 
 /** Board and List filters; each list matches any of its values, and filters combine with AND. */

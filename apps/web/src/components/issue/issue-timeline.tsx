@@ -45,7 +45,7 @@ const Change = ({ entry }: { entry: ActivityEntry }) => (
   <>
     <Value>{entry.oldValue}</Value>
     <ArrowRightIcon aria-hidden="true" className="mx-1 inline size-3" />
-    <span className="sr-only">{" to "}</span>
+    <span className="sr-only">{" a "}</span>
     <Value>{entry.newValue}</Value>
   </>
 );
@@ -54,12 +54,12 @@ const activityCopy: Record<
   ActivityEntry["kind"],
   { icon: LucideIcon; describe: (entry: ActivityEntry) => React.ReactNode }
 > = {
-  created: { icon: CirclePlusIcon, describe: () => "created the Issue" },
+  created: { icon: CirclePlusIcon, describe: () => "creó la tarea" },
   title_changed: {
     icon: TypeIcon,
     describe: (entry) => (
       <>
-        renamed the Issue from <Change entry={entry} />
+        renombró la tarea de <Change entry={entry} />
       </>
     ),
   },
@@ -67,7 +67,7 @@ const activityCopy: Record<
     icon: ArrowRightIcon,
     describe: (entry) => (
       <>
-        moved it <span className="sr-only">from </span>
+        la movió <span className="sr-only">de </span>
         <Change entry={entry} />
       </>
     ),
@@ -76,7 +76,7 @@ const activityCopy: Record<
     icon: SignalIcon,
     describe: (entry) => (
       <>
-        changed Priority from <Change entry={entry} />
+        cambió la prioridad de <Change entry={entry} />
       </>
     ),
   },
@@ -86,18 +86,18 @@ const activityCopy: Record<
       if (entry.newValue === null) {
         return (
           <>
-            unassigned <Value>{entry.oldValue}</Value>
+            quitó a <Value>{entry.oldValue}</Value> como responsable
           </>
         );
       }
 
       return entry.oldValue === null ? (
         <>
-          assigned it to <Value>{entry.newValue}</Value>
+          la asignó a <Value>{entry.newValue}</Value>
         </>
       ) : (
         <>
-          reassigned it from <Change entry={entry} />
+          la reasignó de <Change entry={entry} />
         </>
       );
     },
@@ -106,7 +106,7 @@ const activityCopy: Record<
     icon: TagIcon,
     describe: (entry) => (
       <>
-        added the Label <Value>{entry.newValue}</Value>
+        añadió la etiqueta <Value>{entry.newValue}</Value>
       </>
     ),
   },
@@ -114,7 +114,7 @@ const activityCopy: Record<
     icon: TagIcon,
     describe: (entry) => (
       <>
-        removed the Label <Value>{entry.oldValue}</Value>
+        quitó la etiqueta <Value>{entry.oldValue}</Value>
       </>
     ),
   },
@@ -176,7 +176,7 @@ const CommentItem = ({
     <li className="flex items-start gap-3 py-2">
       <MemberAvatar member={entry.author} className="relative z-10" />
       <article
-        aria-label={`Comment by ${entry.author.displayName}`}
+        aria-label={`Comentario de ${entry.author.displayName}`}
         className="bg-card min-w-0 flex-1 rounded-lg border"
       >
         <header className="flex h-9 items-center gap-1.5 pr-1 pl-3 text-xs">
@@ -188,7 +188,7 @@ const CommentItem = ({
             className="text-muted-foreground shrink-0"
           />
           {entry.editedAt === null ? null : (
-            <span className="text-muted-foreground shrink-0">(edited)</span>
+            <span className="text-muted-foreground shrink-0">(editado)</span>
           )}
           <span className="flex-1" />
           {canDelete && draft === null ? (
@@ -199,7 +199,7 @@ const CommentItem = ({
                   <Button
                     variant="muted"
                     size="icon-xs"
-                    aria-label={`Actions for the Comment by ${entry.author.displayName}`}
+                    aria-label={`Acciones del comentario de ${entry.author.displayName}`}
                   />
                 }
               >
@@ -219,18 +219,18 @@ const CommentItem = ({
                       }}
                     >
                       <PencilIcon />
-                      Edit
+                      Editar
                     </DropdownMenuItem>
                   ) : null}
                   <DropdownMenuItem
                     variant="destructive"
                     onClick={() => {
                       onDelete({
-                        title: "Delete this Comment?",
+                        title: "¿Eliminar este comentario?",
                         description: own
-                          ? "It is removed for everyone. This can’t be undone."
-                          : `${entry.author.displayName}’s Comment is removed for everyone. This can’t be undone.`,
-                        confirmLabel: "Delete Comment",
+                          ? "Se elimina para todos. No se puede deshacer."
+                          : `El comentario de ${entry.author.displayName} se elimina para todos. No se puede deshacer.`,
+                        confirmLabel: "Eliminar comentario",
                         destructive: true,
                         onConfirm: async () => {
                           await remove.mutateAsync({ id: entry.id });
@@ -239,7 +239,7 @@ const CommentItem = ({
                     }}
                   >
                     <TrashIcon />
-                    Delete…
+                    Eliminar…
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -251,7 +251,7 @@ const CommentItem = ({
         ) : (
           <div className="flex flex-col gap-2 px-3 pb-3">
             <MarkdownEditor
-              label="Edit Comment"
+              label="Editar comentario"
               autoFocus
               value={draft}
               onChange={setDraft}
@@ -268,7 +268,7 @@ const CommentItem = ({
                   setDraft(null);
                 }}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button
                 size="sm"
@@ -276,7 +276,7 @@ const CommentItem = ({
                 onClick={save}
               >
                 {edit.isPending ? <Spinner data-icon="inline-start" /> : null}
-                Save
+                Guardar
               </Button>
             </div>
           </div>
@@ -316,15 +316,15 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
       <MemberAvatar member={me} className="relative z-10" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <MarkdownEditor
-          label="Comment"
-          placeholder="Leave a Comment…"
+          label="Comentario"
+          placeholder="Deja un comentario…"
           value={body}
           onChange={setBody}
           onSubmit={submit}
         />
         <div className="flex items-center justify-end gap-2">
           <span className="text-muted-foreground mr-auto text-xs max-md:hidden">
-            Markdown supported · {submitKeys()} to send
+            Compatible con Markdown · {submitKeys()} para enviar
           </span>
           <Button
             size="sm"
@@ -332,7 +332,7 @@ const CommentComposer = ({ issueId }: { issueId: string }) => {
             onClick={submit}
           >
             {add.isPending ? <Spinner data-icon="inline-start" /> : null}
-            Comment
+            Comentar
           </Button>
         </div>
       </div>
@@ -348,14 +348,14 @@ export const IssueTimeline = () => {
   return (
     <section aria-labelledby="activity-heading" className="flex flex-col gap-2">
       <h2 id="activity-heading" className="text-sm font-medium">
-        Activity
+        Actividad
       </h2>
       <div className="relative">
         <span
           aria-hidden="true"
           className="bg-border absolute top-3 bottom-8 left-2.5 w-px"
         />
-        <ol aria-label="Activity and Comments" className="flex flex-col">
+        <ol aria-label="Actividad y comentarios" className="flex flex-col">
           {issue.timeline.map((entry) =>
             entry.type === "activity" ? (
               <ActivityItem key={`activity-${entry.id}`} entry={entry} />

@@ -41,11 +41,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     meta: [
       {
         // The root has no index route, so a path no route matches leaves it alone.
-        title: matches.length === 1 ? "Not found" : "Helios",
+        title: matches.length === 1 ? "No encontrado" : "Helios",
       },
       {
         name: "description",
-        content: "Track the work of one small team.",
+        content: "Sigue el trabajo de un equipo pequeño.",
       },
     ],
     links: [

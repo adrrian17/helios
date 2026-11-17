@@ -30,7 +30,7 @@ export default defineConfig({
       manifest: {
         name: "Helios",
         short_name: "Helios",
-        description: "Track the work of one small team.",
+        description: "Sigue el trabajo de un equipo pequeño.",
         theme_color: "#0c0c0c",
         background_color: "#0c0c0c",
       },

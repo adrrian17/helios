@@ -120,7 +120,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
     ...orpc.labels.create.mutationOptions(),
     meta: { inlineError: true },
     onSuccess: (label, { name: sent, color: sentColor }) => {
-      toast.success(`Label ${label.name} created.`);
+      toast.success(`Etiqueta ${label.name} creada.`);
       setName((current) => (current.trim() === sent ? "" : current));
       // Advance the suggestion only if no other colour was picked meanwhile.
       setColor((current) =>
@@ -144,12 +144,12 @@ const CreateLabelForm = ({ count }: { count: number }) => {
     >
       <FieldGroup>
         <Field data-invalid={error !== undefined || undefined}>
-          <FieldLabel htmlFor="label-name">Name</FieldLabel>
+          <FieldLabel htmlFor="label-name">Nombre</FieldLabel>
           <Input
             id="label-name"
             autoComplete="off"
             maxLength={limits.name}
-            placeholder="Needs review"
+            placeholder="Requiere revisión"
             aria-invalid={error !== undefined || undefined}
             value={name}
             onChange={(event) => {
@@ -162,7 +162,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
           />
           {error === undefined ? null : <FieldError>{error}</FieldError>}
         </Field>
-        <ColorSwatches label="Colour" value={color} onChange={setColor} />
+        <ColorSwatches label="Color" value={color} onChange={setColor} />
       </FieldGroup>
       <Button
         type="submit"
@@ -174,7 +174,7 @@ const CreateLabelForm = ({ count }: { count: number }) => {
         ) : (
           <LabelDot color={color} />
         )}
-        Create Label
+        Crear etiqueta
       </Button>
     </form>
   );
@@ -212,13 +212,13 @@ const RenameForm = ({
     >
       <div className="flex items-center gap-1.5 max-sm:flex-wrap">
         <Input
-          aria-label={`New name for ${label.name}`}
+          aria-label={`Nuevo nombre de ${label.name}`}
           autoFocus
           autoComplete="off"
           maxLength={limits.name}
           aria-invalid={rename.error === null ? undefined : true}
           className="min-w-0 flex-1"
-          // The form closes on success, so nothing typed after Save may be lost.
+          // The form closes on success, so nothing typed after submitting may be lost.
           readOnly={rename.isPending}
           value={name}
           onChange={(event) => {
@@ -240,10 +240,10 @@ const RenameForm = ({
           disabled={rename.isPending || name.trim() === ""}
         >
           {rename.isPending ? <Spinner data-icon="inline-start" /> : null}
-          Save
+          Guardar
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={onDone}>
-          Cancel
+          Cancelar
         </Button>
       </div>
       {rename.error === null ? null : (
@@ -281,7 +281,7 @@ const LabelRow = ({
             <Button
               variant="ghost"
               size="icon-sm"
-              aria-label={`Colour of ${label.name}: ${colorName(color)}`}
+              aria-label={`Color de ${label.name}: ${colorName(color)}`}
             />
           }
         >
@@ -289,7 +289,7 @@ const LabelRow = ({
         </PopoverTrigger>
         <PopoverContent align="start" className="w-auto">
           <ColorSwatches
-            label={`Colour of ${label.name}`}
+            label={`Color de ${label.name}`}
             value={color}
             onChange={(value) => {
               recolor.mutate({ id: label.id, color: value });
@@ -314,7 +314,7 @@ const LabelRow = ({
                 <Button
                   variant="ghost"
                   size="icon-sm"
-                  aria-label={`Actions for ${label.name}`}
+                  aria-label={`Acciones para ${label.name}`}
                 />
               }
             >
@@ -333,26 +333,26 @@ const LabelRow = ({
                   }}
                 >
                   <PencilIcon />
-                  Rename
+                  Renombrar
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => {
                     onDelete({
-                      title: `Delete ${label.name}?`,
+                      title: `¿Eliminar ${label.name}?`,
                       description:
-                        "It is removed from every Issue in every Project. This can’t be undone.",
-                      confirmLabel: "Delete Label",
+                        "Se quita de todas las tareas de todos los proyectos. No se puede deshacer.",
+                      confirmLabel: "Eliminar etiqueta",
                       destructive: true,
                       onConfirm: async () => {
                         await remove.mutateAsync({ id: label.id });
-                        toast.success(`Label ${label.name} deleted.`);
+                        toast.success(`Etiqueta ${label.name} eliminada.`);
                       },
                     });
                   }}
                 >
                   <TrashIcon />
-                  Delete…
+                  Eliminar…
                 </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -370,16 +370,16 @@ const LabelsPage = () => {
   return (
     <>
       <PageHeader>
-        <PageTitle>Labels</PageTitle>
+        <PageTitle>Etiquetas</PageTitle>
       </PageHeader>
       <SettingsPage>
         <SettingsSection
-          title="New Label"
-          description="Labels are shared by every Project. Names are unique, ignoring case."
+          title="Nueva etiqueta"
+          description="Las etiquetas se comparten entre todos los proyectos. Los nombres son únicos, sin distinguir mayúsculas."
         >
           <CreateLabelForm count={labels.length} />
         </SettingsSection>
-        <SettingsSection title={`Labels · ${labels.length}`}>
+        <SettingsSection title={`Etiquetas · ${labels.length}`}>
           {labels.length === 0 ? (
             <div className="rounded-lg border">
               <Empty>
@@ -387,15 +387,16 @@ const LabelsPage = () => {
                   <EmptyMedia variant="icon">
                     <TagIcon />
                   </EmptyMedia>
-                  <EmptyTitle>No Labels yet</EmptyTitle>
+                  <EmptyTitle>Aún no hay etiquetas</EmptyTitle>
                   <EmptyDescription>
-                    Create one above, or straight from an Issue’s Labels picker.
+                    Crea una arriba o directamente desde el selector de
+                    etiquetas de una tarea.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
             </div>
           ) : (
-            <SettingsList label="Labels">
+            <SettingsList label="Etiquetas">
               {labels.map((label) => (
                 <LabelRow key={label.id} label={label} onDelete={setConfirm} />
               ))}
@@ -416,10 +417,10 @@ const LabelsPage = () => {
 const LabelsSkeleton = () => (
   <>
     <PageHeader>
-      <PageTitle>Labels</PageTitle>
+      <PageTitle>Etiquetas</PageTitle>
     </PageHeader>
     <SettingsPage>
-      <output aria-busy="true" aria-label="Loading Labels">
+      <output aria-busy="true" aria-label="Cargando etiquetas">
         <Skeleton className="h-40" />
       </output>
     </SettingsPage>
@@ -433,7 +434,7 @@ export const Route = createFileRoute("/_app/labels")({
       staleTime: "static",
     });
   },
-  head: () => ({ meta: [{ title: "Labels" }] }),
+  head: () => ({ meta: [{ title: "Etiquetas" }] }),
   pendingComponent: LabelsSkeleton,
   component: LabelsPage,
 });

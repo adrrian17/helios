@@ -18,7 +18,6 @@ import {
   StateIcon,
 } from "@/components/issue-meta";
 import { PageHeader, PageTitle } from "@/components/page-header";
-import { ProjectMark } from "@/components/project-mark";
 import type { IssueRow } from "@/utils/domain";
 import { orpc } from "@/utils/orpc";
 
@@ -33,7 +32,7 @@ const MyIssueRow = ({ issue }: { issue: IssueRow }) => (
     >
       <PriorityIcon priority={issue.priority} labelled={false} />
       <span className="text-muted-foreground w-20 shrink-0 text-xs max-md:sr-only">
-        <span className="sr-only">Priority: </span>
+        <span className="sr-only">Prioridad: </span>
         {priorityLabels[issue.priority]}
       </span>
       <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs tabular-nums md:w-20">
@@ -70,10 +69,10 @@ const MyIssuesList = () => {
           <EmptyMedia variant="icon">
             <CircleCheckBigIcon />
           </EmptyMedia>
-          <EmptyTitle>Nothing on your plate</EmptyTitle>
+          <EmptyTitle>No tienes tareas pendientes</EmptyTitle>
           <EmptyDescription>
-            Issues assigned to you show up here while they are in a Backlog or
-            Started Workflow State, most urgent first.
+            Las tareas que te asignan aparecen aquí mientras están en un estado
+            de categoría Pendiente o En curso, las más urgentes primero.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -88,7 +87,6 @@ const MyIssuesList = () => {
             id={`group-${project.id}`}
             className="bg-muted/40 flex h-9 items-center gap-2 border-b px-4 text-sm max-md:h-12"
           >
-            <ProjectMark project={project} />
             <Link
               to="/projects/$prefix"
               params={{ prefix: project.prefix }}
@@ -98,7 +96,7 @@ const MyIssuesList = () => {
             </Link>
             <span className="text-muted-foreground text-xs tabular-nums">
               {issues.length}
-              <span className="sr-only"> Issues</span>
+              <span className="sr-only"> tareas</span>
             </span>
           </h2>
           <ul
@@ -118,7 +116,7 @@ const MyIssuesList = () => {
 const MyIssuesPage = () => (
   <>
     <PageHeader>
-      <PageTitle>My Issues</PageTitle>
+      <PageTitle>Mis tareas</PageTitle>
     </PageHeader>
     <main id="main" className="flex-1 overflow-y-auto max-md:pb-20">
       <MyIssuesList />
@@ -131,11 +129,11 @@ const ROWS = ["a", "b", "c", "d"];
 const MyIssuesSkeleton = () => (
   <>
     <PageHeader>
-      <PageTitle>My Issues</PageTitle>
+      <PageTitle>Mis tareas</PageTitle>
     </PageHeader>
     <output
       aria-busy="true"
-      aria-label="Loading My Issues"
+      aria-label="Cargando mis tareas"
       className="flex flex-col gap-2 p-4"
     >
       <Skeleton className="h-5 w-40" />
@@ -154,7 +152,7 @@ export const Route = createFileRoute("/_app/my-issues")({
       staleTime: "static",
     });
   },
-  head: () => ({ meta: [{ title: "My Issues" }] }),
+  head: () => ({ meta: [{ title: "Mis tareas" }] }),
   pendingComponent: MyIssuesSkeleton,
   component: MyIssuesPage,
 });

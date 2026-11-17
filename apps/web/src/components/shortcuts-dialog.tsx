@@ -61,9 +61,10 @@ export const ShortcutsDialog = ({
   >
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Keyboard shortcuts</DialogTitle>
+        <DialogTitle>Atajos de teclado</DialogTitle>
         <DialogDescription>
-          Single keys pause while you type in a field or a dialog is open.
+          Las teclas sueltas se pausan mientras escribes en un campo o hay un
+          diálogo abierto.
         </DialogDescription>
       </DialogHeader>
       <div className="flex flex-col gap-4">
@@ -78,7 +79,7 @@ export const ShortcutsDialog = ({
             ))}
           </Section>
         ))}
-        <Section title="Board">
+        <Section title="Tablero">
           {boardKeys.map((entry) => (
             <ShortcutRow key={entry.label} {...entry} />
           ))}

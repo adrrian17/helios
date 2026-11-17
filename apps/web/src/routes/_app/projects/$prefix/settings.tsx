@@ -35,7 +35,7 @@ const GeneralForm = ({ project }: { project: Project }) => {
       setDraft((current) => (current?.trim() === sent ? null : current));
       // Loaders hold the Project name for the document title.
       void router.invalidate();
-      toast.success("Project renamed.");
+      toast.success("Proyecto renombrado.");
     },
   });
 
@@ -51,7 +51,7 @@ const GeneralForm = ({ project }: { project: Project }) => {
     >
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor="project-name">Name</FieldLabel>
+          <FieldLabel htmlFor="project-name">Nombre</FieldLabel>
           <div className="flex gap-2 max-sm:flex-col">
             <Input
               id="project-name"
@@ -69,13 +69,13 @@ const GeneralForm = ({ project }: { project: Project }) => {
               disabled={unchanged || rename.isPending}
             >
               {rename.isPending ? <Spinner data-icon="inline-start" /> : null}
-              Save
+              Guardar
             </Button>
           </div>
         </Field>
         <Field>
           {/* Read-only, so a static badge rather than a field that looks editable. */}
-          <FieldTitle>Identifier prefix</FieldTitle>
+          <FieldTitle>Prefijo del identificador</FieldTitle>
           {/* Field stretches its children; the wrapper takes that, so the badge keeps its width. */}
           <div>
             <Badge variant="outline">
@@ -83,11 +83,11 @@ const GeneralForm = ({ project }: { project: Project }) => {
             </Badge>
           </div>
           <FieldDescription>
-            Fixed after creation, so Identifiers like{" "}
+            No cambia después de crearlo, para que identificadores como{" "}
             <span className="font-mono">
               {formatIdentifier(project.prefix, 1)}
             </span>{" "}
-            people have shared never change.
+            que ya se han compartido no cambien nunca.
           </FieldDescription>
         </Field>
       </FieldGroup>
@@ -101,14 +101,14 @@ const ArchiveSection = ({ project }: { project: Project }) => {
   const archive = useMutation({
     ...orpc.projects.archive.mutationOptions(),
     onSuccess: () => {
-      toast.success(`${project.name} archived. Find it under Archived.`);
+      toast.success(`${project.name} archivado. Encuéntralo en Archivados.`);
     },
   });
 
   const unarchive = useMutation({
     ...orpc.projects.unarchive.mutationOptions(),
     onSuccess: () => {
-      toast.success(`${project.name} is back in the sidebar.`);
+      toast.success(`${project.name} volvió a la barra lateral.`);
     },
   });
 
@@ -116,11 +116,11 @@ const ArchiveSection = ({ project }: { project: Project }) => {
 
   return (
     <SettingsSection
-      title={archived ? "Unarchive" : "Archive"}
+      title={archived ? "Desarchivar" : "Archivar"}
       description={
         archived
-          ? "This Project is archived. Unarchive it to bring it back to the sidebar and My Issues."
-          : "Archiving hides the Project from the sidebar and My Issues. Nothing is deleted, and you can unarchive it any time."
+          ? "Este proyecto está archivado. Desarchívalo para recuperarlo en la barra lateral y en Mis tareas."
+          : "Archivar oculta el proyecto de la barra lateral y de Mis tareas. No se elimina nada y puedes desarchivarlo cuando quieras."
       }
     >
       <div>
@@ -133,17 +133,17 @@ const ArchiveSection = ({ project }: { project: Project }) => {
             }}
           >
             <ArchiveRestoreIcon data-icon="inline-start" />
-            Unarchive Project
+            Desarchivar proyecto
           </Button>
         ) : (
           <Button
             variant="destructive"
             onClick={() => {
               setConfirm({
-                title: `Archive ${project.name}?`,
+                title: `¿Archivar ${project.name}?`,
                 description:
-                  "It leaves the sidebar and My Issues. Its board stays reachable from Archived.",
-                confirmLabel: "Archive Project",
+                  "Sale de la barra lateral y de Mis tareas. Su tablero sigue disponible en Archivados.",
+                confirmLabel: "Archivar proyecto",
                 destructive: true,
                 onConfirm: async () => {
                   await archive.mutateAsync({ id: project.id });
@@ -152,7 +152,7 @@ const ArchiveSection = ({ project }: { project: Project }) => {
             }}
           >
             <ArchiveIcon data-icon="inline-start" />
-            Archive Project
+            Archivar proyecto
           </Button>
         )}
       </div>
@@ -176,17 +176,17 @@ const SettingsRoute = () => {
   return (
     <SettingsPage>
       <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-semibold tracking-tight">Settings</h2>
+        <h2 className="text-xl font-semibold tracking-tight">Configuración</h2>
         <p className="text-muted-foreground text-sm">
-          Name, Workflow States and archiving for {project.name}.
+          Nombre, estados y archivado de {project.name}.
         </p>
       </div>
       <SettingsSection title="General">
         <GeneralForm project={project} />
       </SettingsSection>
       <SettingsSection
-        title="Workflow States"
-        description="Board columns follow State Category order, then the order you set inside each category."
+        title="Estados"
+        description="Las columnas del tablero siguen el orden de las categorías de estado y, dentro de cada una, el orden que definas."
       >
         <WorkflowStatesEditor project={project} />
       </SettingsSection>
@@ -214,7 +214,9 @@ export const Route = createFileRoute("/_app/projects/$prefix/settings")({
     return { projectName: project.name };
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `Settings · ${loaderData?.projectName ?? "Project"}` }],
+    meta: [
+      { title: `Configuración · ${loaderData?.projectName ?? "Proyecto"}` },
+    ],
   }),
   component: SettingsRoute,
 });

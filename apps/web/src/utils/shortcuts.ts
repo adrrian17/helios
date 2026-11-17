@@ -6,47 +6,56 @@ interface Shortcut {
   /** Needs Cmd (shown on a Mac) or Ctrl (shown elsewhere), and then works while typing too. */
   mod?: boolean;
   label: string;
-  scope: "Anywhere" | "Issue view";
+  scope: typeof ANYWHERE | typeof ISSUE_VIEW;
 }
 
-const ISSUE_VIEW = "Issue view";
+const ANYWHERE = "En cualquier lugar";
+const ISSUE_VIEW = "Vista de tarea";
 
 /** Every keyboard shortcut; the help dialog lists this table and `useShortcut` binds from it. */
 export const shortcuts = {
   palette: {
     key: "k",
     mod: true,
-    label: "Open the command palette",
-    scope: "Anywhere",
+    label: "Abrir la paleta de comandos",
+    scope: ANYWHERE,
   },
-  search: { key: "/", label: "Search Issues and Projects", scope: "Anywhere" },
+  search: {
+    key: "/",
+    label: "Buscar tareas y proyectos",
+    scope: ANYWHERE,
+  },
   createIssue: {
     key: "c",
-    label: "Create an Issue in this Project",
-    scope: "Anywhere",
+    label: "Crear una tarea en este proyecto",
+    scope: ANYWHERE,
   },
-  help: { key: "?", label: "Show keyboard shortcuts", scope: "Anywhere" },
+  help: {
+    key: "?",
+    label: "Mostrar atajos de teclado",
+    scope: ANYWHERE,
+  },
   close: {
     key: "Escape",
-    label: "Close a dialog or picker",
-    scope: "Anywhere",
+    label: "Cerrar un diálogo o selector",
+    scope: ANYWHERE,
   },
-  state: { key: "s", label: "Change Workflow State", scope: ISSUE_VIEW },
-  priority: { key: "p", label: "Change Priority", scope: ISSUE_VIEW },
-  assignee: { key: "a", label: "Change assignee", scope: ISSUE_VIEW },
+  state: { key: "s", label: "Cambiar estado", scope: ISSUE_VIEW },
+  priority: { key: "p", label: "Cambiar prioridad", scope: ISSUE_VIEW },
+  assignee: { key: "a", label: "Cambiar responsable", scope: ISSUE_VIEW },
 } satisfies Record<string, Shortcut>;
 
 type ShortcutName = keyof typeof shortcuts;
 
 /** Keys on a focused Board card. The Board handles them itself (`use-keyboard-moves.ts`), so `useShortcut` never binds them. */
 export const boardKeys = [
-  { label: "Pick up the focused Issue", keys: ["Space"] },
+  { label: "Levantar la tarea enfocada", keys: ["Espacio"] },
   {
-    label: "Move it within or across Workflow States",
+    label: "Moverla dentro de un estado o entre estados",
     keys: ["←", "↑", "↓", "→"],
   },
-  { label: "Drop it", keys: ["Space"] },
-  { label: "Put it back", keys: ["Esc"] },
+  { label: "Soltarla", keys: ["Espacio"] },
+  { label: "Devolverla a su lugar", keys: ["Esc"] },
 ];
 
 const isMac = () => /Mac|iPhone|iPad/u.test(navigator.userAgent);

@@ -26,7 +26,7 @@ export const ColumnPager = ({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Previous Workflow State"
+        aria-label="Estado anterior"
         disabled={current === 0}
         onClick={() => {
           onGo(current - 1);
@@ -44,7 +44,7 @@ export const ColumnPager = ({
           <span className="truncate">{column.state.name}</span>
           <span className="text-muted-foreground text-xs font-normal tabular-nums">
             {column.issues.length}
-            <span className="sr-only"> Issues</span>
+            <span className="sr-only"> tareas</span>
           </span>
         </span>
         <span className="flex gap-1" aria-hidden="true">
@@ -62,7 +62,7 @@ export const ColumnPager = ({
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Next Workflow State"
+        aria-label="Estado siguiente"
         disabled={current === columns.length - 1}
         onClick={() => {
           onGo(current + 1);

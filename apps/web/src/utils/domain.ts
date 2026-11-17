@@ -30,16 +30,16 @@ export type Label = Outputs["labels"]["list"][number];
 export type Member = Outputs["workspace"]["members"][number];
 
 export const roleLabels: Record<Member["role"], string> = {
-  admin: "Admin",
-  member: "Member",
+  admin: "Administrador",
+  member: "Miembro",
 };
 
 const categoryLabels: Record<StateCategory, string> = {
   ideas: "Ideas",
-  backlog: "Backlog",
-  started: "Started",
-  completed: "Completed",
-  cancelled: "Cancelled",
+  backlog: "Pendiente",
+  started: "En curso",
+  completed: "Completada",
+  cancelled: "Cancelada",
 };
 
 /** State Categories in board order, with the words the UI shows for them. */
@@ -70,16 +70,16 @@ export const suggestPrefix = (name: string) => {
 
 /** The preset Label colours, so Labels stay readable in both themes. */
 export const labelColors = [
-  { value: "#94a3b8", name: "Grey" },
-  { value: "#ef4444", name: "Red" },
-  { value: "#f97316", name: "Orange" },
-  { value: "#eab308", name: "Yellow" },
-  { value: "#22c55e", name: "Green" },
-  { value: "#14b8a6", name: "Teal" },
-  { value: "#3b82f6", name: "Blue" },
-  { value: "#6366f1", name: "Indigo" },
-  { value: "#a855f7", name: "Purple" },
-  { value: "#ec4899", name: "Pink" },
+  { value: "#94a3b8", name: "Gris" },
+  { value: "#ef4444", name: "Rojo" },
+  { value: "#f97316", name: "Naranja" },
+  { value: "#eab308", name: "Amarillo" },
+  { value: "#22c55e", name: "Verde" },
+  { value: "#14b8a6", name: "Turquesa" },
+  { value: "#3b82f6", name: "Azul" },
+  { value: "#6366f1", name: "Índigo" },
+  { value: "#a855f7", name: "Morado" },
+  { value: "#ec4899", name: "Rosa" },
 ] as const;
 
 export const nextLabelColor = (labelCount: number) =>

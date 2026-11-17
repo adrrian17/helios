@@ -29,7 +29,7 @@ const ROWS = ["a", "b", "c", "d", "e", "f"];
 const ListSkeleton = () => (
   <output
     aria-busy="true"
-    aria-label="Loading Issues"
+    aria-label="Cargando tareas"
     className="flex flex-col gap-2 p-3"
   >
     {ROWS.map((row) => (
@@ -86,7 +86,7 @@ const ListPage = () => {
         }}
       >
         <span className="text-muted-foreground shrink-0 pl-2 text-xs tabular-nums max-md:sr-only">
-          {issues.length} {issues.length === 1 ? "Issue" : "Issues"}
+          {issues.length} {issues.length === 1 ? "tarea" : "tareas"}
         </span>
         <SortMenu sort={sort} onChange={setSort} />
       </FilterBar>
@@ -98,18 +98,20 @@ const ListPage = () => {
                 {filtered ? <FilterXIcon /> : <ListIcon />}
               </EmptyMedia>
               <EmptyTitle>
-                {filtered ? "No Issues match these filters" : "No Issues yet"}
+                {filtered
+                  ? "Ninguna tarea coincide con estos filtros"
+                  : "Aún no hay tareas"}
               </EmptyTitle>
               <EmptyDescription>
                 {filtered
-                  ? "Try fewer filters, or clear them to see every Issue."
-                  : `Issues added to ${project.name} are listed here.`}
+                  ? "Prueba con menos filtros o límpialos para ver todas las tareas."
+                  : `Las tareas que se añadan a ${project.name} aparecerán aquí.`}
               </EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               {filtered ? (
                 <Button variant="outline" onClick={clearFilters}>
-                  Clear filters
+                  Quitar filtros
                 </Button>
               ) : (
                 <Link
@@ -117,14 +119,14 @@ const ListPage = () => {
                   params={{ prefix }}
                   className={buttonVariants({ variant: "outline" })}
                 >
-                  Add Issues on the Board
+                  Añadir tareas en el tablero
                 </Link>
               )}
             </EmptyContent>
           </Empty>
         ) : (
           <IssueTable
-            label={`${project.name} Issues`}
+            label={`Tareas de ${project.name}`}
             issues={issues}
             sort={sort}
             onSort={(field) => {
@@ -176,7 +178,7 @@ export const Route = createFileRoute("/_app/projects/$prefix/list")({
     rememberView(params.prefix, "list");
   },
   head: ({ loaderData }) => ({
-    meta: [{ title: `${loaderData?.projectName ?? "Project"} · List` }],
+    meta: [{ title: `${loaderData?.projectName ?? "Proyecto"} · Lista` }],
   }),
   pendingComponent: ListSkeleton,
   component: ListPage,

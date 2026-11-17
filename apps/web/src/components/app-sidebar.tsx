@@ -1,3 +1,8 @@
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@helios/ui/components/collapsible";
 import { Kbd, KbdGroup } from "@helios/ui/components/kbd";
 import {
   Sidebar,
@@ -19,6 +24,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import type { LinkProps } from "@tanstack/react-router";
 import {
   ArchiveIcon,
+  ChevronRightIcon,
   CircleUserRoundIcon,
   PlusIcon,
   SearchIcon,
@@ -30,7 +36,7 @@ import { useState } from "react";
 
 import { useCommands } from "@/components/commands";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
-import { HeliosMark, ProjectMark } from "@/components/project-mark";
+import { HeliosMark } from "@/components/project-mark";
 import { UserMenu } from "@/components/user-menu";
 import { orpc } from "@/utils/orpc";
 import { keysOf, shortcuts } from "@/utils/shortcuts";
@@ -44,7 +50,7 @@ const NavLink = ({
   activePath,
   ...link
 }: LinkProps & {
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   label: string;
   activePath: string;
 }) => {
@@ -115,45 +121,52 @@ const ProjectsGroup = ({ onCreate }: { onCreate: (() => void) | null }) => {
   const projects = useQuery(orpc.projects.list.queryOptions());
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Projects</SidebarGroupLabel>
+    <Collapsible render={<SidebarGroup />}>
+      <SidebarGroupLabel
+        render={<CollapsibleTrigger />}
+        className="w-full cursor-pointer"
+      >
+        Proyectos
+        <ChevronRightIcon className="ml-1 transition-transform in-data-panel-open:rotate-90" />
+      </SidebarGroupLabel>
       {onCreate === null ? null : (
-        <SidebarGroupAction aria-label="New Project" onClick={onCreate}>
+        <SidebarGroupAction aria-label="Nuevo proyecto" onClick={onCreate}>
           <PlusIcon />
         </SidebarGroupAction>
       )}
-      <SidebarGroupContent>
-        <SidebarMenu aria-label="Projects">
-          {projects.data === undefined
-            ? SKELETON_ROWS.map((row) => (
-                <SidebarMenuItem key={row}>
-                  <SidebarMenuSkeleton showIcon />
-                </SidebarMenuItem>
-              ))
-            : projects.data.map((project) => (
-                <NavLink
-                  key={project.id}
-                  to="/projects/$prefix"
-                  params={{ prefix: project.prefix }}
-                  activePath={`/projects/${project.prefix}`}
-                  icon={<ProjectMark project={project} />}
-                  label={project.name}
-                />
-              ))}
-          {projects.data?.length === 0 ? (
-            <li className="text-sidebar-foreground/60 px-2 py-1.5 text-xs">
-              No active Projects.
-            </li>
-          ) : null}
-          <NavLink
-            to="/projects/archived"
-            activePath="/projects/archived"
-            icon={<ArchiveIcon />}
-            label="Archived"
-          />
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+      <CollapsibleContent>
+        <SidebarGroupContent>
+          <SidebarMenu aria-label="Proyectos">
+            {projects.data === undefined
+              ? SKELETON_ROWS.map((row) => (
+                  <SidebarMenuItem key={row}>
+                    <SidebarMenuSkeleton />
+                  </SidebarMenuItem>
+                ))
+              : projects.data.map((project) => (
+                  <NavLink
+                    key={project.id}
+                    to="/projects/$prefix"
+                    params={{ prefix: project.prefix }}
+                    activePath={`/projects/${project.prefix}`}
+                    label={project.name}
+                  />
+                ))}
+            {projects.data?.length === 0 ? (
+              <li className="text-sidebar-foreground/60 px-2 py-1.5 text-xs">
+                No hay proyectos activos.
+              </li>
+            ) : null}
+            <NavLink
+              to="/projects/archived"
+              activePath="/projects/archived"
+              icon={<ArchiveIcon />}
+              label="Archivados"
+            />
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
@@ -168,7 +181,10 @@ export const AppSidebar = () => {
     <>
       <CreateProjectDialog open={creating} onOpenChange={setCreating} />
       <Sidebar>
-        <nav aria-label="Workspace" className="flex min-h-0 flex-1 flex-col">
+        <nav
+          aria-label="Espacio de trabajo"
+          className="flex min-h-0 flex-1 flex-col"
+        >
           <SidebarHeader>
             <Link
               to="/"
@@ -184,13 +200,13 @@ export const AppSidebar = () => {
                 <SidebarMenu>
                   <CommandButton
                     icon={<SquarePenIcon />}
-                    label="New Issue"
+                    label="Nueva tarea"
                     keys={keysOf(shortcuts.createIssue)}
                     run={commands.createIssue}
                   />
                   <CommandButton
                     icon={<SearchIcon />}
-                    label="Search"
+                    label="Buscar"
                     keys={keysOf(shortcuts.palette)}
                     run={commands.openPalette}
                   />
@@ -198,13 +214,13 @@ export const AppSidebar = () => {
                     to="/my-issues"
                     activePath="/my-issues"
                     icon={<CircleUserRoundIcon />}
-                    label="My Issues"
+                    label="Mis tareas"
                   />
                   <NavLink
                     to="/labels"
                     activePath="/labels"
                     icon={<TagIcon />}
-                    label="Labels"
+                    label="Etiquetas"
                   />
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -222,14 +238,14 @@ export const AppSidebar = () => {
             />
             {isAdmin ? (
               <SidebarGroup>
-                <SidebarGroupLabel>Workspace</SidebarGroupLabel>
+                <SidebarGroupLabel>Espacio de trabajo</SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     <NavLink
                       to="/members"
                       activePath="/members"
                       icon={<UsersIcon />}
-                      label="Members"
+                      label="Miembros"
                     />
                   </SidebarMenu>
                 </SidebarGroupContent>

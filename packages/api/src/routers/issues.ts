@@ -117,7 +117,7 @@ const findIssue = async (db: Database, id: string) =>
       where: { id },
       with: { state: true, assignee: memberWith },
     }),
-    "Issue"
+    "la tarea"
   );
 
 const findStateInProject = async (
@@ -131,7 +131,7 @@ const findStateInProject = async (
 
   if (state?.projectId !== projectId) {
     throw new ORPCError("BAD_REQUEST", {
-      message: "Choose a Workflow State of the Issue's Project.",
+      message: "Elige un estado del proyecto de la tarea.",
     });
   }
 
@@ -147,7 +147,7 @@ const activeAssigneeName = async (db: Database, userId: string) => {
 
   if (!assignee) {
     throw new ORPCError("BAD_REQUEST", {
-      message: "Only an active Member can be assigned.",
+      message: "Solo se puede asignar a un miembro activo.",
     });
   }
 
@@ -190,7 +190,7 @@ export const issuesRouter = {
             columns: { prefix: true },
             where: { id: projectId },
           }),
-          "Project"
+          "el proyecto"
         );
 
         const state =
@@ -200,7 +200,7 @@ export const issuesRouter = {
                   where: { projectId, category: "backlog" },
                   orderBy: { position: "asc" },
                 }),
-                "Backlog Workflow State"
+                "el estado Pendiente"
               )
             : await findStateInProject(db, stateId, projectId);
 
@@ -236,7 +236,7 @@ export const issuesRouter = {
           }),
         ]);
 
-        const { number } = found(created, "Issue");
+        const { number } = found(created, "la tarea");
 
         return { id, number, identifier: formatIdentifier(prefix, number) };
       }
@@ -368,7 +368,7 @@ export const issuesRouter = {
         if (position === undefined) {
           throw new ORPCError("CONFLICT", {
             message:
-              "The board changed while you were moving. Reload and try again.",
+              "El tablero cambió mientras movías la tarea. Recarga e inténtalo de nuevo.",
           });
         }
 
@@ -398,7 +398,7 @@ export const issuesRouter = {
         .where(eq(issue.id, id))
         .returning({ id: issue.id });
 
-      found(deleted, "Issue");
+      found(deleted, "la tarea");
     }),
 
   get: memberProcedure
@@ -427,7 +427,7 @@ export const issuesRouter = {
           },
         }));
 
-      const detail = found(row, "Issue");
+      const detail = found(row, "la tarea");
 
       const timeline = [
         ...detail.activityEntries.map((entry) => ({
@@ -530,7 +530,7 @@ export const issuesRouter = {
     )
       .values()
       .map((issues) => ({
-        project: found(issues[0], "Project").project,
+        project: found(issues[0], "el proyecto").project,
         issues,
       }))
       .toArray();

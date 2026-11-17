@@ -59,7 +59,7 @@ const DisplayNameDialog = ({
   const save = useMutation({
     ...orpc.workspace.setDisplayName.mutationOptions(),
     onSuccess: () => {
-      toast.success("Display name saved.");
+      toast.success("Nombre guardado.");
       onOpenChange(false);
     },
   });
@@ -68,9 +68,10 @@ const DisplayNameDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Display name</DialogTitle>
+          <DialogTitle>Nombre para mostrar</DialogTitle>
           <DialogDescription>
-            Teammates see this on Issues, Comments and Activity.
+            Tu equipo verá este nombre en las tareas, los comentarios y la
+            actividad.
           </DialogDescription>
         </DialogHeader>
         <form
@@ -82,12 +83,12 @@ const DisplayNameDialog = ({
         >
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="display-name">Name</FieldLabel>
+              <FieldLabel htmlFor="display-name">Nombre</FieldLabel>
               <Input
                 id="display-name"
                 autoComplete="name"
                 required
-                // The dialog closes on success, so nothing typed after Save may be lost.
+                // The dialog closes on success, so nothing typed after submitting may be lost.
                 readOnly={save.isPending}
                 maxLength={limits.displayName}
                 placeholder={me.email}
@@ -106,14 +107,14 @@ const DisplayNameDialog = ({
                 onOpenChange(false);
               }}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button
               type="submit"
               disabled={save.isPending || name.trim() === ""}
             >
               {save.isPending ? <Spinner data-icon="inline-start" /> : null}
-              Save
+              Guardar
             </Button>
           </DialogFooter>
         </form>
@@ -135,7 +136,7 @@ export const UserMenu = () => {
     const { error } = await authClient.signOut();
 
     if (error) {
-      toast.error("Could not sign out. Try again.");
+      toast.error("No se pudo cerrar la sesión. Inténtalo de nuevo.");
 
       return;
     }
@@ -149,7 +150,7 @@ export const UserMenu = () => {
       <DropdownMenu>
         <DropdownMenuTrigger
           render={
-            <SidebarMenuButton size="lg" aria-label="Account">
+            <SidebarMenuButton size="lg" aria-label="Cuenta">
               <MemberAvatar member={me} size="sm" />
               <span className="grid min-w-0 flex-1 text-left leading-tight">
                 <span className="truncate font-medium">{me.displayName}</span>
@@ -176,30 +177,30 @@ export const UserMenu = () => {
               }}
             >
               <UserPenIcon />
-              Display name…
+              Nombre para mostrar…
             </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <PaletteIcon />
-                Theme
+                Tema
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent>
                 <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>
                   <DropdownMenuRadioItem value="light">
-                    Light
+                    Claro
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="dark">
-                    Dark
+                    Oscuro
                   </DropdownMenuRadioItem>
                   <DropdownMenuRadioItem value="system">
-                    System
+                    Sistema
                   </DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuItem className="max-md:hidden" onClick={showShortcuts}>
               <KeyboardIcon />
-              Keyboard shortcuts
+              Atajos de teclado
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
@@ -210,7 +211,7 @@ export const UserMenu = () => {
               }}
             >
               <LogOutIcon />
-              Sign out
+              Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>

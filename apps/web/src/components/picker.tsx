@@ -44,7 +44,7 @@ export const Picker = ({
   align = "start",
   onCreate,
 }: {
-  /** Names the search field and the list, such as "Change Priority". */
+  /** Names the search field and the list, such as "Cambiar prioridad". */
   label: string;
   options: PickerOption[];
   selected: string[];
@@ -94,7 +94,7 @@ export const Picker = ({
             onValueChange={setSearch}
           />
           <CommandList>
-            <CommandEmpty>No matches.</CommandEmpty>
+            <CommandEmpty>Sin coincidencias.</CommandEmpty>
             <CommandGroup>
               {options.map((option) => {
                 const checked = chosen.has(option.value);
@@ -116,7 +116,7 @@ export const Picker = ({
                     {option.icon}
                     <span className="truncate">{option.label}</span>
                     {checked ? (
-                      <span className="sr-only">, selected</span>
+                      <span className="sr-only">, seleccionado</span>
                     ) : null}
                   </CommandItem>
                 );
@@ -132,7 +132,7 @@ export const Picker = ({
                 >
                   <PlusIcon />
                   <span className="truncate">
-                    Create {onCreate.noun} “{name}”
+                    Crear {onCreate.noun} “{name}”
                   </span>
                 </CommandItem>
               ) : null}

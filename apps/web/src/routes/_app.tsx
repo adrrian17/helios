@@ -20,7 +20,7 @@ const AppLayout = () => (
           main?.focus();
         }}
       >
-        Skip to content
+        Saltar al contenido
       </a>
       <AppSidebar />
       <SidebarInset className="h-svh min-w-0 overflow-hidden">

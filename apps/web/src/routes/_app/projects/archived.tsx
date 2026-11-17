@@ -13,7 +13,6 @@ import { ArchiveIcon, ArchiveRestoreIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import { PageHeader, PageTitle } from "@/components/page-header";
-import { ProjectMark } from "@/components/project-mark";
 import {
   SettingsList,
   SettingsPage,
@@ -33,17 +32,17 @@ const ArchivedList = () => {
   const unarchive = useMutation({
     ...orpc.projects.unarchive.mutationOptions(),
     onSuccess: () => {
-      toast.success("Project unarchived.");
+      toast.success("Proyecto desarchivado.");
     },
   });
 
-  const description = `Hidden from the sidebar and My Issues, with every Issue kept.${
-    me.role === "admin" ? " Unarchive one to bring it back." : ""
+  const description = `Ocultos de la barra lateral y de Mis tareas, con todas sus tareas intactas.${
+    me.role === "admin" ? " Desarchiva uno para recuperarlo." : ""
   }`;
 
   return (
     <SettingsSection
-      title={`${projects.length} ${projects.length === 1 ? "Project" : "Projects"}`}
+      title={`${projects.length} ${projects.length === 1 ? "proyecto" : "proyectos"}`}
       description={description}
     >
       {projects.length === 0 ? (
@@ -53,22 +52,21 @@ const ArchivedList = () => {
               <EmptyMedia variant="icon">
                 <ArchiveIcon />
               </EmptyMedia>
-              <EmptyTitle>No archived Projects</EmptyTitle>
+              <EmptyTitle>No hay proyectos archivados</EmptyTitle>
               <EmptyDescription>
-                Archived Projects leave the sidebar and land here, with their
-                boards intact.
+                Los proyectos archivados salen de la barra lateral y llegan
+                aquí, con sus tableros intactos.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         </div>
       ) : (
-        <SettingsList label="Archived Projects">
+        <SettingsList label="Proyectos archivados">
           {projects.map((project) => (
             <li
               key={project.id}
               className="flex items-center gap-3 px-4 py-2 max-md:py-1"
             >
-              <ProjectMark project={project} className="size-6 text-xs" />
               <Link
                 to="/projects/$prefix/board"
                 params={{ prefix: project.prefix }}
@@ -81,7 +79,7 @@ const ArchivedList = () => {
                   <span className="font-mono">{project.prefix}</span>
                   {project.archivedAt === null
                     ? null
-                    : ` · Archived ${formatDate(project.archivedAt)}`}
+                    : ` · Archivado el ${formatDate(project.archivedAt)}`}
                 </span>
               </Link>
               {me.role === "admin" ? (
@@ -94,7 +92,7 @@ const ArchivedList = () => {
                   }}
                 >
                   <ArchiveRestoreIcon data-icon="inline-start" />
-                  Unarchive
+                  Desarchivar
                 </Button>
               ) : null}
             </li>
@@ -108,7 +106,7 @@ const ArchivedList = () => {
 const ArchivedPage = () => (
   <>
     <PageHeader>
-      <PageTitle>Archived Projects</PageTitle>
+      <PageTitle>Proyectos archivados</PageTitle>
     </PageHeader>
     <SettingsPage>
       <ArchivedList />
@@ -119,7 +117,7 @@ const ArchivedPage = () => (
 const ArchivedSkeleton = () => (
   <>
     <PageHeader>
-      <PageTitle>Archived Projects</PageTitle>
+      <PageTitle>Proyectos archivados</PageTitle>
     </PageHeader>
     <SettingsPage>
       <Skeleton className="h-32" />
@@ -134,7 +132,7 @@ export const Route = createFileRoute("/_app/projects/archived")({
       staleTime: "static",
     });
   },
-  head: () => ({ meta: [{ title: "Archived Projects" }] }),
+  head: () => ({ meta: [{ title: "Proyectos archivados" }] }),
   pendingComponent: ArchivedSkeleton,
   component: ArchivedPage,
 });

@@ -62,10 +62,10 @@ const IssueComposer = ({
                 }
 
                 toast.success(
-                  `${identifier} created. The current filters hide it.`,
+                  `${identifier} creada. Los filtros actuales la ocultan.`,
                   {
                     action: {
-                      label: "Open",
+                      label: "Abrir",
                       onClick: () => {
                         void navigate({
                           to: "/issue/$identifier",
@@ -85,14 +85,14 @@ const IssueComposer = ({
       }}
     >
       <label htmlFor={inputId} className="sr-only">
-        New Issue title in {state.name}
+        Título de la nueva tarea en {state.name}
       </label>
       <Input
         id={inputId}
         autoFocus
         autoComplete="off"
         maxLength={limits.title}
-        placeholder="Issue title"
+        placeholder="Título de la tarea"
         value={title}
         onChange={(event) => {
           setTitle(event.target.value);
@@ -110,13 +110,13 @@ const IssueComposer = ({
           disabled={create.isPending || title.trim() === ""}
         >
           {create.isPending ? <Spinner data-icon="inline-start" /> : null}
-          Add Issue
+          Añadir tarea
         </Button>
         <Button
           type="button"
           variant="ghost"
           size="icon-sm"
-          aria-label="Stop adding Issues"
+          aria-label="Dejar de añadir tareas"
           onClick={onClose}
         >
           <XIcon />
@@ -164,13 +164,13 @@ export const BoardColumnView = ({
         </h2>
         <span className="text-muted-foreground text-xs tabular-nums">
           {issues.length}
-          <span className="sr-only"> Issues</span>
+          <span className="sr-only"> tareas</span>
         </span>
         <span className="flex-1" />
         <Button
           variant="muted"
           size="icon-xs"
-          aria-label={`Add Issue to ${state.name}`}
+          aria-label={`Añadir tarea a ${state.name}`}
           onClick={() => {
             setComposing(true);
           }}
@@ -191,7 +191,7 @@ export const BoardColumnView = ({
             ref={setNodeRef}
             aria-labelledby={headingId}
             className={cn(
-              "flex min-h-12 flex-col gap-1.5 rounded-lg pb-1.5 transition-colors",
+              "flex min-h-17 flex-col gap-1.5 rounded-lg pb-1.5 transition-colors",
               isOver && issues.length === 0 && "bg-muted"
             )}
           >
@@ -210,8 +210,8 @@ export const BoardColumnView = ({
               />
             ))}
             {issues.length === 0 && !composing ? (
-              <li className="text-muted-foreground grid h-12 place-items-center rounded-lg border border-dashed text-xs">
-                {filtered ? "No matching Issues" : "No Issues"}
+              <li className="text-muted-foreground grid h-17 place-items-center rounded-lg border border-dashed text-xs">
+                {filtered ? "Ninguna tarea coincide" : "Sin tareas"}
               </li>
             ) : null}
           </ul>
@@ -242,7 +242,7 @@ export const BoardColumnView = ({
               }}
             >
               <PlusIcon data-icon="inline-start" />
-              Add Issue
+              Añadir tarea
             </Button>
           )}
         </div>

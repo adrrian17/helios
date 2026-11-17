@@ -132,7 +132,7 @@ export const PhoneCommands = () => {
       <Button
         variant="ghost"
         size="icon-sm"
-        aria-label="Search"
+        aria-label="Buscar"
         className="md:hidden"
         onClick={() => {
           commands.openPalette();
@@ -144,7 +144,7 @@ export const PhoneCommands = () => {
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label="New Issue"
+          aria-label="Nueva tarea"
           className="md:hidden"
           onClick={() => {
             commands.createIssue();
@@ -169,7 +169,7 @@ export const CreateIssueFab = () => {
   return (
     <Button
       size="fab"
-      aria-label="New Issue"
+      aria-label="Nueva tarea"
       className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-40 md:hidden"
       onClick={() => {
         createIssue();

@@ -58,11 +58,11 @@ export const RouteError = ({
           <EmptyMedia variant="icon">
             <CircleAlertIcon />
           </EmptyMedia>
-          <EmptyTitle>Something went wrong</EmptyTitle>
+          <EmptyTitle>Algo salió mal</EmptyTitle>
           <EmptyDescription>
             {error instanceof Error
               ? describeError(error)
-              : "Unexpected error."}
+              : "Error inesperado."}
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
@@ -72,7 +72,7 @@ export const RouteError = ({
               void router.invalidate();
             }}
           >
-            Try again
+            Intentar de nuevo
           </Button>
         </EmptyContent>
       </Empty>
@@ -81,10 +81,10 @@ export const RouteError = ({
 };
 
 export const NotFound = ({
-  what = "page",
+  title = "Página no encontrada",
   bare = false,
 }: {
-  what?: string;
+  title?: string;
   bare?: boolean;
 }) => (
   <StatePage bare={bare}>
@@ -93,14 +93,14 @@ export const NotFound = ({
         <EmptyMedia variant="icon">
           <SearchXIcon />
         </EmptyMedia>
-        <EmptyTitle>No such {what}</EmptyTitle>
+        <EmptyTitle>{title}</EmptyTitle>
         <EmptyDescription>
-          It may have been removed, or the link is mistyped.
+          Puede que se haya eliminado o que el enlace tenga un error.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Link to="/" className={buttonVariants()}>
-          Go home
+          Ir al inicio
         </Link>
       </EmptyContent>
     </Empty>

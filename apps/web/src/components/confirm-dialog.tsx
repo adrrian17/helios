@@ -46,7 +46,7 @@ export const ConfirmDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
           <AlertDialogAction
             variant={request?.destructive === true ? "destructive" : "default"}
             disabled={pending}

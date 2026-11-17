@@ -7,10 +7,10 @@ import { z } from "zod";
 
 export const idInput = z.object({ id: z.string() });
 
-/** Returns `value`, or throws NOT_FOUND naming `what`. */
+/** Returns `value`, or throws NOT_FOUND naming `what`, an article and a noun such as "la tarea". */
 export const found = <T>(value: T | undefined, what: string): T => {
   if (value === undefined) {
-    throw new ORPCError("NOT_FOUND", { message: `${what} not found.` });
+    throw new ORPCError("NOT_FOUND", { message: `No se encontró ${what}.` });
   }
 
   return value;
@@ -19,7 +19,7 @@ export const found = <T>(value: T | undefined, what: string): T => {
 export const requireIssue = async (db: Database, id: string) => {
   found(
     await db.query.issue.findFirst({ columns: { id: true }, where: { id } }),
-    "Issue"
+    "la tarea"
   );
 };
 

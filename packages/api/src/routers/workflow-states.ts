@@ -10,7 +10,7 @@ import { nameSchema } from "../domain";
 import { adminProcedure } from "../index";
 import { batchAll, found, idInput, keyAfter, placeAfter } from "./shared";
 
-const STATE = "Workflow State";
+const STATE = "el estado";
 
 const findState = async (db: Database, id: string) =>
   found(await db.query.workflowState.findFirst({ where: { id } }), STATE);
@@ -37,7 +37,7 @@ export const workflowStatesRouter = {
     .handler(async ({ context: { db }, input }) => {
       found(
         await db.query.project.findFirst({ where: { id: input.projectId } }),
-        "Project"
+        "el proyecto"
       );
       const siblings = await categoryStates(db, input);
 
@@ -78,7 +78,7 @@ export const workflowStatesRouter = {
       if (position === undefined) {
         throw new ORPCError("BAD_REQUEST", {
           message:
-            "A Workflow State can only move among states of its own State Category.",
+            "Un estado solo se puede mover entre los estados de su misma categoría.",
         });
       }
 
@@ -109,7 +109,7 @@ export const workflowStatesRouter = {
           destination.projectId !== state.projectId
         ) {
           throw new ORPCError("BAD_REQUEST", {
-            message: "Choose another Workflow State of the same Project.",
+            message: "Elige otro estado del mismo proyecto.",
           });
         }
 
@@ -119,7 +119,7 @@ export const workflowStatesRouter = {
           if (backlogStates.length === 1) {
             throw new ORPCError("CONFLICT", {
               message:
-                "A Project needs at least one backlog Workflow State for new Issues.",
+                "Un proyecto necesita al menos un estado de categoría Pendiente para las tareas nuevas.",
             });
           }
         }

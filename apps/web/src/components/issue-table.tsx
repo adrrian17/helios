@@ -45,23 +45,23 @@ const columns: {
   className: string;
 }[] = [
   { field: "identifier", label: "ID", className: "w-20 md:w-24" },
-  { field: "title", label: "Title", className: "" },
-  { field: "state", label: "State", className: "w-32 max-md:hidden" },
+  { field: "title", label: "Título", className: "" },
+  { field: "state", label: "Estado", className: "w-32 max-md:hidden" },
   {
     field: "priority",
-    label: "Priority",
+    label: "Prioridad",
     icon: SignalIcon,
     className: "w-11 lg:w-28",
   },
   {
     field: "assignee",
-    label: "Assignee",
+    label: "Responsable",
     icon: UserRoundIcon,
     // The last shown column until Created and Updated appear.
     className: "w-11 md:max-xl:pr-4 lg:w-40",
   },
-  { field: "created", label: "Created", className: "w-26 max-xl:hidden" },
-  { field: "updated", label: "Updated", className: "w-28 max-xl:hidden" },
+  { field: "created", label: "Creada", className: "w-26 max-xl:hidden" },
+  { field: "updated", label: "Actualizada", className: "w-28 max-xl:hidden" },
 ];
 
 const CELL = "px-2 first:pl-4 last:pr-4";
@@ -119,16 +119,16 @@ const SortHeader = ({
 
 /** What the sort menu calls each field, since narrower widths hide some column headers. */
 const sortNames: Record<SortField, string> = {
-  identifier: "Identifier",
-  title: "Title",
-  state: "Workflow State",
-  priority: "Priority",
-  assignee: "Assignee",
-  created: "Created",
-  updated: "Updated",
+  identifier: "Identificador",
+  title: "Título",
+  state: "Estado",
+  priority: "Prioridad",
+  assignee: "Responsable",
+  created: "Creada",
+  updated: "Actualizada",
 };
 
-const directionNames = { asc: "Ascending", desc: "Descending" } as const;
+const directionNames = { asc: "Ascendente", desc: "Descendente" } as const;
 
 const isField = (value: unknown): value is SortField =>
   sortFields.some((field) => field === value);
@@ -148,7 +148,7 @@ export const SortMenu = ({
           variant="muted"
           size="icon-sm"
           className="xl:hidden"
-          aria-label={`Sort: ${sortNames[sort.field]}, ${directionNames[sort.direction].toLowerCase()}`}
+          aria-label={`Orden: ${sortNames[sort.field]}, ${directionNames[sort.direction].toLowerCase()}`}
         />
       }
     >
@@ -163,7 +163,7 @@ export const SortMenu = ({
           }
         }}
       >
-        <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+        <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
         {sortFields.map((field) => (
           <DropdownMenuRadioItem key={field} value={field}>
             {sortNames[field]}
@@ -181,14 +181,14 @@ export const SortMenu = ({
           }
         }}
       >
-        <DropdownMenuLabel>Order</DropdownMenuLabel>
+        <DropdownMenuLabel>Orden</DropdownMenuLabel>
         <DropdownMenuRadioItem value="asc">
           <ArrowUpIcon />
-          Ascending
+          Ascendente
         </DropdownMenuRadioItem>
         <DropdownMenuRadioItem value="desc">
           <ArrowDownIcon />
-          Descending
+          Descendente
         </DropdownMenuRadioItem>
       </DropdownMenuRadioGroup>
     </DropdownMenuContent>
@@ -263,7 +263,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
             issue.assignee === null && "text-muted-foreground"
           )}
         >
-          {issue.assignee?.displayName ?? "Unassigned"}
+          {issue.assignee?.displayName ?? "Sin responsable"}
         </span>
       </span>
     </td>

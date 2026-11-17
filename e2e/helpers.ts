@@ -42,10 +42,12 @@ export const signIn = async (
   email: string
 ) => {
   await page.goto("/sign-in");
-  await page.getByLabel("Email").fill(email);
-  await page.getByRole("button", { name: "Email me a sign-in link" }).click();
+  await page.getByLabel("Correo electrónico").fill(email);
+  await page
+    .getByRole("button", { name: "Enviarme un enlace de acceso" })
+    .click();
   await expect(page.getByRole("status")).toContainText(
-    "a sign-in link is on its way"
+    "enlace de acceso va en camino"
   );
   await page.goto(await capturedLinkTo(request, email));
   await expect(page).not.toHaveURL(/\/sign-in/u);
@@ -54,7 +56,7 @@ export const signIn = async (
 /** On phones the sidebar is a drawer that has to be opened first. */
 export const openNavigation = async (page: Page, isMobile: boolean) => {
   if (isMobile) {
-    await page.getByRole("button", { name: "Open navigation" }).click();
+    await page.getByRole("button", { name: "Abrir navegación" }).click();
   }
 };
 
@@ -65,12 +67,12 @@ export const createProject = async (
   prefix: string
 ) => {
   await openNavigation(page, isMobile);
-  await page.getByRole("button", { name: "New Project" }).first().click();
+  await page.getByRole("button", { name: "Nuevo proyecto" }).first().click();
 
-  const dialog = page.getByRole("dialog", { name: "New Project" });
-  await dialog.getByLabel("Name").fill(name);
-  await dialog.getByLabel("Identifier prefix").fill(prefix);
-  await dialog.getByRole("button", { name: "Create Project" }).click();
+  const dialog = page.getByRole("dialog", { name: "Nuevo proyecto" });
+  await dialog.getByLabel("Nombre").fill(name);
+  await dialog.getByLabel("Prefijo del identificador").fill(prefix);
+  await dialog.getByRole("button", { name: "Crear proyecto" }).click();
   await expect(page).toHaveURL(new RegExp(`/projects/${prefix}/board$`, "u"));
   await expect(dialog).toBeHidden();
 };
@@ -80,12 +82,12 @@ export const column = (page: Page, state: string) =>
 
 export const addIssue = async (page: Page, state: string, title: string) => {
   const target = column(page, state);
-  const input = target.getByLabel(`New Issue title in ${state}`);
+  const input = target.getByLabel(`Título de la nueva tarea en ${state}`);
 
   // The input stays open after an Issue is added, ready for the next one.
   if (!(await input.isVisible())) {
     await target
-      .getByRole("button", { name: "Add Issue", exact: true })
+      .getByRole("button", { name: "Añadir tarea", exact: true })
       .click();
   }
 
@@ -99,17 +101,17 @@ export const addIssue = async (page: Page, state: string, title: string) => {
 /** Archives the Project through its settings, so test runs do not pile up in the sidebar. */
 export const archiveProject = async (page: Page, prefix: string) => {
   await page.goto(`/projects/${prefix}/settings`);
-  await page.getByRole("button", { name: "Archive Project" }).click();
+  await page.getByRole("button", { name: "Archivar proyecto" }).click();
   await page
     .getByRole("alertdialog")
-    .getByRole("button", { name: "Archive Project" })
+    .getByRole("button", { name: "Archivar proyecto" })
     .click();
   await expect(
-    page.getByRole("button", { name: "Unarchive Project" })
+    page.getByRole("button", { name: "Desarchivar proyecto" })
   ).toBeVisible();
   await page.goto("/projects/archived");
   await expect(
-    page.getByRole("list", { name: "Archived Projects" })
+    page.getByRole("list", { name: "Proyectos archivados" })
   ).toContainText(prefix);
 };
 
@@ -168,9 +170,11 @@ export const horizontalOverflow = async (page: Page) =>
  */
 export const assignToAdmin = async (page: Page, identifier: string) => {
   await page.goto(`/issue/${identifier}`);
-  await page.getByRole("button", { name: "Assignee: Unassigned" }).click();
+  await page
+    .getByRole("button", { name: "Responsable: Sin responsable" })
+    .click();
   await page.getByRole("option", { name: adminEmail, exact: true }).click();
   await expect(
-    page.getByRole("button", { name: `Assignee: ${adminEmail}` })
+    page.getByRole("button", { name: `Responsable: ${adminEmail}` })
   ).toBeVisible();
 };

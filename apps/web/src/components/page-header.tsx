@@ -10,7 +10,7 @@ export const PageHeader = ({
   actions?: React.ReactNode;
 }) => (
   <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4 max-md:h-14 max-md:px-2">
-    <SidebarTrigger aria-label="Open navigation" className="md:hidden" />
+    <SidebarTrigger aria-label="Abrir navegación" className="md:hidden" />
     <div className="flex min-w-0 flex-1 items-center gap-2">{children}</div>
     <div className="flex shrink-0 items-center gap-1">
       <PhoneCommands />

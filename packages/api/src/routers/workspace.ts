@@ -15,7 +15,7 @@ import { found, idInput } from "./shared";
 const memberInput = z.object({ memberId: z.string() });
 
 const findMember = async (db: Database, userId: string) =>
-  found(await db.query.member.findFirst({ where: { userId } }), "Member");
+  found(await db.query.member.findFirst({ where: { userId } }), "el miembro");
 
 /**
  * Refuses a change that would leave no active Admin. Only matters when the
@@ -34,7 +34,8 @@ const keepAnActiveAdmin = async (db: Database, userId: string) => {
 
   if (!otherAdmin) {
     throw new ORPCError("CONFLICT", {
-      message: "The Workspace needs at least one active Admin.",
+      message:
+        "El espacio de trabajo necesita al menos un administrador activo.",
     });
   }
 };
@@ -76,7 +77,7 @@ export const workspaceRouter = {
 
       if (existingMember) {
         throw new ORPCError("CONFLICT", {
-          message: `${email} is already a Member.`,
+          message: `${email} ya es miembro.`,
         });
       }
 
@@ -86,7 +87,7 @@ export const workspaceRouter = {
 
       if (existing?.status === "pending") {
         throw new ORPCError("CONFLICT", {
-          message: `${email} is already invited.`,
+          message: `${email} ya tiene una invitación.`,
         });
       }
 
@@ -99,7 +100,7 @@ export const workspaceRouter = {
         })
         .returning({ id: invitation.id, email: invitation.email });
 
-      return found(invited, "Invitation");
+      return found(invited, "la invitación");
     }),
 
   revokeInvitation: adminProcedure
@@ -111,7 +112,7 @@ export const workspaceRouter = {
         .where(and(eq(invitation.id, id), eq(invitation.status, "pending")))
         .returning({ id: invitation.id });
 
-      found(revoked, "Pending Invitation");
+      found(revoked, "la invitación pendiente");
     }),
 
   /** Ends the Member's sessions at once; they stay visible as authors and past assignees. */

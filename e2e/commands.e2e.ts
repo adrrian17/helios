@@ -14,20 +14,22 @@ import {
 } from "./helpers";
 
 const palette = (page: Page) =>
-  page.getByRole("dialog", { name: "Command palette" });
+  page.getByRole("dialog", { name: "Paleta de comandos" });
+
+const NEW_ISSUE = "Nueva tarea";
 
 const newIssueDialog = (page: Page) =>
-  page.getByRole("dialog", { name: "New Issue" });
+  page.getByRole("dialog", { name: NEW_ISSUE });
 
 const MY_ISSUES = "/my-issues";
 const OPEN_PALETTE = "ControlOrMeta+k";
-const GO_TO_LABELS = "Go to Labels";
+const GO_TO_LABELS = "Ir a Etiquetas";
 const SEARCH_RPC = `${API_URL}/rpc/issues/search`;
 
 /** Keys go to the window, so wait until the signed-in page has mounted. */
 const openMyIssues = async (page: Page) => {
   await page.goto(MY_ISSUES);
-  await expect(page.getByRole("heading", { name: "My Issues" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Mis tareas" })).toBeVisible();
 };
 
 test.describe("desktop keyboard", () => {
@@ -115,7 +117,7 @@ test.describe("desktop keyboard", () => {
     await page.keyboard.press("/");
     await palette(page).getByRole("combobox").fill(prefix);
     await palette(page)
-      .getByRole("group", { name: "Projects" })
+      .getByRole("group", { name: "Proyectos" })
       .getByRole("option", { name: new RegExp(`Seed ${prefix}`, "u") })
       .click();
     await expect(page).toHaveURL(new RegExp(`/projects/${prefix}/`, "u"));
@@ -132,16 +134,18 @@ test.describe("desktop keyboard", () => {
     await seedProject(page, prefix);
 
     await page.goto(`/projects/${prefix}/board`);
-    await expect(column(page, "Backlog")).toBeVisible();
+    await expect(column(page, "Pendiente")).toBeVisible();
     await page.keyboard.press("c");
 
     const dialog = newIssueDialog(page);
-    await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
-    await dialog.getByLabel("Title").fill("Pressed C for this");
-    await dialog.getByLabel("Title").press("Enter");
+    await expect(dialog.getByLabel("Proyecto")).toContainText(`Seed ${prefix}`);
+    await dialog.getByLabel("Título").fill("Pressed C for this");
+    await dialog.getByLabel("Título").press("Enter");
     await expect(dialog).toBeHidden();
     await expect(
-      column(page, "Backlog").getByRole("link", { name: /Pressed C for this/u })
+      column(page, "Pendiente").getByRole("link", {
+        name: /Pressed C for this/u,
+      })
     ).toContainText(`${prefix}-1`);
 
     await archiveProject(page, prefix);
@@ -156,24 +160,24 @@ test.describe("desktop keyboard", () => {
     await seedProject(page, prefix);
 
     await page.goto(`/projects/${prefix}/board`);
-    await expect(column(page, "Backlog")).toBeVisible();
+    await expect(column(page, "Pendiente")).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Project settings" })
+      page.getByRole("link", { name: "Configuración del proyecto" })
     ).toBeVisible();
     await page.keyboard.press(OPEN_PALETTE);
-    await palette(page).getByRole("combobox").fill("go labels");
+    await palette(page).getByRole("combobox").fill("ir etiquetas");
     await expect(
       palette(page).getByRole("option", { name: GO_TO_LABELS })
     ).toBeVisible();
 
-    await palette(page).getByRole("combobox").fill("new issue");
+    await palette(page).getByRole("combobox").fill("nueva tarea");
     await expect(
       palette(page).getByRole("option", {
-        name: `New Issue in Seed ${prefix}…`,
+        name: `Nueva tarea en Seed ${prefix}…`,
       })
     ).toBeVisible();
     await page.keyboard.press("Enter");
-    await expect(newIssueDialog(page).getByLabel("Project")).toContainText(
+    await expect(newIssueDialog(page).getByLabel("Proyecto")).toContainText(
       `Seed ${prefix}`
     );
     await page.keyboard.press("Escape");
@@ -192,10 +196,10 @@ test.describe("desktop keyboard", () => {
       await route.abort();
     });
     await page.keyboard.press(OPEN_PALETTE);
-    await palette(page).getByRole("combobox").fill("go labels");
+    await palette(page).getByRole("combobox").fill("ir etiquetas");
 
     const retry = palette(page).getByRole("option", {
-      name: /Couldn’t search Issues/u,
+      name: /No se pudieron buscar las tareas/u,
     });
 
     // Network errors are retried twice with backoff before the query fails.
@@ -232,39 +236,39 @@ test.describe("desktop keyboard", () => {
     ).toBeVisible();
 
     await page.keyboard.press("s");
-    await expect(page.getByRole("combobox", { name: "Move to" })).toBeFocused();
-    await page.keyboard.type("In Progress");
+    await expect(page.getByRole("combobox", { name: "Mover a" })).toBeFocused();
+    await page.keyboard.type("En curso");
     await page.keyboard.press("Enter");
     await expect(
-      page.getByRole("button", { name: "Workflow State: In Progress" })
+      page.getByRole("button", { name: "Estado: En curso" })
     ).toBeVisible();
 
     await page.keyboard.press("p");
     await expect(
-      page.getByRole("combobox", { name: "Change Priority" })
+      page.getByRole("combobox", { name: "Cambiar prioridad" })
     ).toBeFocused();
-    await page.keyboard.type("Urgent");
+    await page.keyboard.type("Urgente");
     await page.keyboard.press("Enter");
     await expect(
-      page.getByRole("button", { name: "Priority: Urgent" })
+      page.getByRole("button", { name: "Prioridad: Urgente" })
     ).toBeVisible();
 
     await page.keyboard.press("a");
     await expect(
-      page.getByRole("combobox", { name: "Assign to" })
+      page.getByRole("combobox", { name: "Asignar a" })
     ).toBeFocused();
     // Over an open picker, single keys are text for its search, not shortcuts.
     await page.keyboard.type("cs");
-    await expect(page.getByRole("combobox", { name: "Assign to" })).toHaveValue(
+    await expect(page.getByRole("combobox", { name: "Asignar a" })).toHaveValue(
       "cs"
     );
     await expect(newIssueDialog(page)).toBeHidden();
     await page.keyboard.press("Escape");
     await expect(
-      page.getByRole("combobox", { name: "Assign to" })
+      page.getByRole("combobox", { name: "Asignar a" })
     ).toBeHidden();
 
-    const comment = page.getByLabel("Comment", { exact: true });
+    const comment = page.getByLabel("Comentario", { exact: true });
     await comment.click();
     await page.keyboard.type("scap");
     await expect(comment).toHaveValue("scap");
@@ -279,10 +283,10 @@ test.describe("desktop keyboard", () => {
     await openMyIssues(page);
     await page.keyboard.press("?");
 
-    const help = page.getByRole("dialog", { name: "Keyboard shortcuts" });
-    await expect(help).toContainText("Change Workflow State");
-    await expect(help.getByRole("region", { name: "Board" })).toContainText(
-      "Pick up the focused Issue"
+    const help = page.getByRole("dialog", { name: "Atajos de teclado" });
+    await expect(help).toContainText("Cambiar estado");
+    await expect(help.getByRole("region", { name: "Tablero" })).toContainText(
+      "Levantar la tarea enfocada"
     );
     await page.keyboard.press("Escape");
     await expect(help).toBeHidden();
@@ -306,7 +310,7 @@ test.describe("phone commands", () => {
     });
 
     await page.goto(`/projects/${prefix}/board`);
-    await page.getByRole("button", { name: "Search" }).click();
+    await page.getByRole("button", { name: "Buscar" }).click();
 
     const viewport = page.viewportSize();
     // Polled, since the palette zooms in before it settles.
@@ -329,11 +333,11 @@ test.describe("phone commands", () => {
       new RegExp(`/issue/${issue.identifier}$`, "u")
     );
 
-    await page.getByRole("button", { name: "New Issue" }).click();
+    await page.getByRole("button", { name: NEW_ISSUE }).click();
     const dialog = newIssueDialog(page);
-    await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
-    await dialog.getByLabel("Title").fill("Made with a thumb");
-    await dialog.getByRole("button", { name: "Create Issue" }).click();
+    await expect(dialog.getByLabel("Proyecto")).toContainText(`Seed ${prefix}`);
+    await dialog.getByLabel("Título").fill("Made with a thumb");
+    await dialog.getByRole("button", { name: "Crear tarea" }).click();
     await expect(dialog).toBeHidden();
 
     await page.goto(`/projects/${prefix}/list`);
@@ -373,7 +377,7 @@ test.describe("phone commands", () => {
     for (const [path, place] of Object.entries(screens)) {
       // oxlint-disable-next-line eslint/no-await-in-loop -- each screen is a page visit.
       await page.goto(path);
-      const button = page.getByRole("button", { name: "New Issue" });
+      const button = page.getByRole("button", { name: NEW_ISSUE });
       // oxlint-disable-next-line eslint/no-await-in-loop -- see above.
       await expect(button).toHaveCount(1);
       // oxlint-disable-next-line eslint/no-await-in-loop -- see above.
@@ -408,7 +412,7 @@ test.describe("phone commands", () => {
 
     await atEveryWidth("sign-in", async () => {
       await page.goto("/sign-in");
-      await expect(page.getByLabel("Email")).toBeVisible();
+      await expect(page.getByLabel("Correo electrónico")).toBeVisible();
     });
 
     const prefix = uniquePrefix();
@@ -463,34 +467,36 @@ test("on a short screen the New Issue dialog scrolls to its button and keeps a d
 
   const open = async () => {
     await (isMobile
-      ? page.getByRole("button", { name: "New Issue" }).click()
+      ? page.getByRole("button", { name: NEW_ISSUE }).click()
       : page.keyboard.press("c"));
     await expect(dialog).toBeVisible();
   };
 
   await open();
-  await dialog.getByLabel("Project").click();
+  await dialog.getByLabel("Proyecto").click();
   await page.getByRole("option", { name: `Seed ${otherPrefix}` }).click();
-  await dialog.getByLabel("Title").fill("Typed, then dismissed");
-  await dialog.getByRole("button", { name: "Close" }).click();
+  await dialog.getByLabel("Título").fill("Typed, then dismissed");
+  await dialog.getByRole("button", { name: "Cerrar" }).click();
   await expect(dialog).toBeHidden();
 
   await open();
-  await expect(dialog.getByLabel("Title")).toHaveValue("Typed, then dismissed");
-  await expect(dialog.getByLabel("Project")).toContainText(
+  await expect(dialog.getByLabel("Título")).toHaveValue(
+    "Typed, then dismissed"
+  );
+  await expect(dialog.getByLabel("Proyecto")).toContainText(
     `Seed ${otherPrefix}`
   );
-  await dialog.getByRole("button", { name: "Create Issue" }).click();
+  await dialog.getByRole("button", { name: "Crear tarea" }).click();
   await expect(dialog).toBeHidden();
   await expect(
-    page.getByText(new RegExp(`^${otherPrefix}-\\d+ created\\.$`, "u"))
+    page.getByText(new RegExp(`^${otherPrefix}-\\d+ creada\\.$`, "u"))
   ).toBeVisible();
 
   await open();
-  await expect(dialog.getByLabel("Title")).toHaveValue("");
-  await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
-  await dialog.getByLabel("Title").fill("Default Project, then navigated");
-  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog.getByLabel("Título")).toHaveValue("");
+  await expect(dialog.getByLabel("Proyecto")).toContainText(`Seed ${prefix}`);
+  await dialog.getByLabel("Título").fill("Default Project, then navigated");
+  await dialog.getByRole("button", { name: "Cancelar" }).click();
   await expect(dialog).toBeHidden();
 
   // In-app navigation, as a reload would drop the draft anyway.
@@ -499,12 +505,12 @@ test("on a short screen the New Issue dialog scrolls to its button and keeps a d
   );
   await expect(page).toHaveTitle(new RegExp(`Seed ${otherPrefix}`, "u"));
   await open();
-  await expect(dialog.getByLabel("Title")).toHaveValue(
+  await expect(dialog.getByLabel("Título")).toHaveValue(
     "Default Project, then navigated"
   );
-  await expect(dialog.getByLabel("Project")).toContainText(`Seed ${prefix}`);
-  await dialog.getByLabel("Title").fill("");
-  await dialog.getByRole("button", { name: "Cancel" }).click();
+  await expect(dialog.getByLabel("Proyecto")).toContainText(`Seed ${prefix}`);
+  await dialog.getByLabel("Título").fill("");
+  await dialog.getByRole("button", { name: "Cancelar" }).click();
 
   await page.setViewportSize(
     isMobile ? { width: 412, height: 839 } : { width: 1280, height: 720 }
@@ -518,17 +524,17 @@ test("each page names itself in the document title", async ({
   request,
 }) => {
   await page.goto("/sign-in");
-  await expect(page).toHaveTitle("Sign in");
+  await expect(page).toHaveTitle("Iniciar sesión");
 
   const prefix = uniquePrefix();
   await signIn(page, request, adminEmail);
   await seedProject(page, prefix);
 
   const titles = {
-    [`/projects/${prefix}/board`]: `Seed ${prefix} · Board`,
-    [`/projects/${prefix}/settings`]: `Settings · Seed ${prefix}`,
-    [MY_ISSUES]: "My Issues",
-    "/projects/archived": "Archived Projects",
+    [`/projects/${prefix}/board`]: `Seed ${prefix} · Tablero`,
+    [`/projects/${prefix}/settings`]: `Configuración · Seed ${prefix}`,
+    [MY_ISSUES]: "Mis tareas",
+    "/projects/archived": "Proyectos archivados",
   };
 
   for (const [path, title] of Object.entries(titles)) {
@@ -548,9 +554,9 @@ test("an unknown page, a missing Issue or Project and an unreachable API each sh
   await signIn(page, request, adminEmail);
 
   const missing = {
-    "/nope": "No such page",
-    "/issue/DEMO-999999": "No such Issue",
-    "/projects/NOPE/board": "No such Project",
+    "/nope": "Página no encontrada",
+    "/issue/DEMO-999999": "Tarea no encontrada",
+    "/projects/NOPE/board": "Proyecto no encontrado",
   };
 
   for (const [path, heading] of Object.entries(missing)) {
@@ -559,19 +565,23 @@ test("an unknown page, a missing Issue or Project and an unreachable API each sh
     // oxlint-disable-next-line eslint/no-await-in-loop -- each state is a page visit.
     await expect(page.getByText(heading, { exact: true })).toBeVisible();
     // oxlint-disable-next-line eslint/no-await-in-loop -- each state is a page visit.
-    await expect(page).toHaveTitle("Not found");
+    await expect(page).toHaveTitle("No encontrado");
   }
 
-  await expect(page.getByRole("link", { name: "Go home" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Ir al inicio" })).toBeVisible();
 
   await page.route(`${API_URL}/**`, async (route) => {
     await route.abort();
   });
   await page.goto("/my-issues");
   // Network errors are retried twice with backoff before the error state shows.
+  await expect(page.getByText("Algo salió mal", { exact: true })).toBeVisible({
+    timeout: 10_000,
+  });
   await expect(
-    page.getByText("Something went wrong", { exact: true })
-  ).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText(/can’t reach its server/u)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+    page.getByText(/no puede conectarse con su servidor/u)
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Intentar de nuevo" })
+  ).toBeVisible();
 });

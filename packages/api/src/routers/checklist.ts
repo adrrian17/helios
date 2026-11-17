@@ -8,7 +8,7 @@ import { checklistItemSchema } from "../domain";
 import { memberProcedure } from "../index";
 import { found, idInput, keyAfter, placeAfter, requireIssue } from "./shared";
 
-const ITEM = "Checklist item";
+const ITEM = "el elemento del checklist";
 
 const itemsOf = async (db: Database, issueId: string) =>
   await db.query.checklistItem.findMany({
@@ -66,7 +66,7 @@ export const checklistRouter = {
 
       if (position === undefined) {
         throw new ORPCError("CONFLICT", {
-          message: "The Checklist changed. Reload and try again.",
+          message: "El checklist cambió. Recarga e inténtalo de nuevo.",
         });
       }
 

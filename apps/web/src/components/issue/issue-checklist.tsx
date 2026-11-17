@@ -7,7 +7,11 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { DragEndEvent } from "@dnd-kit/core";
+import type {
+  Announcements,
+  DragEndEvent,
+  UniqueIdentifier,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
@@ -31,6 +35,11 @@ import { orpc } from "@/utils/orpc";
 import { useReturnFocus } from "@/utils/use-return-focus";
 
 type Item = IssueDetail["checklist"][number];
+
+const screenReaderInstructions = {
+  draggable:
+    "Para reordenar este elemento, pulsa la barra espaciadora, usa las flechas para moverlo y pulsa de nuevo la barra espaciadora para soltarlo o Escape para cancelar.",
+};
 
 const SORTABLE_MOTION =
   // oxlint-disable-next-line shadcn/no-arbitrary-values -- dnd-kit computes the transition on every drag frame; no token can express it.
@@ -125,7 +134,7 @@ const ItemRow = ({
           ref={setActivatorNodeRef}
           variant="muted"
           size="icon-xs"
-          aria-label={`Reorder ${item.text}`}
+          aria-label={`Reordenar ${item.text}`}
           {...attributes}
           {...listeners}
         >
@@ -155,7 +164,7 @@ const ItemRow = ({
         </button>
       ) : (
         <Input
-          aria-label={`Edit ${item.text}`}
+          aria-label={`Editar ${item.text}`}
           autoFocus
           maxLength={limits.checklistItem}
           className="h-7 flex-1"
@@ -181,7 +190,7 @@ const ItemRow = ({
         <Button
           variant="muted"
           size="icon-xs"
-          aria-label={`Delete ${item.text}`}
+          aria-label={`Eliminar ${item.text}`}
           onClick={() => {
             writes.remove.mutate({ id: item.id });
           }}
@@ -224,8 +233,8 @@ const AddItem = ({ issueId }: { issueId: string }) => {
         className="text-muted-foreground size-4 shrink-0"
       />
       <Input
-        aria-label="New Checklist item"
-        placeholder="Add an item"
+        aria-label="Nuevo elemento del checklist"
+        placeholder="Añadir un elemento"
         autoComplete="off"
         maxLength={limits.checklistItem}
         className="h-8"
@@ -253,6 +262,23 @@ export const IssueChecklist = () => {
       coordinateGetter: sortableKeyboardCoordinates,
     })
   );
+
+  const textOf = (id: UniqueIdentifier) =>
+    items.find((item) => item.id === id)?.text ?? "El elemento";
+
+  const announcements: Announcements = {
+    onDragStart: ({ active }) => `Has levantado ${textOf(active.id)}.`,
+    onDragOver: ({ active, over }) =>
+      over === null
+        ? `${textOf(active.id)} está fuera de la lista.`
+        : `${textOf(active.id)} está sobre ${textOf(over.id)}.`,
+    onDragEnd: ({ active, over }) =>
+      over === null
+        ? `${textOf(active.id)} volvió a su lugar.`
+        : `Has soltado ${textOf(active.id)} sobre ${textOf(over.id)}.`,
+    onDragCancel: ({ active }) =>
+      `Cancelado. ${textOf(active.id)} volvió a su lugar.`,
+  };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
     const from = items.findIndex((item) => item.id === active.id);
@@ -283,7 +309,7 @@ export const IssueChecklist = () => {
           <>
             <span className="text-muted-foreground text-xs tabular-nums">
               {done}/{items.length}
-              <span className="sr-only"> done</span>
+              <span className="sr-only"> completados</span>
             </span>
             <span
               aria-hidden="true"
@@ -300,6 +326,7 @@ export const IssueChecklist = () => {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
+        accessibility={{ announcements, screenReaderInstructions }}
         onDragEnd={onDragEnd}
       >
         <SortableContext

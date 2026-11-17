@@ -42,7 +42,7 @@ import { orpc } from "@/utils/orpc";
 
 const screenReaderInstructions = {
   draggable:
-    "Press Enter to open the Issue. To move it, press Space, use the arrow keys to move it within its column or to another column, then press Space to drop it or Escape to cancel.",
+    "Pulsa Enter para abrir la tarea. Para moverla, pulsa la barra espaciadora, usa las flechas para moverla dentro de su columna o a otra columna y pulsa de nuevo la barra espaciadora para soltarla o Escape para cancelar.",
 };
 
 const CLICK_GUARD_MS = 150;
@@ -202,16 +202,16 @@ export const Board = ({
   };
 
   const identifierOf = (id: UniqueIdentifier) =>
-    locate(shown, String(id)).issue?.identifier ?? "The Issue";
+    locate(shown, String(id)).issue?.identifier ?? "La tarea";
 
   const announcements: Announcements = {
-    onDragStart: ({ active }) => `Picked up ${identifierOf(active.id)}.`,
+    onDragStart: ({ active }) => `Has levantado ${identifierOf(active.id)}.`,
     onDragOver: ({ active }) =>
-      `${identifierOf(active.id)} is ${describePosition(shown, String(active.id))}.`,
+      `${identifierOf(active.id)} está ${describePosition(shown, String(active.id))}.`,
     onDragEnd: ({ active }) =>
-      `Dropped ${identifierOf(active.id)} ${describePosition(shown, String(active.id))}.`,
+      `Has soltado ${identifierOf(active.id)} ${describePosition(shown, String(active.id))}.`,
     onDragCancel: ({ active }) =>
-      `Cancelled. ${identifierOf(active.id)} went back to where it was.`,
+      `Cancelado. ${identifierOf(active.id)} volvió a su lugar.`,
   };
 
   const onDragStart = ({ active }: DragStartEvent) => {

@@ -152,7 +152,7 @@ export const PriorityIcon = ({
       {priorityGlyph(priority)}
     </svg>
     {labelled ? (
-      <span className="sr-only">Priority: {priorityLabels[priority]}</span>
+      <span className="sr-only">Prioridad: {priorityLabels[priority]}</span>
     ) : null}
   </>
 );

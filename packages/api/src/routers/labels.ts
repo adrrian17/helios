@@ -6,14 +6,16 @@ import { nameSchema } from "../domain";
 import { memberProcedure } from "../index";
 import { conflictOnDuplicate, found, idInput } from "./shared";
 
+const LABEL = "la etiqueta";
+
 const colorSchema = z
   .string()
-  .regex(/^#[\dA-Fa-f]{6}$/u, "Use a hex colour such as #3b82f6.");
+  .regex(/^#[\dA-Fa-f]{6}$/u, "Usa un color hexadecimal, como #3b82f6.");
 
 const linkInput = z.object({ issueId: z.string(), labelId: z.string() });
 
 const nameTaken = (name: string | undefined) =>
-  `A Label named "${name ?? ""}" already exists.`;
+  `Ya existe una etiqueta llamada "${name ?? ""}".`;
 
 export const labelsRouter = {
   list: memberProcedure.handler(async ({ context: { db } }) => {
@@ -37,7 +39,7 @@ export const labelsRouter = {
         nameTaken(input.name)
       );
 
-      return found(created, "Label");
+      return found(created, LABEL);
     }),
 
   update: memberProcedure
@@ -58,7 +60,7 @@ export const labelsRouter = {
         nameTaken(changes.name)
       );
 
-      found(updated, "Label");
+      found(updated, LABEL);
     }),
 
   /** Deletes a Label and removes it from every Issue. */
@@ -70,7 +72,7 @@ export const labelsRouter = {
         .where(eq(label.id, id))
         .returning({ id: label.id });
 
-      found(deleted, "Label");
+      found(deleted, LABEL);
     }),
 
   /** Attaches a Label to an Issue and records it in Activity; attaching twice changes nothing. */
@@ -86,8 +88,8 @@ export const labelsRouter = {
         db.query.issueLabel.findFirst({ where: input }),
       ]);
 
-      found(issue, "Issue");
-      const { name } = found(attached, "Label");
+      found(issue, "la tarea");
+      const { name } = found(attached, LABEL);
 
       if (existing) {
         return;

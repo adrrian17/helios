@@ -42,7 +42,7 @@ import { useMe } from "@/utils/use-me";
 
 const describeInviteError = (error: Error) =>
   error instanceof ORPCError && error.code === "BAD_REQUEST"
-    ? "Enter a valid email address."
+    ? "Introduce un correo electrónico válido."
     : describeError(error);
 
 const InviteForm = () => {
@@ -52,7 +52,7 @@ const InviteForm = () => {
     ...orpc.workspace.invite.mutationOptions(),
     meta: { inlineError: true },
     onSuccess: (invited, { email: sent }) => {
-      toast.success(`Invitation sent to ${invited.email}.`);
+      toast.success(`Invitación enviada a ${invited.email}.`);
       setEmail((current) => (current.trim() === sent ? "" : current));
     },
   });
@@ -70,7 +70,7 @@ const InviteForm = () => {
     >
       <Field data-invalid={error !== undefined || undefined}>
         <FieldLabel htmlFor="invite-email" className="sr-only">
-          Email
+          Correo electrónico
         </FieldLabel>
         <div className="flex gap-2 max-sm:flex-col">
           <Input
@@ -78,7 +78,7 @@ const InviteForm = () => {
             type="email"
             required
             autoComplete="off"
-            placeholder="name@example.com"
+            placeholder="nombre@ejemplo.com"
             aria-invalid={error !== undefined || undefined}
             value={email}
             onChange={(event) => {
@@ -100,7 +100,7 @@ const InviteForm = () => {
             ) : (
               <MailIcon data-icon="inline-start" />
             )}
-            Send invite
+            Enviar invitación
           </Button>
         </div>
         {error === undefined ? null : <FieldError>{error}</FieldError>}
@@ -117,20 +117,20 @@ const Invitations = () => {
   const revoke = useMutation({
     ...orpc.workspace.revokeInvitation.mutationOptions(),
     onSuccess: () => {
-      toast.success("Invitation revoked.");
+      toast.success("Invitación revocada.");
     },
   });
 
   if (invitations.length === 0) {
     return (
       <p className="text-muted-foreground rounded-lg border border-dashed px-4 py-6 text-center text-sm">
-        No pending Invitations.
+        No hay invitaciones pendientes.
       </p>
     );
   }
 
   return (
-    <SettingsList label="Pending Invitations">
+    <SettingsList label="Invitaciones pendientes">
       {invitations.map((invitation) => (
         <li key={invitation.id} className="flex items-center gap-3 px-4 py-2.5">
           <span className="bg-muted text-muted-foreground grid size-8 shrink-0 place-items-center rounded-full">
@@ -141,7 +141,7 @@ const Invitations = () => {
               {invitation.email}
             </span>
             <span className="text-muted-foreground truncate text-xs">
-              Invited by {invitation.invitedBy} on{" "}
+              Invitado por {invitation.invitedBy} el{" "}
               {formatDate(invitation.createdAt)}
             </span>
           </div>
@@ -149,12 +149,12 @@ const Invitations = () => {
             variant="ghost"
             size="sm"
             disabled={revoke.isPending && revoke.variables.id === invitation.id}
-            aria-label={`Revoke the Invitation for ${invitation.email}`}
+            aria-label={`Revocar la invitación de ${invitation.email}`}
             onClick={() => {
               revoke.mutate({ id: invitation.id });
             }}
           >
-            Revoke
+            Revocar
           </Button>
         </li>
       ))}
@@ -184,7 +184,7 @@ const Members = () => {
 
   return (
     <>
-      <SettingsList label="Members">
+      <SettingsList label="Miembros">
         {members.map((member) => {
           const self = member.id === me.id;
           const admin = member.role === "admin";
@@ -207,7 +207,7 @@ const Members = () => {
                   <span className="truncate max-md:break-all max-md:whitespace-normal">
                     {member.displayName}
                   </span>
-                  {self ? <Badge variant="outline">You</Badge> : null}
+                  {self ? <Badge variant="outline">Tú</Badge> : null}
                 </span>
                 {member.displayName === member.email ? null : (
                   <span className="text-muted-foreground truncate text-xs max-md:break-all max-md:whitespace-normal">
@@ -217,7 +217,7 @@ const Members = () => {
               </div>
               <div className="flex shrink-0 items-center gap-1.5 max-md:order-last max-md:w-full max-md:pl-11">
                 {member.active ? null : (
-                  <Badge variant="destructive">Deactivated</Badge>
+                  <Badge variant="destructive">Desactivado</Badge>
                 )}
                 <Badge variant={admin ? "secondary" : "outline"}>
                   {roleLabels[member.role]}
@@ -229,7 +229,7 @@ const Members = () => {
                     <Button
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={`Actions for ${member.displayName}`}
+                      aria-label={`Acciones para ${member.displayName}`}
                     />
                   }
                 >
@@ -242,10 +242,10 @@ const Members = () => {
                         onClick={() => {
                           if (self) {
                             setConfirm({
-                              title: "Give up Admin?",
+                              title: "¿Dejar de ser administrador?",
                               description:
-                                "You’ll become a Member and lose access to Members and Project settings.",
-                              confirmLabel: "Make me a Member",
+                                "Pasarás a ser miembro y perderás el acceso a Miembros y a la configuración de los proyectos.",
+                              confirmLabel: "Hacerme miembro",
                               destructive: true,
                               onConfirm: demoteSelf,
                             });
@@ -258,7 +258,7 @@ const Members = () => {
                         }}
                       >
                         <ShieldOffIcon />
-                        Make Member
+                        Hacer miembro
                       </DropdownMenuItem>
                     ) : (
                       <DropdownMenuItem
@@ -270,7 +270,7 @@ const Members = () => {
                         }}
                       >
                         <ShieldIcon />
-                        Make Admin
+                        Hacer administrador
                       </DropdownMenuItem>
                     )}
                     {member.active && !self ? (
@@ -278,10 +278,10 @@ const Members = () => {
                         variant="destructive"
                         onClick={() => {
                           setConfirm({
-                            title: `Deactivate ${member.displayName}?`,
+                            title: `¿Desactivar a ${member.displayName}?`,
                             description:
-                              "They are signed out everywhere at once and can’t sign in again until reactivated. Their Issues, Comments and Activity stay.",
-                            confirmLabel: "Deactivate",
+                              "Se cerrará su sesión en todas partes de inmediato y no podrá volver a iniciarla hasta que lo reactives. Sus tareas, comentarios y actividad se conservan.",
+                            confirmLabel: "Desactivar",
                             destructive: true,
                             onConfirm: async () => {
                               await deactivate.mutateAsync({
@@ -292,7 +292,7 @@ const Members = () => {
                         }}
                       >
                         <UserXIcon />
-                        Deactivate
+                        Desactivar
                       </DropdownMenuItem>
                     ) : null}
                     {member.active ? null : (
@@ -302,7 +302,7 @@ const Members = () => {
                         }}
                       >
                         <UserCheckIcon />
-                        Reactivate
+                        Reactivar
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuGroup>
@@ -334,21 +334,23 @@ const MembersPage = () => {
   return (
     <>
       <PageHeader>
-        <PageTitle>Members</PageTitle>
+        <PageTitle>Miembros</PageTitle>
       </PageHeader>
       <SettingsPage>
         <SettingsSection
-          title="Invite people"
-          description="Invited people sign in with a magic link sent to their email and become Members."
+          title="Invitar personas"
+          description="Las personas invitadas inician sesión con un enlace mágico enviado a su correo y se convierten en miembros."
         >
           <InviteForm />
         </SettingsSection>
-        <SettingsSection title={`Pending Invitations · ${invitations.length}`}>
+        <SettingsSection
+          title={`Invitaciones pendientes · ${invitations.length}`}
+        >
           <Invitations />
         </SettingsSection>
         <SettingsSection
-          title={`Members · ${members.length}`}
-          description="Deactivated Members can’t sign in but stay visible on their Issues and Comments."
+          title={`Miembros · ${members.length}`}
+          description="Los miembros desactivados no pueden iniciar sesión, pero siguen visibles en sus tareas y comentarios."
         >
           <Members />
         </SettingsSection>
@@ -362,12 +364,12 @@ const ROWS = ["a", "b", "c"];
 const MembersSkeleton = () => (
   <>
     <PageHeader>
-      <PageTitle>Members</PageTitle>
+      <PageTitle>Miembros</PageTitle>
     </PageHeader>
     <SettingsPage>
       <output
         aria-busy="true"
-        aria-label="Loading Members"
+        aria-label="Cargando miembros"
         className="flex flex-col gap-3"
       >
         <Skeleton className="h-5 w-32" />
@@ -398,7 +400,7 @@ export const Route = createFileRoute("/_app/members")({
       }),
     ]);
   },
-  head: () => ({ meta: [{ title: "Members" }] }),
+  head: () => ({ meta: [{ title: "Miembros" }] }),
   pendingComponent: MembersSkeleton,
   component: MembersPage,
 });

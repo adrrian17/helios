@@ -1,11 +1,11 @@
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
+const dateFormat = new Intl.DateTimeFormat("es", { dateStyle: "medium" });
 
-const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
+const dateTimeFormat = new Intl.DateTimeFormat("es", {
   dateStyle: "medium",
   timeStyle: "short",
 });
 
-const relativeFormat = new Intl.RelativeTimeFormat(undefined, {
+const relativeFormat = new Intl.RelativeTimeFormat("es", {
   numeric: "auto",
   style: "short",
 });
@@ -20,13 +20,13 @@ const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 const WEEK = 7 * DAY;
 
-/** "just now", "5 min. ago", "yesterday"; past a week the plain date reads better. */
+/** "ahora mismo", "hace 5 min", "ayer"; past a week the plain date reads better. */
 export const formatRelative = (date: Date, now = Date.now()) => {
   const elapsed = date.getTime() - now;
   const magnitude = Math.abs(elapsed);
 
   if (magnitude < MINUTE) {
-    return "just now";
+    return "ahora mismo";
   }
 
   if (magnitude < HOUR) {

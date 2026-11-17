@@ -28,12 +28,12 @@ export const priorityOptions: PickerOption[] = pickerPriorities.map(
 );
 
 export const assigneeOptions = (members: Member[]): PickerOption[] => [
-  { value: UNASSIGNED, label: "Unassigned", icon: <UnassignedAvatar /> },
+  { value: UNASSIGNED, label: "Sin responsable", icon: <UnassignedAvatar /> },
   ...members.map((member) => ({
     value: member.id,
     label: member.active
       ? member.displayName
-      : `${member.displayName} (deactivated)`,
+      : `${member.displayName} (desactivado)`,
     icon: <MemberAvatar member={member} />,
   })),
 ];

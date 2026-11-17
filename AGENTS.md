@@ -4,7 +4,7 @@ A work tracker for a single small team: React + TanStack Router web app, Hono + 
 
 - Package manager: **pnpm** (workspaces; versions in the `pnpm-workspace.yaml` catalog).
 - Toolchain: **Vite+** (`vp`). Lint and format rules live in `vite.config.ts`; there is no ESLint, Prettier or Biome config.
-- Domain terms: use `GLOSSARY.md` words in code, UI copy and docs; avoid the synonyms it lists.
+- Domain terms: code and docs use the `GLOSSARY.md` English words and avoid the synonyms it lists; UI copy is Spanish and uses each entry's `_Spanish UI_` term.
 
 ## Commands
 

@@ -79,6 +79,6 @@ export const describePosition = (columns: BoardColumn[], id: string) => {
   const { column, index } = locate(columns, id);
 
   return column === undefined
-    ? "outside the board"
-    : `in ${column.state.name}, position ${index + 1} of ${column.issues.length}`;
+    ? "fuera del tablero"
+    : `en ${column.state.name}, posición ${index + 1} de ${column.issues.length}`;
 };

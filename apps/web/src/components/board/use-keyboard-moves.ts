@@ -95,7 +95,7 @@ export const useKeyboardMoves = ({
       setWorking(next);
     });
     refocus(issue.id);
-    setNote(`${issue.identifier} is ${describePosition(next, issue.id)}.`);
+    setNote(`${issue.identifier} está ${describePosition(next, issue.id)}.`);
   };
 
   const handleCardKeyDown = (issue: IssueRow, event: React.KeyboardEvent) => {
@@ -105,7 +105,7 @@ export const useKeyboardMoves = ({
         setPickedId(issue.id);
         setWorking(columns);
         setNote(
-          `Picked up ${issue.identifier}. Arrow keys move it, Space drops it, Escape cancels.`
+          `Has levantado ${issue.identifier}. Las flechas la mueven, la barra espaciadora la suelta y Escape cancela.`
         );
       }
 
@@ -124,7 +124,7 @@ export const useKeyboardMoves = ({
     } else if (event.key === " " || event.key === "Enter") {
       event.preventDefault();
       setNote(
-        `Dropped ${issue.identifier} ${describePosition(current, issue.id)}.`
+        `Has soltado ${issue.identifier} ${describePosition(current, issue.id)}.`
       );
 
       const placement = changedPlacement(columns, current, issue.id);
@@ -139,10 +139,10 @@ export const useKeyboardMoves = ({
     } else if (event.key === "Escape") {
       flushSync(putDown);
       refocus(issue.id);
-      setNote(`Cancelled. ${issue.identifier} went back to where it was.`);
+      setNote(`Cancelado. ${issue.identifier} volvió a su lugar.`);
     } else if (event.key === "Tab") {
       putDown();
-      setNote(`Cancelled. ${issue.identifier} went back to where it was.`);
+      setNote(`Cancelado. ${issue.identifier} volvió a su lugar.`);
     }
   };
 

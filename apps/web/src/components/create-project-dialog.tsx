@@ -30,7 +30,7 @@ import { useRef, useState } from "react";
 import { suggestPrefix } from "@/utils/domain";
 import { describeError, orpc } from "@/utils/orpc";
 
-const defaultStateNames = new Intl.ListFormat("en-GB").format(
+const defaultStateNames = new Intl.ListFormat("es").format(
   defaultStates.map((state) => state.name)
 );
 
@@ -83,13 +83,13 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
     >
       <FieldGroup>
         <Field data-invalid={nameInvalid || undefined}>
-          <FieldLabel htmlFor="project-name">Name</FieldLabel>
+          <FieldLabel htmlFor="project-name">Nombre</FieldLabel>
           <Input
             id="project-name"
             autoComplete="off"
             placeholder="Helios"
             aria-invalid={nameInvalid || undefined}
-            // The dialog closes on success, so nothing typed after Create may be lost.
+            // The dialog closes on success, so nothing typed after submitting may be lost.
             readOnly={create.isPending}
             value={name}
             onChange={(event) => {
@@ -101,13 +101,15 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
             }}
           />
           {nameInvalid ? (
-            <FieldError>Give the Project a name.</FieldError>
+            <FieldError>Ponle un nombre al proyecto.</FieldError>
           ) : null}
         </Field>
         <Field
           data-invalid={prefixInvalid || conflict !== undefined || undefined}
         >
-          <FieldLabel htmlFor="project-prefix">Identifier prefix</FieldLabel>
+          <FieldLabel htmlFor="project-prefix">
+            Prefijo del identificador
+          </FieldLabel>
           <Input
             id="project-prefix"
             autoComplete="off"
@@ -127,12 +129,12 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
             }}
           />
           <FieldDescription id="project-prefix-help">
-            {prefixRule.min} to {prefixRule.max} letters. Issues get Identifiers
-            like{" "}
+            De {prefixRule.min} a {prefixRule.max} letras. Las tareas reciben
+            identificadores como{" "}
             <span className="font-mono">
               {formatIdentifier(prefixValid ? prefix : "HEL", 1)}
             </span>
-            . The prefix can’t change later.
+            . El prefijo no se puede cambiar después.
           </FieldDescription>
           {prefixInvalid ? <FieldError>{prefixRule.message}</FieldError> : null}
           {conflict === undefined ? null : <FieldError>{conflict}</FieldError>}
@@ -145,11 +147,11 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
       </FieldGroup>
       <DialogFooter>
         <Button variant="outline" type="button" onClick={onDone}>
-          Cancel
+          Cancelar
         </Button>
         <Button type="submit" disabled={create.isPending}>
           {create.isPending ? <Spinner data-icon="inline-start" /> : null}
-          Create Project
+          Crear proyecto
         </Button>
       </DialogFooter>
     </form>
@@ -166,9 +168,9 @@ export const CreateProjectDialog = ({
   <Dialog open={open} onOpenChange={onOpenChange}>
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>New Project</DialogTitle>
+        <DialogTitle>Nuevo proyecto</DialogTitle>
         <DialogDescription>
-          It starts with these Workflow States: {defaultStateNames}.
+          Empieza con estos estados: {defaultStateNames}.
         </DialogDescription>
       </DialogHeader>
       <CreateProjectForm

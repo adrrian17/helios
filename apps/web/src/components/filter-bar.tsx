@@ -46,9 +46,11 @@ const FilterPicker = ({
       ? options.find((option) => option.value === selected[0])
       : undefined;
 
+  const count = selected.length === 1 ? "seleccionado" : "seleccionados";
+
   return (
     <Picker
-      label={`Filter by ${name.toLowerCase()}`}
+      label={`Filtrar por ${name.toLowerCase()}`}
       multiple
       options={options}
       selected={selected}
@@ -59,8 +61,8 @@ const FilterPicker = ({
           size="sm"
           aria-label={
             selected.length === 0
-              ? `${name} filter`
-              : `${name} filter, ${selected.length} selected`
+              ? `Filtro de ${name.toLowerCase()}`
+              : `Filtro de ${name.toLowerCase()}, ${selected.length} ${count}`
           }
         >
           {only?.icon ?? <Icon data-icon="inline-start" />}
@@ -90,10 +92,10 @@ export const FilterBar = ({
 
   return (
     <fieldset className="flex h-11 min-w-0 shrink-0 items-center gap-1 border-b pr-3 max-md:h-14 max-md:pr-2">
-      <legend className="sr-only">Filters</legend>
+      <legend className="sr-only">Filtros</legend>
       <div className="flex min-w-0 flex-1 items-center gap-1 self-stretch overflow-x-auto pr-1 pl-3 max-md:pl-2">
         <FilterPicker
-          name="Assignee"
+          name="Responsable"
           icon={UserRoundIcon}
           options={assigneeOptions(members.data ?? [])}
           selected={search.assignee ?? []}
@@ -102,7 +104,7 @@ export const FilterBar = ({
           }}
         />
         <FilterPicker
-          name="Label"
+          name="Etiqueta"
           icon={TagIcon}
           options={labelOptions(labels.data ?? [])}
           selected={search.label ?? []}
@@ -111,7 +113,7 @@ export const FilterBar = ({
           }}
         />
         <FilterPicker
-          name="Priority"
+          name="Prioridad"
           icon={SignalIcon}
           options={priorityOptions}
           selected={search.priority ?? []}
@@ -136,7 +138,7 @@ export const FilterBar = ({
             }}
           >
             <XIcon data-icon="inline-start" />
-            <span className="max-md:sr-only">Clear filters</span>
+            <span className="max-md:sr-only">Quitar filtros</span>
           </Button>
         ) : null}
       </div>

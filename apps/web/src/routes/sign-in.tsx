@@ -29,7 +29,7 @@ const requestMagicLink = async (email: string) => {
   });
 
   if (error) {
-    throw new Error(error.message ?? "Request failed");
+    throw new Error(error.message ?? "Solicitud fallida");
   }
 };
 
@@ -40,7 +40,9 @@ const SignInPage = () => {
   const requestLink = useMutation({
     mutationFn: requestMagicLink,
     onError: () => {
-      toast.error("Could not request a sign-in link. Try again.");
+      toast.error(
+        "No se pudo solicitar el enlace de acceso. Inténtalo de nuevo."
+      );
     },
   });
 
@@ -55,9 +57,9 @@ const SignInPage = () => {
       </p>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Sign in to Helios</CardTitle>
+          <CardTitle>Inicia sesión en Helios</CardTitle>
           <CardDescription>
-            We email you a link that signs you in.
+            Te enviamos por correo un enlace para iniciar sesión.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,8 +71,9 @@ const SignInPage = () => {
                 tabIndex={-1}
                 className="block outline-none"
               >
-                If {email} belongs to a Member or has an Invitation, a sign-in
-                link is on its way. It works once and expires in 5 minutes.
+                Si {email} pertenece a un miembro o tiene una invitación, el
+                enlace de acceso va en camino. Funciona una sola vez y caduca en
+                5 minutos.
               </output>
               <Button
                 variant="ghost"
@@ -78,7 +81,7 @@ const SignInPage = () => {
                   requestLink.reset();
                 }}
               >
-                Use a different email
+                Usar otro correo
               </Button>
             </div>
           ) : (
@@ -91,15 +94,15 @@ const SignInPage = () => {
             >
               {error === undefined ? null : (
                 <p role="alert" className="text-destructive text-sm">
-                  That sign-in link is invalid or has expired. Request a new
-                  one.
+                  El enlace de acceso no es válido o ha caducado. Solicita uno
+                  nuevo.
                 </p>
               )}
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
-                  // Back after "Use a different email", so keyboard users keep their place.
+                  // Back after choosing another email, so keyboard users keep their place.
                   autoFocus
                   type="email"
                   autoComplete="email"
@@ -118,7 +121,7 @@ const SignInPage = () => {
                 className="h-11"
                 disabled={requestLink.isPending}
               >
-                Email me a sign-in link
+                Enviarme un enlace de acceso
               </Button>
             </form>
           )}
@@ -130,6 +133,6 @@ const SignInPage = () => {
 
 export const Route = createFileRoute("/sign-in")({
   validateSearch: z.object({ error: z.string().optional() }),
-  head: () => ({ meta: [{ title: "Sign in" }] }),
+  head: () => ({ meta: [{ title: "Iniciar sesión" }] }),
   component: SignInPage,
 });
