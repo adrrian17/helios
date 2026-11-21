@@ -31,6 +31,7 @@ import {
 } from "@/components/issue-meta";
 import type { IssueRow } from "@/utils/domain";
 import { formatDate } from "@/utils/format";
+import { useIssueSequence } from "@/utils/issue-sequence";
 import { nextSort } from "@/utils/list-sort";
 
 /**
@@ -286,24 +287,28 @@ export const IssueTable = ({
   issues: IssueRow[];
   sort: Sort;
   onSort: (field: SortField) => void;
-}) => (
-  <table aria-label={label} className="w-full table-fixed text-sm">
-    <thead className="border-b">
-      <tr>
-        {columns.map((column) => (
-          <SortHeader
-            key={column.field}
-            column={column}
-            sort={sort}
-            onSort={onSort}
-          />
+}) => {
+  useIssueSequence(issues.map((issue) => issue.identifier));
+
+  return (
+    <table aria-label={label} className="w-full table-fixed text-sm">
+      <thead className="border-b">
+        <tr>
+          {columns.map((column) => (
+            <SortHeader
+              key={column.field}
+              column={column}
+              sort={sort}
+              onSort={onSort}
+            />
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {issues.map((issue) => (
+          <IssueTableRow key={issue.id} issue={issue} />
         ))}
-      </tr>
-    </thead>
-    <tbody>
-      {issues.map((issue) => (
-        <IssueTableRow key={issue.id} issue={issue} />
-      ))}
-    </tbody>
-  </table>
-);
+      </tbody>
+    </table>
+  );
+};

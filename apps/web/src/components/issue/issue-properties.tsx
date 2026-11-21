@@ -69,6 +69,19 @@ const Row = ({
   </div>
 );
 
+/** A display name that may be an email: offers a break before the at sign so it wraps there first. */
+const Name = ({ name }: { name: string }) => {
+  const at = Math.max(name.indexOf("@"), 0);
+
+  return (
+    <>
+      {name.slice(0, at)}
+      <wbr />
+      {name.slice(at)}
+    </>
+  );
+};
+
 const AssigneeValue = ({
   assignee,
   wrap,
@@ -88,7 +101,11 @@ const AssigneeValue = ({
         assignee === null && "text-muted-foreground"
       )}
     >
-      {assignee?.displayName ?? "Sin responsable"}
+      {assignee === null ? (
+        "Sin responsable"
+      ) : (
+        <Name name={assignee.displayName} />
+      )}
     </span>
   </>
 );
@@ -236,7 +253,7 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
         <span className="text-muted-foreground flex min-w-0 items-center gap-2 px-2.5 text-sm">
           <MemberAvatar member={issue.creator} />
           <span className="min-w-0 [overflow-wrap:anywhere]">
-            {issue.creator.displayName}
+            <Name name={issue.creator.displayName} />
           </span>
         </span>
       </Row>

@@ -43,6 +43,16 @@ export const shortcuts = {
   state: { key: "s", label: "Cambiar estado", scope: ISSUE_VIEW },
   priority: { key: "p", label: "Cambiar prioridad", scope: ISSUE_VIEW },
   assignee: { key: "a", label: "Cambiar responsable", scope: ISSUE_VIEW },
+  previousIssue: {
+    key: "k",
+    label: "Ir a la tarea anterior de la vista",
+    scope: ISSUE_VIEW,
+  },
+  nextIssue: {
+    key: "j",
+    label: "Ir a la tarea siguiente de la vista",
+    scope: ISSUE_VIEW,
+  },
 } satisfies Record<string, Shortcut>;
 
 type ShortcutName = keyof typeof shortcuts;

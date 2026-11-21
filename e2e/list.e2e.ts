@@ -274,3 +274,42 @@ test.describe("phone list", () => {
     await archiveProject(page, prefix);
   });
 });
+
+test.describe("issue neighbours", () => {
+  test.skip(({ isMobile }) => isMobile, "Desktop List.");
+
+  test("the Issue view steps through the List it was opened from", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+
+    await Promise.all(
+      ["Alpha", "Bravo", "Charlie"].map(
+        async (title) =>
+          await apiAs(page).issues.create({ projectId: project.id, title })
+      )
+    );
+
+    await page.goto(`/projects/${prefix}/list?sort=title&dir=desc`);
+    await expect(rows(page)).toHaveText(titles("Charlie", "Bravo", "Alpha"));
+    await page.getByRole("link", { name: "Charlie" }).click();
+
+    const previous = page.getByRole("button", { name: "Tarea anterior" });
+    const next = page.getByRole("button", { name: "Tarea siguiente" });
+    await expect(page.getByText("1 / 3")).toBeVisible();
+    await expect(previous).toBeDisabled();
+
+    await next.click();
+    await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+    await page.keyboard.press("j");
+    await expect(page.getByRole("heading", { name: "Alpha" })).toBeVisible();
+    await expect(next).toBeDisabled();
+    await page.keyboard.press("k");
+    await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+
+    await archiveProject(page, prefix);
+  });
+});

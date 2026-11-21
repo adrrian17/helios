@@ -38,6 +38,7 @@ import { ColumnPager } from "@/components/board/column-pager";
 import { IssueCardBody } from "@/components/board/issue-card";
 import { useKeyboardMoves } from "@/components/board/use-keyboard-moves";
 import type { BoardColumn, IssueRow, Project } from "@/utils/domain";
+import { useIssueSequence } from "@/utils/issue-sequence";
 import { orpc } from "@/utils/orpc";
 
 const screenReaderInstructions = {
@@ -111,6 +112,9 @@ export const Board = ({
   const [working, setWorking] = useState<BoardColumn[] | null>(null);
   const [activeIssue, setActiveIssue] = useState<IssueRow | null>(null);
   const shown = working ?? columns;
+  useIssueSequence(
+    columns.flatMap(({ issues }) => issues.map((issue) => issue.identifier))
+  );
   const lastOverId = useRef<UniqueIdentifier | null>(null);
   const justMovedColumn = useRef(false);
   const dragEndedAt = useRef(0);

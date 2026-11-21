@@ -19,6 +19,7 @@ import {
 } from "@/components/issue-meta";
 import { PageHeader, PageTitle } from "@/components/page-header";
 import type { IssueRow } from "@/utils/domain";
+import { useIssueSequence } from "@/utils/issue-sequence";
 import { orpc } from "@/utils/orpc";
 
 const MAX_LABELS = 2;
@@ -60,6 +61,9 @@ const MyIssueRow = ({ issue }: { issue: IssueRow }) => (
 
 const MyIssuesList = () => {
   const { data: groups } = useSuspenseQuery(orpc.issues.mine.queryOptions());
+  useIssueSequence(
+    groups.flatMap(({ issues }) => issues.map((issue) => issue.identifier))
+  );
 
   if (groups.length === 0) {
     return (
