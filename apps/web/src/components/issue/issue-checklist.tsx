@@ -303,7 +303,7 @@ export const IssueChecklist = () => {
       className="flex flex-col gap-2"
     >
       <div className="flex items-center gap-3">
-        <h2 id="checklist-heading" className="text-sm font-medium">
+        <h2 id="checklist-heading" className="text-sm font-semibold">
           Checklist
         </h2>
         {items.length === 0 ? null : (

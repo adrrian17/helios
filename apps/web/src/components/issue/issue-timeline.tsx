@@ -347,7 +347,7 @@ export const IssueTimeline = () => {
 
   return (
     <section aria-labelledby="activity-heading" className="flex flex-col gap-2">
-      <h2 id="activity-heading" className="text-sm font-medium">
+      <h2 id="activity-heading" className="text-sm font-semibold">
         Actividad
       </h2>
       <div className="relative">

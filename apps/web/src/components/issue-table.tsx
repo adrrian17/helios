@@ -27,7 +27,6 @@ import {
   PriorityIcon,
   RelativeTime,
   StateIcon,
-  UnassignedAvatar,
 } from "@/components/issue-meta";
 import type { IssueRow } from "@/utils/domain";
 import { formatDate } from "@/utils/format";
@@ -253,9 +252,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
     </td>
     <td className={cn(CELL, "md:max-xl:pr-4")}>
       <span className="flex min-w-0 items-center gap-2">
-        {issue.assignee === null ? (
-          <UnassignedAvatar />
-        ) : (
+        {issue.assignee === null ? null : (
           <MemberAvatar member={issue.assignee} />
         )}
         <span
