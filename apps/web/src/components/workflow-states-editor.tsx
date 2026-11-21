@@ -235,7 +235,7 @@ const StateRow = ({
   const move = useMutation(orpc.workflowStates.move.mutationOptions());
 
   return (
-    <li className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-4">
+    <li className="hover:bg-muted/40 flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-4 transition-colors">
       <StateIcon category={state.category} />
       {renaming ? (
         <StateNameForm
@@ -289,7 +289,7 @@ const StateRow = ({
               ref={opener}
               render={
                 <Button
-                  variant="ghost"
+                  variant="muted"
                   size="icon-sm"
                   aria-label={`Más acciones para ${state.name}`}
                 />

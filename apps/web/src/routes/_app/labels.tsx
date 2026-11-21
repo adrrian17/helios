@@ -274,7 +274,7 @@ const LabelRow = ({
       : label.color;
 
   return (
-    <li className="flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-2">
+    <li className="hover:bg-muted/40 flex min-h-12 items-center gap-2 py-1.5 pr-1.5 pl-2 transition-colors">
       <Popover>
         <PopoverTrigger
           render={
@@ -312,7 +312,7 @@ const LabelRow = ({
               ref={opener}
               render={
                 <Button
-                  variant="ghost"
+                  variant="muted"
                   size="icon-sm"
                   aria-label={`Acciones para ${label.name}`}
                 />

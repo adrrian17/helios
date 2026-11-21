@@ -41,19 +41,22 @@ type Layout = "rail" | "summary" | "details";
 const Row = ({
   term,
   chip = false,
+  className,
   children,
 }: {
   term: string;
   /** A bare value in the phone's chip row; the term is only spoken. */
   chip?: boolean;
+  className?: string;
   children: React.ReactNode;
 }) => (
   <div
-    className={
+    className={cn(
       chip
         ? "flex max-w-full min-w-0 last:min-w-11 last:grow last:basis-0"
-        : "flex min-h-8 items-center gap-2"
-    }
+        : "flex min-h-8 items-center gap-2",
+      className
+    )}
   >
     <dt
       className={
@@ -228,8 +231,9 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
 
   return (
     <>
-      <Row term="Creada por">
-        <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
+      {/* Read-only history, set apart from the fields a picker edits. */}
+      <Row term="Creada por" className="mt-3 border-t pt-3">
+        <span className="text-muted-foreground flex min-w-0 items-center gap-2 px-2.5 text-sm">
           <MemberAvatar member={issue.creator} />
           <span className="min-w-0 [overflow-wrap:anywhere]">
             {issue.creator.displayName}
@@ -237,10 +241,15 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
         </span>
       </Row>
       <Row term="Creada">
-        <span className="px-2.5 text-sm">{formatDate(issue.createdAt)}</span>
+        <span className="text-muted-foreground px-2.5 text-sm">
+          {formatDate(issue.createdAt)}
+        </span>
       </Row>
       <Row term="Actualizada">
-        <RelativeTime date={issue.updatedAt} className="px-2.5 text-sm" />
+        <RelativeTime
+          date={issue.updatedAt}
+          className="text-muted-foreground px-2.5 text-sm"
+        />
       </Row>
     </>
   );

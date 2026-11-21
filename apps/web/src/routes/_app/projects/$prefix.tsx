@@ -36,7 +36,6 @@ const ProjectLayout = () => {
 
   const me = useMe();
 
-  // On phones the Settings header needs the room for the Project name.
   const onSettings =
     useMatchRoute()({ to: "/projects/$prefix/settings" }) !== false;
 
@@ -68,7 +67,8 @@ const ProjectLayout = () => {
           aria-label="Vistas del proyecto"
           className={cn(
             "ml-1 flex items-center gap-0.5 md:ml-3",
-            onSettings && "max-md:hidden"
+            // Settings is no view of the Board or List, so neither tab would be current.
+            onSettings && "hidden"
           )}
         >
           <Link

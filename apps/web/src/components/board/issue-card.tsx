@@ -75,7 +75,7 @@ export const IssueCardBody = ({
           </>
         )}
       </div>
-      <p className="line-clamp-3 text-sm leading-snug font-medium text-pretty break-words">
+      <p className="line-clamp-3 text-sm leading-snug font-medium break-words">
         {issue.title}
       </p>
       <span className="sr-only">
