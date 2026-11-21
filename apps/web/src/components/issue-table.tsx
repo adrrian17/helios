@@ -51,16 +51,16 @@ const columns: {
     field: "priority",
     label: "Prioridad",
     icon: SignalIcon,
-    className: "w-11 lg:w-28",
+    className: "w-11 lg:w-32",
   },
   {
     field: "assignee",
     label: "Responsable",
     icon: UserRoundIcon,
-    // The last shown column until Created and Updated appear.
+    // The last shown column until Updated appears.
     className: "w-11 md:max-xl:pr-4 lg:w-40",
   },
-  { field: "created", label: "Creada", className: "w-26 max-xl:hidden" },
+  { field: "created", label: "Creada", className: "w-26 max-2xl:hidden" },
   { field: "updated", label: "Actualizada", className: "w-28 max-xl:hidden" },
 ];
 
@@ -133,7 +133,7 @@ const directionNames = { asc: "Ascendente", desc: "Descendente" } as const;
 const isField = (value: unknown): value is SortField =>
   sortFields.some((field) => field === value);
 
-/** Every sort field and the direction, for widths where the List hides the date columns. */
+/** Every sort field and the direction, for widths where the List hides a date column. */
 export const SortMenu = ({
   sort,
   onChange,
@@ -147,7 +147,7 @@ export const SortMenu = ({
         <Button
           variant="muted"
           size="icon-sm"
-          className="xl:hidden"
+          className="2xl:hidden"
           aria-label={`Orden: ${sortNames[sort.field]}, ${directionNames[sort.direction].toLowerCase()}`}
         />
       }
@@ -217,7 +217,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
           {issue.labels.slice(0, MAX_LABELS).map((label) => (
             <span
               key={label.id}
-              className="text-muted-foreground inline-flex h-5 max-w-24 items-center gap-1 rounded-md border px-1.5 text-xs"
+              className="text-muted-foreground inline-flex h-5 max-w-32 items-center gap-1 rounded-md border px-1.5 text-xs"
             >
               <LabelDot color={label.color} />
               <span className="truncate">{label.name}</span>
@@ -262,7 +262,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         </span>
       </span>
     </td>
-    <td className={cn(CELL, "text-muted-foreground max-xl:hidden")}>
+    <td className={cn(CELL, "text-muted-foreground max-2xl:hidden")}>
       {formatDate(issue.createdAt)}
     </td>
     <td

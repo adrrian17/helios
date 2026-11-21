@@ -52,8 +52,10 @@ export const ColumnPager = ({
             <span
               key={entry.state.id}
               className={cn(
-                "size-1.5 rounded-full transition-colors",
-                index === current ? "bg-foreground" : "bg-foreground/20"
+                "h-1.5 rounded-full transition-all",
+                index === current
+                  ? "bg-foreground w-4"
+                  : "bg-foreground/20 w-1.5"
               )}
             />
           ))}

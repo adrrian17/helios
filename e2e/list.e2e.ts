@@ -50,13 +50,13 @@ test.describe("desktop list", () => {
     await page.goto(`/projects/${prefix}/list`);
     await expect(rows(page)).toHaveText(titles("Charlie", "Alpha", "Bravo"));
 
-    await page.getByRole("button", { name: "Título" }).click();
+    await page.getByRole("button", { name: "Título", exact: true }).click();
     await expect(rows(page)).toHaveText(titles("Alpha", "Bravo", "Charlie"));
     await expect(
       page.getByRole("columnheader", { name: "Título" })
     ).toHaveAttribute("aria-sort", "ascending");
 
-    await page.getByRole("button", { name: "Título" }).click();
+    await page.getByRole("button", { name: "Título", exact: true }).click();
     await expect(rows(page)).toHaveText(titles("Charlie", "Bravo", "Alpha"));
 
     await page.getByRole("button", { name: "Prioridad", exact: true }).click();
@@ -165,7 +165,7 @@ test.describe("desktop list", () => {
     await expect(page).toHaveURL(/sort=created/u);
     await page.keyboard.press("Escape");
 
-    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.setViewportSize({ width: 1536, height: 864 });
     await expect(page.getByRole("button", { name: /^Orden: /u })).toBeHidden();
 
     await archiveProject(page, prefix);

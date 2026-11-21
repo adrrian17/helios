@@ -246,17 +246,15 @@ const IssuePage = () => {
             className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10"
           >
             <IssueTitle />
-            {showRail ? null : properties("summary")}
-            <IssueDescription />
-            <IssueChecklist />
             {showRail ? null : (
-              <section
-                aria-label="Propiedades"
-                className="bg-card rounded-lg border p-2"
-              >
+              // Every property sits under the title, so none waits past the checklist.
+              <section aria-label="Propiedades" className="flex flex-col gap-2">
+                {properties("summary")}
                 {properties("details")}
               </section>
             )}
+            <IssueDescription />
+            <IssueChecklist />
             <IssueTimeline />
           </div>
         </main>

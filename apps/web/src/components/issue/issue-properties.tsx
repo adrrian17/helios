@@ -317,7 +317,7 @@ export const IssueProperties = ({
 
   const { variant, width, opens, list } = chip
     ? ({
-        variant: "outline",
+        variant: "secondary",
         // A chip too long for the row truncates on a line of its own; the rest wrap below it.
         width: "min-w-11 max-w-full shrink",
         opens: null,
