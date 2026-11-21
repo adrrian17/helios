@@ -131,7 +131,7 @@ const CreateProjectForm = ({ onDone }: { onDone: () => void }) => {
           <FieldDescription id="project-prefix-help">
             De {prefixRule.min} a {prefixRule.max} letras. Las tareas reciben
             identificadores como{" "}
-            <span className="font-mono">
+            <span className="tabular-nums">
               {formatIdentifier(prefixValid ? prefix : "HEL", 1)}
             </span>
             . El prefijo no se puede cambiar después.

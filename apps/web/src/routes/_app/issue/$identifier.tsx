@@ -232,7 +232,7 @@ const IssuePage = () => {
           />
           <span
             aria-current="page"
-            className="shrink-0 font-mono text-sm font-medium whitespace-nowrap tabular-nums"
+            className="shrink-0 text-sm font-medium whitespace-nowrap tabular-nums"
           >
             {issue.identifier}
           </span>

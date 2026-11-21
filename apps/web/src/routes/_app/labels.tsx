@@ -374,12 +374,9 @@ const LabelsPage = () => {
       </PageHeader>
       <SettingsPage>
         <SettingsSection
-          title="Nueva etiqueta"
-          description="Las etiquetas se comparten entre todos los proyectos. Los nombres son únicos, sin distinguir mayúsculas."
+          title="Etiquetas"
+          description={`${labels.length} en total. Se comparten entre todos los proyectos.`}
         >
-          <CreateLabelForm count={labels.length} />
-        </SettingsSection>
-        <SettingsSection title={`Etiquetas · ${labels.length}`}>
           {labels.length === 0 ? (
             <div className="rounded-lg border">
               <Empty>
@@ -389,8 +386,8 @@ const LabelsPage = () => {
                   </EmptyMedia>
                   <EmptyTitle>Aún no hay etiquetas</EmptyTitle>
                   <EmptyDescription>
-                    Crea una arriba o directamente desde el selector de
-                    etiquetas de una tarea.
+                    Crea una abajo o directamente desde el selector de etiquetas
+                    de una tarea.
                   </EmptyDescription>
                 </EmptyHeader>
               </Empty>
@@ -402,6 +399,12 @@ const LabelsPage = () => {
               ))}
             </SettingsList>
           )}
+        </SettingsSection>
+        <SettingsSection
+          title="Nueva etiqueta"
+          description="Los nombres son únicos, sin distinguir mayúsculas."
+        >
+          <CreateLabelForm count={labels.length} />
         </SettingsSection>
       </SettingsPage>
       <ConfirmDialog

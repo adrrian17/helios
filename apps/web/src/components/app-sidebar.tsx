@@ -36,7 +36,7 @@ import { useState } from "react";
 
 import { useCommands } from "@/components/commands";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
-import { HeliosMark } from "@/components/project-mark";
+import { HeliosMark, ProjectMark } from "@/components/project-mark";
 import { UserMenu } from "@/components/user-menu";
 import { orpc } from "@/utils/orpc";
 import { keysOf, shortcuts } from "@/utils/shortcuts";
@@ -149,6 +149,7 @@ const ProjectsGroup = ({ onCreate }: { onCreate: (() => void) | null }) => {
                     to="/projects/$prefix"
                     params={{ prefix: project.prefix }}
                     activePath={`/projects/${project.prefix}`}
+                    icon={<ProjectMark name={project.name} />}
                     label={project.name}
                   />
                 ))}

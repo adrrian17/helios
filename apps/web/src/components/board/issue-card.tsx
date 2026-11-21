@@ -24,7 +24,6 @@ import {
   MemberAvatar,
   PriorityIcon,
   StateIcon,
-  UnassignedAvatar,
 } from "@/components/issue-meta";
 import type { IssueRow, WorkflowState } from "@/utils/domain";
 
@@ -62,13 +61,11 @@ export const IssueCardBody = ({
             Prioridad: {priorityLabels[issue.priority]}
           </TooltipContent>
         </Tooltip>
-        <span className="font-mono tabular-nums">{issue.identifier}</span>
+        <span className="tabular-nums">{issue.identifier}</span>
         <span className="flex-1" />
         {issue.assignee === null ? (
-          <>
-            <UnassignedAvatar />
-            <span className="sr-only">Sin responsable</span>
-          </>
+          // No placeholder: a ring on every unassigned card is noise.
+          <span className="sr-only">Sin responsable</span>
         ) : (
           <>
             <MemberAvatar member={issue.assignee} />

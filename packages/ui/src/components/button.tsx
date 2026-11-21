@@ -19,6 +19,9 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive/10 text-[oklch(0.48_0.2_27.5)] hover:bg-destructive/20 focus-visible:border-destructive focus-visible:ring-destructive dark:bg-destructive/20 dark:text-[oklch(0.808_0.114_19.6)] dark:hover:bg-destructive/30",
         link: "text-primary underline-offset-4 hover:underline",
+        /** An unset filter: a dashed outline that reads as a control without competing with set ones. */
+        filter:
+          "border-dashed border-border text-muted-foreground hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:hover:bg-muted/50",
         /** A full-width, left-aligned value that opens a picker, as in an Issue's properties. */
         property:
           "w-full justify-start font-normal hover:bg-muted aria-expanded:bg-muted dark:hover:bg-muted/50",

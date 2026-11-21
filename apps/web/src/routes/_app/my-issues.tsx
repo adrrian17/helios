@@ -31,16 +31,15 @@ const MyIssueRow = ({ issue }: { issue: IssueRow }) => (
       className="hover:bg-muted/50 focus-visible:ring-ring flex h-10 items-center gap-3 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset max-md:h-12"
     >
       <PriorityIcon priority={issue.priority} labelled={false} />
-      <span className="text-muted-foreground w-20 shrink-0 text-xs max-md:sr-only">
-        <span className="sr-only">Prioridad: </span>
-        {priorityLabels[issue.priority]}
+      <span className="sr-only">
+        Prioridad: {priorityLabels[issue.priority]}
       </span>
-      <span className="text-muted-foreground w-16 shrink-0 font-mono text-xs tabular-nums md:w-20">
+      <span className="text-muted-foreground w-14 shrink-0 text-xs tabular-nums md:w-16">
         {issue.identifier}
       </span>
       <StateIcon category={issue.state.category} />
       <span className="sr-only">{issue.state.name}</span>
-      <span className="min-w-0 flex-1 truncate font-medium">{issue.title}</span>
+      <span className="min-w-0 flex-1 truncate">{issue.title}</span>
       <span className="flex shrink-0 items-center gap-1 max-lg:hidden">
         {issue.labels.slice(0, MAX_LABELS).map((label) => (
           <span
@@ -85,7 +84,7 @@ const MyIssuesList = () => {
         <section key={project.id} aria-labelledby={`group-${project.id}`}>
           <h2
             id={`group-${project.id}`}
-            className="bg-muted/40 flex h-9 items-center gap-2 border-b px-4 text-sm max-md:h-12"
+            className="bg-muted/50 flex h-9 items-center gap-2 border-b px-4 text-sm max-md:h-12"
           >
             <Link
               to="/projects/$prefix"

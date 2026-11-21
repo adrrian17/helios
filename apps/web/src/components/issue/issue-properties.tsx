@@ -57,7 +57,7 @@ const Row = ({
   >
     <dt
       className={
-        chip ? "sr-only" : "text-muted-foreground w-24 shrink-0 text-xs"
+        chip ? "sr-only" : "text-muted-foreground w-20 shrink-0 text-xs"
       }
     >
       {term}
@@ -161,7 +161,7 @@ const LabelsField = ({
       {issue.labels.map((label) => (
         <span
           key={label.id}
-          className="inline-flex h-6 max-w-40 items-center gap-1.5 rounded-md border px-2 text-xs"
+          className="inline-flex h-6 max-w-40 items-center gap-1 rounded-md border px-1.5 text-xs"
         >
           <LabelDot color={label.color} />
           <span className="truncate">{label.name}</span>
