@@ -121,7 +121,7 @@ const ProjectsGroup = ({ onCreate }: { onCreate: (() => void) | null }) => {
   const projects = useQuery(orpc.projects.list.queryOptions());
 
   return (
-    <Collapsible render={<SidebarGroup />}>
+    <Collapsible defaultOpen render={<SidebarGroup />}>
       <SidebarGroupLabel
         render={<CollapsibleTrigger />}
         className="w-full cursor-pointer"
@@ -180,7 +180,7 @@ export const AppSidebar = () => {
   return (
     <>
       <CreateProjectDialog open={creating} onOpenChange={setCreating} />
-      <Sidebar>
+      <Sidebar variant="inset">
         <nav
           aria-label="Espacio de trabajo"
           className="flex min-h-0 flex-1 flex-col"
