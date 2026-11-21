@@ -314,7 +314,7 @@ export const IssueChecklist = () => {
             </span>
             <span
               aria-hidden="true"
-              className="bg-muted h-1 max-w-32 flex-1 overflow-hidden rounded-full"
+              className="bg-foreground/10 h-1.5 max-w-32 flex-1 overflow-hidden rounded-full"
             >
               <span
                 className="bg-state-completed block h-full w-full origin-left scale-x-(--progress) rounded-full transition-transform"

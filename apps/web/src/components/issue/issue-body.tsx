@@ -40,7 +40,7 @@ export const IssueTitle = () => {
   };
 
   return (
-    <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
+    <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
       <textarea
         aria-label="Título"
         rows={1}

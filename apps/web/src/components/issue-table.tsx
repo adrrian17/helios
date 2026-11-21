@@ -214,7 +214,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         >
           {issue.title}
         </Link>
-        <span className="ml-auto flex shrink-0 items-center gap-1 max-xl:hidden">
+        <span className="ml-auto flex shrink-0 items-center gap-1 max-2xl:hidden">
           {issue.labels.slice(0, MAX_LABELS).map((label) => (
             <span
               key={label.id}
@@ -241,7 +241,12 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
     <td className={CELL}>
       <span className="flex min-w-0 items-center gap-2">
         <PriorityIcon priority={issue.priority} labelled={false} />
-        <span className="text-muted-foreground truncate max-lg:sr-only">
+        <span
+          className={cn(
+            "text-muted-foreground truncate max-lg:sr-only",
+            issue.priority === "none" && "sr-only"
+          )}
+        >
           {priorityLabels[issue.priority]}
         </span>
       </span>
@@ -256,7 +261,7 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         <span
           className={cn(
             "truncate max-lg:sr-only",
-            issue.assignee === null && "text-muted-foreground"
+            issue.assignee === null && "sr-only"
           )}
         >
           {issue.assignee?.displayName ?? "Sin responsable"}

@@ -124,7 +124,7 @@ const ActivityItem = ({ entry }: { entry: ActivityEntry }) => {
   const { icon: Icon, describe } = activityCopy[entry.kind];
 
   return (
-    <li className="text-muted-foreground flex items-start gap-3 py-1.5 text-xs leading-5">
+    <li className="text-muted-foreground flex items-start gap-3 py-1.5 text-sm leading-5">
       <span className="bg-background ring-border relative z-10 grid size-5 shrink-0 place-items-center rounded-full ring-1">
         <Icon aria-hidden="true" className="size-3" />
       </span>

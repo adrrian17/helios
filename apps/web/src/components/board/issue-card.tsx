@@ -48,7 +48,7 @@ export const IssueCardBody = ({
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-1.5 rounded-lg border p-2.5 shadow-xs",
+        "bg-card text-card-foreground dark:border-input flex flex-col gap-1.5 rounded-lg border p-2.5 shadow-xs",
         className
       )}
     >
