@@ -350,16 +350,16 @@ const CategoryGroup = ({
 
   return (
     <li className="flex flex-col">
-      <div className="bg-muted/50 flex items-center gap-2 py-2 pr-1.5 pl-4">
+      <div className="bg-muted/30 flex items-center gap-2 py-2 pr-1.5 pl-4">
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <h3 className="text-sm font-medium">{label}</h3>
+          <h3 className="text-muted-foreground text-xs font-medium">{label}</h3>
           <p className="text-muted-foreground text-xs md:truncate">
             {categoryHints[category]}
           </p>
         </div>
         <Button
           ref={addButton}
-          variant="ghost"
+          variant="muted"
           size="sm"
           aria-label={`Añadir un estado a ${label}`}
           onClick={() => {

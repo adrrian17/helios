@@ -10,7 +10,13 @@ import {
   notFound,
   useMatchRoute,
 } from "@tanstack/react-router";
-import { ArchiveIcon, KanbanIcon, ListIcon, SettingsIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  ChevronRightIcon,
+  KanbanIcon,
+  ListIcon,
+  SettingsIcon,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { NotFound } from "@/components/route-states";
@@ -57,6 +63,15 @@ const ProjectLayout = () => {
         }
       >
         <h1 className="min-w-0 truncate text-sm font-medium">{project.name}</h1>
+        {onSettings ? (
+          <>
+            <ChevronRightIcon
+              aria-hidden="true"
+              className="text-muted-foreground size-3.5 shrink-0"
+            />
+            <span className="shrink-0 text-sm">Configuración</span>
+          </>
+        ) : null}
         {project.archivedAt === null ? null : (
           <Badge variant="secondary">
             <ArchiveIcon data-icon="inline-start" />

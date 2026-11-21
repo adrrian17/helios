@@ -155,7 +155,7 @@ export const BoardColumnView = ({
   return (
     <section
       aria-labelledby={headingId}
-      className="bg-muted/80 dark:bg-sidebar/70 flex max-h-full w-68 shrink-0 flex-col rounded-xl max-md:h-full max-md:max-h-none max-md:w-full max-md:snap-center max-md:snap-always max-md:rounded-none max-md:bg-transparent"
+      className="bg-muted dark:bg-sidebar/70 flex max-h-full w-68 shrink-0 flex-col rounded-xl max-md:h-full max-md:max-h-none max-md:w-full max-md:snap-center max-md:snap-always max-md:rounded-none max-md:bg-transparent"
     >
       <header className="flex h-10 shrink-0 items-center gap-2 pr-1.5 pl-3 max-md:hidden">
         <StateIcon category={state.category} />
