@@ -193,14 +193,15 @@ export const SortableIssueCard = ({
         onKeyDown={onKeyDown}
         className={cn(
           "focus-visible:ring-ring block touch-manipulation rounded-lg outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3",
-          isDragging && "opacity-40",
+          isDragging &&
+            "outline-foreground/20 bg-foreground/5 outline-2 -outline-offset-2 outline-dashed *:invisible",
           picked &&
             "ring-primary focus-visible:ring-primary ring-offset-background shadow-lg ring-2 ring-offset-2"
         )}
       >
         <IssueCardBody
           issue={issue}
-          className="hover:border-foreground/20 transition-colors"
+          className="hover:border-foreground/20 hover:bg-muted/40 transition-colors"
         />
       </Link>
       <MoveToMenu issue={issue} states={states} onMove={onMove} />

@@ -28,7 +28,7 @@ const MyIssueRow = ({ issue }: { issue: IssueRow }) => (
     <Link
       to="/issue/$identifier"
       params={{ identifier: issue.identifier }}
-      className="hover:bg-muted/50 focus-visible:ring-ring flex h-10 items-center gap-3 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset max-md:h-12"
+      className="hover:bg-muted dark:hover:bg-muted/50 focus-visible:ring-ring flex h-10 items-center gap-3 px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset max-md:h-12"
     >
       <PriorityIcon priority={issue.priority} labelled={false} />
       <span className="sr-only">

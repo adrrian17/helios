@@ -199,7 +199,7 @@ export const SortMenu = ({
 const MAX_LABELS = 2;
 
 const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
-  <tr className="hover:bg-muted/50 has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12">
+  <tr className="hover:bg-muted has-focus-visible:bg-muted dark:hover:bg-muted/50 dark:has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12">
     <td className={cn(CELL, "text-muted-foreground text-xs tabular-nums")}>
       {issue.identifier}
     </td>

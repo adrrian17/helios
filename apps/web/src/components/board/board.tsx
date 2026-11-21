@@ -361,7 +361,7 @@ export const Board = ({
           {activeIssue === null ? null : (
             <IssueCardBody
               issue={activeIssue}
-              className="ring-foreground/10 cursor-grabbing shadow-lg ring-1 md:rotate-2"
+              className="ring-foreground/10 dark:ring-foreground/20 cursor-grabbing shadow-xl ring-1 md:rotate-2"
             />
           )}
         </DragOverlay>
