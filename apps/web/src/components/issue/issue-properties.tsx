@@ -126,17 +126,22 @@ const useLabelWrites = (all: Label[]) => {
 
   const attach = useMutation({
     ...orpc.labels.attach.mutationOptions(),
-    onMutate: ({ labelId }) => {
+    onMutate: ({ issueId, labelId }) => {
       const label = all.find((entry) => entry.id === labelId);
 
       if (label !== undefined) {
-        patch((issue) => ({
-          ...issue,
-          labels: [
-            ...issue.labels.filter((entry) => entry.id !== labelId),
-            label,
-          ].toSorted(byName),
-        }));
+        // The view may have moved to another Issue since a Label create started.
+        patch((issue) =>
+          issue.id === issueId
+            ? {
+                ...issue,
+                labels: [
+                  ...issue.labels.filter((entry) => entry.id !== labelId),
+                  label,
+                ].toSorted(byName),
+              }
+            : issue
+        );
       }
     },
     onError: revert,
@@ -169,7 +174,15 @@ const LabelsField = ({
   const { attach, detach } = useLabelWrites(all);
   const attached = new Set(issue.labels.map((label) => label.id));
 
-  const create = useMutation(orpc.labels.create.mutationOptions());
+  // Hook-level, so the attach still runs after navigation unmounts this field.
+  const create = useMutation({
+    ...orpc.labels.create.mutationOptions(),
+    // Bound when the create starts: J or K can show another Issue before it lands.
+    onMutate: () => ({ issueId: issue.id }),
+    onSuccess: (label, _input, { issueId }) => {
+      attach({ issueId, labelId: label.id });
+    },
+  });
 
   return (
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pl-2.5">
@@ -201,17 +214,7 @@ const LabelsField = ({
         onCreate={{
           noun: "etiqueta",
           create: (name) => {
-            // Bound now: J or K can show another Issue before the create lands.
-            const issueId = issue.id;
-
-            create.mutate(
-              { name, color: nextLabelColor(all.length) },
-              {
-                onSuccess: (label) => {
-                  attach({ issueId, labelId: label.id });
-                },
-              }
-            );
+            create.mutate({ name, color: nextLabelColor(all.length) });
           },
         }}
         trigger={
