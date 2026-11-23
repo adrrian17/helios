@@ -169,12 +169,7 @@ const LabelsField = ({
   const { attach, detach } = useLabelWrites(all);
   const attached = new Set(issue.labels.map((label) => label.id));
 
-  const create = useMutation({
-    ...orpc.labels.create.mutationOptions(),
-    onSuccess: (label) => {
-      attach({ issueId: issue.id, labelId: label.id });
-    },
-  });
+  const create = useMutation(orpc.labels.create.mutationOptions());
 
   return (
     <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pl-2.5">
@@ -206,7 +201,17 @@ const LabelsField = ({
         onCreate={{
           noun: "etiqueta",
           create: (name) => {
-            create.mutate({ name, color: nextLabelColor(all.length) });
+            // Bound now: J or K can show another Issue before the create lands.
+            const issueId = issue.id;
+
+            create.mutate(
+              { name, color: nextLabelColor(all.length) },
+              {
+                onSuccess: (label) => {
+                  attach({ issueId, labelId: label.id });
+                },
+              }
+            );
           },
         }}
         trigger={

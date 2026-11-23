@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Page, Route } from "@playwright/test";
 
 import {
+  API_URL,
   adminEmail,
   apiAs,
   assignToAdmin,
@@ -10,6 +11,7 @@ import {
   column,
   seedProject,
   signIn,
+  uniqueId,
   uniquePrefix,
 } from "./helpers";
 
@@ -310,6 +312,61 @@ test.describe("issue neighbours", () => {
     await page.keyboard.press("k");
     await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
 
+    await archiveProject(page, prefix);
+  });
+
+  test("a Label still being created lands on the Issue it was created from after stepping to the next", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+    const api = apiAs(page);
+
+    const [first, second] = await Promise.all(
+      ["Alpha", "Bravo"].map(
+        async (title) =>
+          await api.issues.create({ projectId: project.id, title })
+      )
+    );
+
+    const name = `Label ${uniqueId()}`;
+
+    await page.goto(`/projects/${prefix}/list?sort=title&dir=asc`);
+    await page.getByRole("link", { name: "Alpha" }).click();
+    await expect(page.getByText("1 / 2")).toBeVisible();
+
+    // Held so the create is still pending when the view moves on.
+    const held: Route[] = [];
+    await page.route(`${API_URL}/rpc/labels/create`, (route) => {
+      held.push(route);
+    });
+    await page.getByRole("button", { name: "Añadir etiqueta" }).click();
+    await page.getByRole("combobox", { name: "Cambiar etiquetas" }).fill(name);
+    await page
+      .getByRole("option", { name: `Crear etiqueta “${name}”` })
+      .click();
+    await expect.poll(() => held.length).toBe(1);
+    await page.keyboard.press("Escape");
+    await page.keyboard.press("j");
+    await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+    const attached = page.waitForResponse(`${API_URL}/rpc/labels/attach`);
+    await held[0]?.continue();
+    await page.unroute(`${API_URL}/rpc/labels/create`);
+    await attached;
+
+    const rail = page.getByRole("complementary", { name: "Propiedades" });
+    await page.goto(`/issue/${first?.identifier}`);
+    await expect(rail).toContainText(name);
+    await page.goto(`/issue/${second?.identifier}`);
+    await expect(rail).toContainText("Añadir etiqueta");
+    await expect(rail).not.toContainText(name);
+
+    const all = await api.labels.list();
+    const created = all.find((label) => label.name === name);
+
+    await api.labels.delete({ id: created?.id ?? "" });
     await archiveProject(page, prefix);
   });
 });
