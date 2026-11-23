@@ -41,23 +41,26 @@ type Layout = "rail" | "summary" | "details";
 const Row = ({
   term,
   chip = false,
+  className,
   children,
 }: {
   term: string;
   /** A bare value in the phone's chip row; the term is only spoken. */
   chip?: boolean;
+  className?: string;
   children: React.ReactNode;
 }) => (
   <div
-    className={
+    className={cn(
       chip
         ? "flex max-w-full min-w-0 last:min-w-11 last:grow last:basis-0"
-        : "flex min-h-8 items-center gap-2"
-    }
+        : "flex min-h-8 items-center gap-2",
+      className
+    )}
   >
     <dt
       className={
-        chip ? "sr-only" : "text-muted-foreground w-24 shrink-0 text-xs"
+        chip ? "sr-only" : "text-muted-foreground w-20 shrink-0 text-xs"
       }
     >
       {term}
@@ -65,6 +68,19 @@ const Row = ({
     <dd className={cn("flex min-w-0", !chip && "flex-1")}>{children}</dd>
   </div>
 );
+
+/** A display name that may be an email: offers a break before the at sign so it wraps there first. */
+const Name = ({ name }: { name: string }) => {
+  const at = Math.max(name.indexOf("@"), 0);
+
+  return (
+    <>
+      {name.slice(0, at)}
+      <wbr />
+      {name.slice(at)}
+    </>
+  );
+};
 
 const AssigneeValue = ({
   assignee,
@@ -85,7 +101,11 @@ const AssigneeValue = ({
         assignee === null && "text-muted-foreground"
       )}
     >
-      {assignee?.displayName ?? "Sin responsable"}
+      {assignee === null ? (
+        "Sin responsable"
+      ) : (
+        <Name name={assignee.displayName} />
+      )}
     </span>
   </>
 );
@@ -106,17 +126,22 @@ const useLabelWrites = (all: Label[]) => {
 
   const attach = useMutation({
     ...orpc.labels.attach.mutationOptions(),
-    onMutate: ({ labelId }) => {
+    onMutate: ({ issueId, labelId }) => {
       const label = all.find((entry) => entry.id === labelId);
 
       if (label !== undefined) {
-        patch((issue) => ({
-          ...issue,
-          labels: [
-            ...issue.labels.filter((entry) => entry.id !== labelId),
-            label,
-          ].toSorted(byName),
-        }));
+        // The view may have moved to another Issue since a Label create started.
+        patch((issue) =>
+          issue.id === issueId
+            ? {
+                ...issue,
+                labels: [
+                  ...issue.labels.filter((entry) => entry.id !== labelId),
+                  label,
+                ].toSorted(byName),
+              }
+            : issue
+        );
       }
     },
     onError: revert,
@@ -149,10 +174,13 @@ const LabelsField = ({
   const { attach, detach } = useLabelWrites(all);
   const attached = new Set(issue.labels.map((label) => label.id));
 
+  // Hook-level, so the attach still runs after navigation unmounts this field.
   const create = useMutation({
     ...orpc.labels.create.mutationOptions(),
-    onSuccess: (label) => {
-      attach({ issueId: issue.id, labelId: label.id });
+    // Bound when the create starts: J or K can show another Issue before it lands.
+    onMutate: () => ({ issueId: issue.id }),
+    onSuccess: (label, _input, { issueId }) => {
+      attach({ issueId, labelId: label.id });
     },
   });
 
@@ -161,7 +189,7 @@ const LabelsField = ({
       {issue.labels.map((label) => (
         <span
           key={label.id}
-          className="inline-flex h-6 max-w-40 items-center gap-1.5 rounded-md border px-2 text-xs"
+          className="inline-flex h-6 max-w-40 items-center gap-1 rounded-md border px-1.5 text-xs"
         >
           <LabelDot color={label.color} />
           <span className="truncate">{label.name}</span>
@@ -228,19 +256,25 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
 
   return (
     <>
-      <Row term="Creada por">
-        <span className="flex min-w-0 items-center gap-2 px-2.5 text-sm">
+      {/* Read-only history, set apart from the fields a picker edits. */}
+      <Row term="Creada por" className="mt-3 border-t pt-3">
+        <span className="text-muted-foreground flex min-w-0 items-center gap-2 px-2.5 text-sm">
           <MemberAvatar member={issue.creator} />
           <span className="min-w-0 [overflow-wrap:anywhere]">
-            {issue.creator.displayName}
+            <Name name={issue.creator.displayName} />
           </span>
         </span>
       </Row>
       <Row term="Creada">
-        <span className="px-2.5 text-sm">{formatDate(issue.createdAt)}</span>
+        <span className="text-muted-foreground px-2.5 text-sm">
+          {formatDate(issue.createdAt)}
+        </span>
       </Row>
       <Row term="Actualizada">
-        <RelativeTime date={issue.updatedAt} className="px-2.5 text-sm" />
+        <RelativeTime
+          date={issue.updatedAt}
+          className="text-muted-foreground px-2.5 text-sm"
+        />
       </Row>
     </>
   );
@@ -308,7 +342,7 @@ export const IssueProperties = ({
 
   const { variant, width, opens, list } = chip
     ? ({
-        variant: "outline",
+        variant: "secondary",
         // A chip too long for the row truncates on a line of its own; the rest wrap below it.
         width: "min-w-11 max-w-full shrink",
         opens: null,

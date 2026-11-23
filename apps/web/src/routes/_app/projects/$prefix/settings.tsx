@@ -79,12 +79,12 @@ const GeneralForm = ({ project }: { project: Project }) => {
           {/* Field stretches its children; the wrapper takes that, so the badge keeps its width. */}
           <div>
             <Badge variant="outline">
-              <span className="font-mono">{project.prefix}</span>
+              <span className="tabular-nums">{project.prefix}</span>
             </Badge>
           </div>
           <FieldDescription>
             No cambia después de crearlo, para que identificadores como{" "}
-            <span className="font-mono">
+            <span className="tabular-nums">
               {formatIdentifier(project.prefix, 1)}
             </span>{" "}
             que ya se han compartido no cambien nunca.

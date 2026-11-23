@@ -1,7 +1,8 @@
 import { expect, test } from "@playwright/test";
-import type { Page } from "@playwright/test";
+import type { Page, Route } from "@playwright/test";
 
 import {
+  API_URL,
   adminEmail,
   apiAs,
   assignToAdmin,
@@ -10,6 +11,7 @@ import {
   column,
   seedProject,
   signIn,
+  uniqueId,
   uniquePrefix,
 } from "./helpers";
 
@@ -50,13 +52,13 @@ test.describe("desktop list", () => {
     await page.goto(`/projects/${prefix}/list`);
     await expect(rows(page)).toHaveText(titles("Charlie", "Alpha", "Bravo"));
 
-    await page.getByRole("button", { name: "Título" }).click();
+    await page.getByRole("button", { name: "Título", exact: true }).click();
     await expect(rows(page)).toHaveText(titles("Alpha", "Bravo", "Charlie"));
     await expect(
       page.getByRole("columnheader", { name: "Título" })
     ).toHaveAttribute("aria-sort", "ascending");
 
-    await page.getByRole("button", { name: "Título" }).click();
+    await page.getByRole("button", { name: "Título", exact: true }).click();
     await expect(rows(page)).toHaveText(titles("Charlie", "Bravo", "Alpha"));
 
     await page.getByRole("button", { name: "Prioridad", exact: true }).click();
@@ -165,7 +167,7 @@ test.describe("desktop list", () => {
     await expect(page).toHaveURL(/sort=created/u);
     await page.keyboard.press("Escape");
 
-    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.setViewportSize({ width: 1536, height: 864 });
     await expect(page.getByRole("button", { name: /^Orden: /u })).toBeHidden();
 
     await archiveProject(page, prefix);
@@ -273,4 +275,111 @@ test.describe("phone list", () => {
 
     await archiveProject(page, prefix);
   });
+});
+
+test.describe("issue neighbours", () => {
+  test.skip(({ isMobile }) => isMobile, "Desktop List.");
+
+  test("the Issue view steps through the List it was opened from", async ({
+    page,
+    request,
+  }) => {
+    const prefix = uniquePrefix();
+    await signIn(page, request, adminEmail);
+    const project = await seedProject(page, prefix);
+
+    await Promise.all(
+      ["Alpha", "Bravo", "Charlie"].map(
+        async (title) =>
+          await apiAs(page).issues.create({ projectId: project.id, title })
+      )
+    );
+
+    await page.goto(`/projects/${prefix}/list?sort=title&dir=desc`);
+    await expect(rows(page)).toHaveText(titles("Charlie", "Bravo", "Alpha"));
+    await page.getByRole("link", { name: "Charlie" }).click();
+
+    const previous = page.getByRole("button", { name: "Tarea anterior" });
+    const next = page.getByRole("button", { name: "Tarea siguiente" });
+    await expect(page.getByText("1 / 3")).toBeVisible();
+    await expect(previous).toBeDisabled();
+
+    await next.click();
+    await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+    await page.keyboard.press("j");
+    await expect(page.getByRole("heading", { name: "Alpha" })).toBeVisible();
+    await expect(next).toBeDisabled();
+    await page.keyboard.press("k");
+    await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+
+    await archiveProject(page, prefix);
+  });
+
+  for (const rail of [true, false]) {
+    test(`a Label still being created lands on the Issue it was created from after stepping to the next (${rail ? "rail" : "no rail"})`, async ({
+      page,
+      request,
+    }) => {
+      const prefix = uniquePrefix();
+      await signIn(page, request, adminEmail);
+      const project = await seedProject(page, prefix);
+      const api = apiAs(page);
+
+      const [first, second] = await Promise.all(
+        ["Alpha", "Bravo"].map(
+          async (title) =>
+            await api.issues.create({ projectId: project.id, title })
+        )
+      );
+
+      const name = `Label ${uniqueId()}`;
+      const label = page.getByText(name, { exact: true });
+
+      await page.goto(`/projects/${prefix}/list?sort=title&dir=asc`);
+      await page.getByRole("link", { name: "Alpha" }).click();
+      await expect(page.getByText("1 / 2")).toBeVisible();
+
+      if (!rail) {
+        // Without the rail the properties sit in the per-Issue column, which navigation unmounts.
+        await page.getByRole("button", { name: "Ocultar propiedades" }).click();
+      }
+
+      // Both writes are held: the create so the view moves on first, the attach to catch an early patch.
+      const held: Route[] = [];
+      await page.route(`${API_URL}/rpc/labels/{create,attach}`, (route) => {
+        held.push(route);
+      });
+      await page.getByRole("button", { name: "Añadir etiqueta" }).click();
+      await page
+        .getByRole("combobox", { name: "Cambiar etiquetas" })
+        .fill(name);
+      await page
+        .getByRole("option", { name: `Crear etiqueta “${name}”` })
+        .click();
+      await expect.poll(() => held.length).toBe(1);
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("j");
+      await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+
+      await held[0]?.continue();
+      await expect.poll(() => held.length).toBe(2);
+      await expect(label, "Bravo never shows it").toHaveCount(0);
+      const attached = page.waitForResponse(`${API_URL}/rpc/labels/attach`);
+      await held[1]?.continue();
+      await attached;
+      await page.unroute(`${API_URL}/rpc/labels/{create,attach}`);
+
+      await page.goto(`/issue/${first?.identifier}`);
+      await expect(label.first()).toBeVisible();
+      await page.goto(`/issue/${second?.identifier}`);
+      await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
+      await expect(label).toHaveCount(0);
+
+      const all = await api.labels.list();
+      const created = all.find((entry) => entry.name === name);
+
+      await api.labels.delete({ id: created?.id ?? "" });
+      await archiveProject(page, prefix);
+    });
+  }
 });

@@ -232,12 +232,13 @@ const AddItem = ({ issueId }: { issueId: string }) => {
         aria-hidden="true"
         className="text-muted-foreground size-4 shrink-0"
       />
-      <Input
+      {/* A bare input, so the add row reads like the items until it is used. */}
+      <input
         aria-label="Nuevo elemento del checklist"
         placeholder="Añadir un elemento"
         autoComplete="off"
         maxLength={limits.checklistItem}
-        className="h-8"
+        className="placeholder:text-muted-foreground hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:ring-ring h-8 min-w-0 flex-1 rounded-md bg-transparent px-2 text-sm outline-none focus-visible:ring-2 max-md:h-11 max-md:text-base"
         value={text}
         onChange={(event) => {
           setText(event.target.value);
@@ -302,7 +303,7 @@ export const IssueChecklist = () => {
       className="flex flex-col gap-2"
     >
       <div className="flex items-center gap-3">
-        <h2 id="checklist-heading" className="text-sm font-medium">
+        <h2 id="checklist-heading" className="text-sm font-semibold">
           Checklist
         </h2>
         {items.length === 0 ? null : (
@@ -313,7 +314,7 @@ export const IssueChecklist = () => {
             </span>
             <span
               aria-hidden="true"
-              className="bg-muted h-1 max-w-32 flex-1 overflow-hidden rounded-full"
+              className="bg-foreground/10 h-1.5 max-w-32 flex-1 overflow-hidden rounded-full"
             >
               <span
                 className="bg-state-completed block h-full w-full origin-left scale-x-(--progress) rounded-full transition-transform"

@@ -23,7 +23,7 @@ const AppLayout = () => (
         Saltar al contenido
       </a>
       <AppSidebar />
-      <SidebarInset className="h-svh min-w-0 overflow-hidden">
+      <SidebarInset className="h-svh min-w-0 overflow-hidden md:h-[calc(100svh-1rem)]">
         <Outlet />
       </SidebarInset>
       <CreateIssueFab />

@@ -227,7 +227,7 @@ const Members = () => {
                 <DropdownMenuTrigger
                   render={
                     <Button
-                      variant="ghost"
+                      variant="muted"
                       size="icon-sm"
                       aria-label={`Acciones para ${member.displayName}`}
                     />

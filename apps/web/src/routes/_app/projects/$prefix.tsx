@@ -10,7 +10,13 @@ import {
   notFound,
   useMatchRoute,
 } from "@tanstack/react-router";
-import { ArchiveIcon, KanbanIcon, ListIcon, SettingsIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  ChevronRightIcon,
+  KanbanIcon,
+  ListIcon,
+  SettingsIcon,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { NotFound } from "@/components/route-states";
@@ -36,7 +42,6 @@ const ProjectLayout = () => {
 
   const me = useMe();
 
-  // On phones the Settings header needs the room for the Project name.
   const onSettings =
     useMatchRoute()({ to: "/projects/$prefix/settings" }) !== false;
 
@@ -58,6 +63,15 @@ const ProjectLayout = () => {
         }
       >
         <h1 className="min-w-0 truncate text-sm font-medium">{project.name}</h1>
+        {onSettings ? (
+          <>
+            <ChevronRightIcon
+              aria-hidden="true"
+              className="text-muted-foreground size-3.5 shrink-0"
+            />
+            <span className="shrink-0 text-sm">Configuración</span>
+          </>
+        ) : null}
         {project.archivedAt === null ? null : (
           <Badge variant="secondary">
             <ArchiveIcon data-icon="inline-start" />
@@ -68,7 +82,8 @@ const ProjectLayout = () => {
           aria-label="Vistas del proyecto"
           className={cn(
             "ml-1 flex items-center gap-0.5 md:ml-3",
-            onSettings && "max-md:hidden"
+            // Settings is no view of the Board or List, so neither tab would be current.
+            onSettings && "hidden"
           )}
         >
           <Link

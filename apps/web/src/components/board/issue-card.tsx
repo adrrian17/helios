@@ -24,7 +24,6 @@ import {
   MemberAvatar,
   PriorityIcon,
   StateIcon,
-  UnassignedAvatar,
 } from "@/components/issue-meta";
 import type { IssueRow, WorkflowState } from "@/utils/domain";
 
@@ -49,7 +48,7 @@ export const IssueCardBody = ({
   return (
     <div
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-1.5 rounded-lg border p-2.5 shadow-xs",
+        "bg-card text-card-foreground dark:border-input flex flex-col gap-1.5 rounded-lg border p-2.5 shadow-xs",
         className
       )}
     >
@@ -62,13 +61,11 @@ export const IssueCardBody = ({
             Prioridad: {priorityLabels[issue.priority]}
           </TooltipContent>
         </Tooltip>
-        <span className="font-mono tabular-nums">{issue.identifier}</span>
+        <span className="tabular-nums">{issue.identifier}</span>
         <span className="flex-1" />
         {issue.assignee === null ? (
-          <>
-            <UnassignedAvatar />
-            <span className="sr-only">Sin responsable</span>
-          </>
+          // No placeholder: a ring on every unassigned card is noise.
+          <span className="sr-only">Sin responsable</span>
         ) : (
           <>
             <MemberAvatar member={issue.assignee} />
@@ -78,7 +75,7 @@ export const IssueCardBody = ({
           </>
         )}
       </div>
-      <p className="line-clamp-3 text-sm leading-snug font-medium text-pretty break-words">
+      <p className="line-clamp-3 text-sm leading-snug font-medium break-words">
         {issue.title}
       </p>
       <span className="sr-only">
@@ -196,14 +193,15 @@ export const SortableIssueCard = ({
         onKeyDown={onKeyDown}
         className={cn(
           "focus-visible:ring-ring block touch-manipulation rounded-lg outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-3",
-          isDragging && "opacity-40",
+          isDragging &&
+            "outline-foreground/20 bg-foreground/5 outline-2 -outline-offset-2 outline-dashed *:invisible",
           picked &&
             "ring-primary focus-visible:ring-primary ring-offset-background shadow-lg ring-2 ring-offset-2"
         )}
       >
         <IssueCardBody
           issue={issue}
-          className="hover:border-foreground/20 transition-colors"
+          className="hover:border-foreground/20 hover:bg-muted/40 transition-colors"
         />
       </Link>
       <MoveToMenu issue={issue} states={states} onMove={onMove} />

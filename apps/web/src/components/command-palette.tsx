@@ -25,6 +25,7 @@ import type { LucideIcon } from "lucide-react";
 import { useDeferredValue, useState } from "react";
 
 import { StateIcon } from "@/components/issue-meta";
+import { ProjectMark } from "@/components/project-mark";
 import { orpc } from "@/utils/orpc";
 import { keysOf, shortcuts } from "@/utils/shortcuts";
 import { useMe } from "@/utils/use-me";
@@ -180,7 +181,7 @@ const PaletteBody = ({
             }}
           >
             <StateIcon category={issue.state.category} />
-            <span className="text-muted-foreground w-[4.5rem] shrink-0 font-mono text-xs tabular-nums">
+            <span className="text-muted-foreground w-[4.5rem] shrink-0 text-xs tabular-nums">
               {issue.identifier}
             </span>
             <span className="truncate max-md:line-clamp-2 max-md:whitespace-normal">
@@ -278,9 +279,10 @@ const PaletteBody = ({
                   });
                 }}
               >
+                <ProjectMark name={project.name} />
                 <span className="truncate">{project.name}</span>
                 <CommandShortcut>
-                  <span className="font-mono tracking-normal">
+                  <span className="tracking-normal tabular-nums">
                     {project.prefix}
                   </span>
                 </CommandShortcut>

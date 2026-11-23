@@ -27,10 +27,10 @@ import {
   PriorityIcon,
   RelativeTime,
   StateIcon,
-  UnassignedAvatar,
 } from "@/components/issue-meta";
 import type { IssueRow } from "@/utils/domain";
 import { formatDate } from "@/utils/format";
+import { useIssueSequence } from "@/utils/issue-sequence";
 import { nextSort } from "@/utils/list-sort";
 
 /**
@@ -51,16 +51,16 @@ const columns: {
     field: "priority",
     label: "Prioridad",
     icon: SignalIcon,
-    className: "w-11 lg:w-28",
+    className: "w-11 lg:w-32",
   },
   {
     field: "assignee",
     label: "Responsable",
     icon: UserRoundIcon,
-    // The last shown column until Created and Updated appear.
+    // The last shown column until Updated appears.
     className: "w-11 md:max-xl:pr-4 lg:w-40",
   },
-  { field: "created", label: "Creada", className: "w-26 max-xl:hidden" },
+  { field: "created", label: "Creada", className: "w-26 max-2xl:hidden" },
   { field: "updated", label: "Actualizada", className: "w-28 max-xl:hidden" },
 ];
 
@@ -133,7 +133,7 @@ const directionNames = { asc: "Ascendente", desc: "Descendente" } as const;
 const isField = (value: unknown): value is SortField =>
   sortFields.some((field) => field === value);
 
-/** Every sort field and the direction, for widths where the List hides the date columns. */
+/** Every sort field and the direction, for widths where the List hides a date column. */
 export const SortMenu = ({
   sort,
   onChange,
@@ -147,7 +147,7 @@ export const SortMenu = ({
         <Button
           variant="muted"
           size="icon-sm"
-          className="xl:hidden"
+          className="2xl:hidden"
           aria-label={`Orden: ${sortNames[sort.field]}, ${directionNames[sort.direction].toLowerCase()}`}
         />
       }
@@ -199,13 +199,8 @@ export const SortMenu = ({
 const MAX_LABELS = 2;
 
 const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
-  <tr className="hover:bg-muted/50 has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12">
-    <td
-      className={cn(
-        CELL,
-        "text-muted-foreground font-mono text-xs tabular-nums"
-      )}
-    >
+  <tr className="hover:bg-muted has-focus-visible:bg-muted dark:hover:bg-muted/50 dark:has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12">
+    <td className={cn(CELL, "text-muted-foreground text-xs tabular-nums")}>
       {issue.identifier}
     </td>
     {/* oxlint-disable-next-line jsx-a11y/control-has-associated-label -- the cell's text is the title inside the row's link, deeper than the rule looks. */}
@@ -214,15 +209,15 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         <Link
           to="/issue/$identifier"
           params={{ identifier: issue.identifier }}
-          className="focus-visible:after:ring-ring min-w-0 truncate font-medium outline-none after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-inset"
+          className="focus-visible:after:ring-ring min-w-0 truncate outline-none after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-inset"
         >
           {issue.title}
         </Link>
-        <span className="flex shrink-0 items-center gap-1 max-xl:hidden">
+        <span className="ml-auto flex shrink-0 items-center gap-1 max-2xl:hidden">
           {issue.labels.slice(0, MAX_LABELS).map((label) => (
             <span
               key={label.id}
-              className="text-muted-foreground inline-flex h-5 max-w-24 items-center gap-1 rounded-md border px-1.5 text-xs"
+              className="text-muted-foreground inline-flex h-5 max-w-32 items-center gap-1 rounded-md border px-1.5 text-xs"
             >
               <LabelDot color={label.color} />
               <span className="truncate">{label.name}</span>
@@ -245,29 +240,32 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
     <td className={CELL}>
       <span className="flex min-w-0 items-center gap-2">
         <PriorityIcon priority={issue.priority} labelled={false} />
-        <span className="text-muted-foreground truncate max-lg:sr-only">
+        <span
+          className={cn(
+            "text-muted-foreground truncate max-lg:sr-only",
+            issue.priority === "none" && "sr-only"
+          )}
+        >
           {priorityLabels[issue.priority]}
         </span>
       </span>
     </td>
     <td className={cn(CELL, "md:max-xl:pr-4")}>
       <span className="flex min-w-0 items-center gap-2">
-        {issue.assignee === null ? (
-          <UnassignedAvatar />
-        ) : (
+        {issue.assignee === null ? null : (
           <MemberAvatar member={issue.assignee} />
         )}
         <span
           className={cn(
             "truncate max-lg:sr-only",
-            issue.assignee === null && "text-muted-foreground"
+            issue.assignee === null && "sr-only"
           )}
         >
           {issue.assignee?.displayName ?? "Sin responsable"}
         </span>
       </span>
     </td>
-    <td className={cn(CELL, "text-muted-foreground max-xl:hidden")}>
+    <td className={cn(CELL, "text-muted-foreground max-2xl:hidden")}>
       {formatDate(issue.createdAt)}
     </td>
     <td
@@ -291,24 +289,28 @@ export const IssueTable = ({
   issues: IssueRow[];
   sort: Sort;
   onSort: (field: SortField) => void;
-}) => (
-  <table aria-label={label} className="w-full table-fixed text-sm">
-    <thead className="border-b">
-      <tr>
-        {columns.map((column) => (
-          <SortHeader
-            key={column.field}
-            column={column}
-            sort={sort}
-            onSort={onSort}
-          />
+}) => {
+  useIssueSequence(issues.map((issue) => issue.identifier));
+
+  return (
+    <table aria-label={label} className="w-full table-fixed text-sm">
+      <thead className="border-b">
+        <tr>
+          {columns.map((column) => (
+            <SortHeader
+              key={column.field}
+              column={column}
+              sort={sort}
+              onSort={onSort}
+            />
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {issues.map((issue) => (
+          <IssueTableRow key={issue.id} issue={issue} />
         ))}
-      </tr>
-    </thead>
-    <tbody>
-      {issues.map((issue) => (
-        <IssueTableRow key={issue.id} issue={issue} />
-      ))}
-    </tbody>
-  </table>
-);
+      </tbody>
+    </table>
+  );
+};

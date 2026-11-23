@@ -76,7 +76,7 @@ const ArchivedList = () => {
                   {project.name}
                 </span>
                 <span className="text-muted-foreground truncate text-xs">
-                  <span className="font-mono">{project.prefix}</span>
+                  <span className="tabular-nums">{project.prefix}</span>
                   {project.archivedAt === null
                     ? null
                     : ` · Archivado el ${formatDate(project.archivedAt)}`}

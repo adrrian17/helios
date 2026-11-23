@@ -57,7 +57,7 @@ const FilterPicker = ({
       onSelect={onSelect}
       trigger={
         <Button
-          variant={selected.length === 0 ? "muted" : "secondary"}
+          variant={selected.length === 0 ? "filter" : "secondary"}
           size="sm"
           aria-label={
             selected.length === 0

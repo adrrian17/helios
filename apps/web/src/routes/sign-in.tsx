@@ -1,13 +1,7 @@
 import { Button } from "@helios/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@helios/ui/components/card";
 import { Input } from "@helios/ui/components/input";
 import { Label } from "@helios/ui/components/label";
+import { Spinner } from "@helios/ui/components/spinner";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
@@ -49,34 +43,36 @@ const SignInPage = () => {
   return (
     <main
       id="main"
-      className="flex min-h-svh flex-col items-center justify-center gap-6 p-4"
+      className="bg-sidebar flex min-h-svh flex-col items-center justify-center p-4"
     >
-      <p className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-        <HeliosMark className="size-7 rounded-md text-sm" />
-        Helios
-      </p>
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Inicia sesión en Helios</CardTitle>
-          <CardDescription>
-            Te enviamos por correo un enlace para iniciar sesión.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <div className="grid w-full max-w-[400px] gap-8">
+        <div className="grid justify-items-center gap-4 text-center">
+          <HeliosMark className="size-10 rounded-xl text-lg" />
+          <div className="grid gap-1.5">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Inicia sesión en Helios
+            </h1>
+            <p className="text-muted-foreground text-sm text-balance">
+              Te enviamos por correo un enlace para iniciar sesión.
+            </p>
+          </div>
+        </div>
+        <div className="bg-card ring-foreground/10 rounded-2xl p-6 shadow-sm ring-1">
           {requestLink.isSuccess ? (
             <div className="grid gap-4">
               <output
                 // Focused so screen readers read it and keyboard focus is not lost with the form.
                 ref={focusOnMount}
                 tabIndex={-1}
-                className="block outline-none"
+                className="block text-sm leading-relaxed outline-none"
               >
                 Si {email} pertenece a un miembro o tiene una invitación, el
                 enlace de acceso va en camino. Funciona una sola vez y caduca en
                 5 minutos.
               </output>
               <Button
-                variant="ghost"
+                variant="outline"
+                className="h-10"
                 onClick={() => {
                   requestLink.reset();
                 }}
@@ -106,8 +102,9 @@ const SignInPage = () => {
                   autoFocus
                   type="email"
                   autoComplete="email"
+                  placeholder="nombre@empresa.com"
                   required
-                  className="h-11"
+                  className="h-10"
                   // Success swaps in a message naming this email, so it must not change meanwhile.
                   readOnly={requestLink.isPending}
                   value={email}
@@ -118,15 +115,20 @@ const SignInPage = () => {
               </div>
               <Button
                 type="submit"
-                className="h-11"
+                className="h-10"
                 disabled={requestLink.isPending}
               >
+                {requestLink.isPending ? <Spinner /> : null}
                 Enviarme un enlace de acceso
               </Button>
             </form>
           )}
-        </CardContent>
-      </Card>
+        </div>
+        <p className="text-muted-foreground text-center text-xs text-balance">
+          Solo pueden entrar los miembros del espacio de trabajo y las personas
+          invitadas.
+        </p>
+      </div>
     </main>
   );
 };

@@ -36,7 +36,7 @@ import { useState } from "react";
 
 import { useCommands } from "@/components/commands";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
-import { HeliosMark } from "@/components/project-mark";
+import { HeliosMark, ProjectMark } from "@/components/project-mark";
 import { UserMenu } from "@/components/user-menu";
 import { orpc } from "@/utils/orpc";
 import { keysOf, shortcuts } from "@/utils/shortcuts";
@@ -121,7 +121,7 @@ const ProjectsGroup = ({ onCreate }: { onCreate: (() => void) | null }) => {
   const projects = useQuery(orpc.projects.list.queryOptions());
 
   return (
-    <Collapsible render={<SidebarGroup />}>
+    <Collapsible defaultOpen render={<SidebarGroup />}>
       <SidebarGroupLabel
         render={<CollapsibleTrigger />}
         className="w-full cursor-pointer"
@@ -149,6 +149,7 @@ const ProjectsGroup = ({ onCreate }: { onCreate: (() => void) | null }) => {
                     to="/projects/$prefix"
                     params={{ prefix: project.prefix }}
                     activePath={`/projects/${project.prefix}`}
+                    icon={<ProjectMark name={project.name} />}
                     label={project.name}
                   />
                 ))}
@@ -180,7 +181,7 @@ export const AppSidebar = () => {
   return (
     <>
       <CreateProjectDialog open={creating} onOpenChange={setCreating} />
-      <Sidebar>
+      <Sidebar variant="inset">
         <nav
           aria-label="Espacio de trabajo"
           className="flex min-h-0 flex-1 flex-col"

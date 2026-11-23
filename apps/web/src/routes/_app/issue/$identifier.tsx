@@ -22,7 +22,9 @@ import {
 } from "@tanstack/react-router";
 import {
   ArrowRightLeftIcon,
+  ChevronDownIcon,
   ChevronRightIcon,
+  ChevronUpIcon,
   LinkIcon,
   MoreHorizontalIcon,
   PanelRightCloseIcon,
@@ -42,6 +44,7 @@ import { IssueTimeline } from "@/components/issue/issue-timeline";
 import { useIssue, useIssueOptions } from "@/components/issue/use-issue";
 import { PageHeader } from "@/components/page-header";
 import { NotFound } from "@/components/route-states";
+import { neighboursOf } from "@/utils/issue-sequence";
 import { orpc } from "@/utils/orpc";
 import { useShortcut } from "@/utils/shortcuts";
 import { useMediaQuery } from "@/utils/use-media-query";
@@ -170,6 +173,22 @@ const IssuePage = () => {
     setOpenPicker("assignee");
   });
 
+  const navigate = useNavigate();
+  const neighbours = neighboursOf(issue.identifier);
+
+  const goTo = (identifier: string | undefined) => {
+    if (identifier !== undefined) {
+      void navigate({ to: "/issue/$identifier", params: { identifier } });
+    }
+  };
+
+  useShortcut("previousIssue", () => {
+    goTo(neighbours?.previous);
+  });
+  useShortcut("nextIssue", () => {
+    goTo(neighbours?.next);
+  });
+
   const { data: project } = useSuspenseQuery(
     orpc.projects.get.queryOptions({
       input: { prefix: issue.project.prefix },
@@ -190,6 +209,35 @@ const IssuePage = () => {
       <PageHeader
         actions={
           <>
+            {neighbours === null ? null : (
+              <>
+                <span className="text-muted-foreground px-1 text-xs tabular-nums max-sm:hidden">
+                  {neighbours.position} / {neighbours.total}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Tarea anterior"
+                  disabled={neighbours.previous === undefined}
+                  onClick={() => {
+                    goTo(neighbours.previous);
+                  }}
+                >
+                  <ChevronUpIcon />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Tarea siguiente"
+                  disabled={neighbours.next === undefined}
+                  onClick={() => {
+                    goTo(neighbours.next);
+                  }}
+                >
+                  <ChevronDownIcon />
+                </Button>
+              </>
+            )}
             {wide ? (
               <Button
                 variant="ghost"
@@ -232,7 +280,7 @@ const IssuePage = () => {
           />
           <span
             aria-current="page"
-            className="shrink-0 font-mono text-sm font-medium whitespace-nowrap tabular-nums"
+            className="shrink-0 text-sm font-medium whitespace-nowrap tabular-nums"
           >
             {issue.identifier}
           </span>
@@ -246,17 +294,15 @@ const IssuePage = () => {
             className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 md:px-10 md:py-10"
           >
             <IssueTitle />
-            {showRail ? null : properties("summary")}
-            <IssueDescription />
-            <IssueChecklist />
             {showRail ? null : (
-              <section
-                aria-label="Propiedades"
-                className="bg-card rounded-lg border p-2"
-              >
+              // Every property sits under the title, so none waits past the checklist.
+              <section aria-label="Propiedades" className="flex flex-col gap-2">
+                {properties("summary")}
                 {properties("details")}
               </section>
             )}
+            <IssueDescription />
+            <IssueChecklist />
             <IssueTimeline />
           </div>
         </main>
