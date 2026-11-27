@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
-import { Route as AppLabelsRouteImport } from './routes/_app/labels'
 import { Route as AppMembersRouteImport } from './routes/_app/members'
 import { Route as AppMyIssuesRouteImport } from './routes/_app/my-issues'
 import { Route as AppIssueIdentifierRouteImport } from './routes/_app/issue/$identifier'
@@ -35,11 +34,6 @@ const SignInRoute = SignInRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLabelsRoute = AppLabelsRouteImport.update({
-  id: '/labels',
-  path: '/labels',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMembersRoute = AppMembersRouteImport.update({
@@ -92,7 +86,6 @@ const AppProjectsPrefixSettingsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/sign-in': typeof SignInRoute
-  '/labels': typeof AppLabelsRoute
   '/members': typeof AppMembersRoute
   '/my-issues': typeof AppMyIssuesRoute
   '/issue/$identifier': typeof AppIssueIdentifierRoute
@@ -105,7 +98,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
-  '/labels': typeof AppLabelsRoute
   '/members': typeof AppMembersRoute
   '/my-issues': typeof AppMyIssuesRoute
   '/': typeof AppIndexRoute
@@ -120,7 +112,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/sign-in': typeof SignInRoute
-  '/_app/labels': typeof AppLabelsRoute
   '/_app/members': typeof AppMembersRoute
   '/_app/my-issues': typeof AppMyIssuesRoute
   '/_app/': typeof AppIndexRoute
@@ -137,7 +128,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/sign-in'
-    | '/labels'
     | '/members'
     | '/my-issues'
     | '/issue/$identifier'
@@ -150,7 +140,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/sign-in'
-    | '/labels'
     | '/members'
     | '/my-issues'
     | '/'
@@ -164,7 +153,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/sign-in'
-    | '/_app/labels'
     | '/_app/members'
     | '/_app/my-issues'
     | '/_app/'
@@ -203,13 +191,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/labels': {
-      id: '/_app/labels'
-      path: '/labels'
-      fullPath: '/labels'
-      preLoaderRoute: typeof AppLabelsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/members': {
@@ -296,7 +277,6 @@ const AppProjectsPrefixRouteWithChildren =
   AppProjectsPrefixRoute._addFileChildren(AppProjectsPrefixRouteChildren)
 
 interface AppRouteChildren {
-  AppLabelsRoute: typeof AppLabelsRoute
   AppMembersRoute: typeof AppMembersRoute
   AppMyIssuesRoute: typeof AppMyIssuesRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -306,7 +286,6 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppLabelsRoute: AppLabelsRoute,
   AppMembersRoute: AppMembersRoute,
   AppMyIssuesRoute: AppMyIssuesRoute,
   AppIndexRoute: AppIndexRoute,

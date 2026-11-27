@@ -1,4 +1,3 @@
-import { priorityLabels } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   Tooltip,
@@ -7,32 +6,24 @@ import {
 } from "@helios/ui/components/tooltip";
 import { cn } from "@helios/ui/lib/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { ChevronDownIcon, PlusIcon } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 
 import {
-  LabelDot,
   MemberAvatar,
-  PriorityIcon,
   RelativeTime,
   StateIcon,
   UnassignedAvatar,
 } from "@/components/issue-meta";
-import {
-  assigneeOptions,
-  labelOptions,
-  priorityOptions,
-  stateOptions,
-} from "@/components/issue-options";
-import { useIssue, useIssueCache } from "@/components/issue/use-issue";
+import { assigneeOptions, stateOptions } from "@/components/issue-options";
+import { useIssue } from "@/components/issue/use-issue";
 import { Picker } from "@/components/picker";
-import { nextLabelColor, pickerPriorities } from "@/utils/domain";
-import type { Label, MemberSummary, WorkflowState } from "@/utils/domain";
+import type { MemberSummary, WorkflowState } from "@/utils/domain";
 import { UNASSIGNED } from "@/utils/filters";
 import { formatDate } from "@/utils/format";
 import { orpc } from "@/utils/orpc";
 
-/** The pickers a keyboard shortcut can open by name (S, P, A, and one for Labels). */
-export type IssuePicker = "state" | "priority" | "assignee" | "labels";
+/** The pickers a keyboard shortcut can open by name (S and A). */
+export type IssuePicker = "state" | "assignee";
 
 /** Where the properties show: the desktop rail, or the phone's chip row and the card below the body. */
 type Layout = "rail" | "summary" | "details";
@@ -118,126 +109,6 @@ const Opens = () => (
   />
 );
 
-const byName = (a: Label, b: Label) => a.name.localeCompare(b.name);
-
-/** Attach and detach show at once; the cached Issue is patched and reloaded if the server refuses. */
-const useLabelWrites = (all: Label[]) => {
-  const { patch, revert } = useIssueCache();
-
-  const attach = useMutation({
-    ...orpc.labels.attach.mutationOptions(),
-    onMutate: ({ issueId, labelId }) => {
-      const label = all.find((entry) => entry.id === labelId);
-
-      if (label !== undefined) {
-        // The view may have moved to another Issue since a Label create started.
-        patch((issue) =>
-          issue.id === issueId
-            ? {
-                ...issue,
-                labels: [
-                  ...issue.labels.filter((entry) => entry.id !== labelId),
-                  label,
-                ].toSorted(byName),
-              }
-            : issue
-        );
-      }
-    },
-    onError: revert,
-  });
-
-  const detach = useMutation({
-    ...orpc.labels.detach.mutationOptions(),
-    onMutate: ({ labelId }) => {
-      patch((issue) => ({
-        ...issue,
-        labels: issue.labels.filter((entry) => entry.id !== labelId),
-      }));
-    },
-    onError: revert,
-  });
-
-  return { attach: attach.mutate, detach: detach.mutate };
-};
-
-const LabelsField = ({
-  open,
-  onOpenChange,
-}: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) => {
-  const issue = useIssue();
-  const labels = useQuery(orpc.labels.list.queryOptions());
-  const all = labels.data ?? issue.labels;
-  const { attach, detach } = useLabelWrites(all);
-  const attached = new Set(issue.labels.map((label) => label.id));
-
-  // Hook-level, so the attach still runs after navigation unmounts this field.
-  const create = useMutation({
-    ...orpc.labels.create.mutationOptions(),
-    // Bound when the create starts: J or K can show another Issue before it lands.
-    onMutate: () => ({ issueId: issue.id }),
-    onSuccess: (label, _input, { issueId }) => {
-      attach({ issueId, labelId: label.id });
-    },
-  });
-
-  return (
-    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1 pl-2.5">
-      {issue.labels.map((label) => (
-        <span
-          key={label.id}
-          className="inline-flex h-6 max-w-40 items-center gap-1 rounded-md border px-1.5 text-xs"
-        >
-          <LabelDot color={label.color} />
-          <span className="truncate">{label.name}</span>
-        </span>
-      ))}
-      <Picker
-        label="Cambiar etiquetas"
-        multiple
-        open={open}
-        onOpenChange={onOpenChange}
-        options={labelOptions(all)}
-        selected={[...attached]}
-        onSelect={(labelId) => {
-          const link = { issueId: issue.id, labelId };
-
-          if (attached.has(labelId)) {
-            detach(link);
-          } else {
-            attach(link);
-          }
-        }}
-        onCreate={{
-          noun: "etiqueta",
-          create: (name) => {
-            create.mutate({ name, color: nextLabelColor(all.length) });
-          },
-        }}
-        trigger={
-          issue.labels.length === 0 ? (
-            <Button variant="property">
-              <PlusIcon data-icon="inline-start" />
-              <span className="text-muted-foreground">Añadir etiqueta</span>
-            </Button>
-          ) : (
-            <Button
-              variant="muted"
-              size="icon-xs"
-              aria-label="Cambiar etiquetas"
-            >
-              <PlusIcon />
-            </Button>
-          )
-        }
-      />
-    </div>
-  );
-};
-
 const IssueMetadata = ({ compact }: { compact: boolean }) => {
   const issue = useIssue();
 
@@ -281,9 +152,9 @@ const IssueMetadata = ({ compact }: { compact: boolean }) => {
 };
 
 /**
- * Workflow State, Priority, assignee and Labels, each edited through a picker;
- * plus who created it and when. Phones split them: the first three as chips
- * under the title (`summary`), the rest in a card below the body (`details`).
+ * Workflow State and assignee, each edited through a picker; plus who created
+ * it and when. Phones split them: the first two as chips under the title
+ * (`summary`), the rest in a card below the body (`details`).
  */
 export const IssueProperties = ({
   states,
@@ -302,7 +173,6 @@ export const IssueProperties = ({
 
   // Show the value being saved until the refetch brings it back.
   const saving = update.isPending ? update.variables : undefined;
-  const priority = saving?.priority ?? issue.priority;
 
   const state =
     states.find((entry) => entry.id === saving?.stateId) ?? issue.state;
@@ -325,17 +195,12 @@ export const IssueProperties = ({
     (member) => member.active || member.id === issue.assignee?.id
   );
 
-  const details = (
-    <>
-      <Row term="Etiquetas">
-        <LabelsField {...pickerProps("labels")} />
-      </Row>
-      <IssueMetadata compact={layout === "details"} />
-    </>
-  );
-
   if (layout === "details") {
-    return <dl className="flex flex-col gap-1">{details}</dl>;
+    return (
+      <dl className="flex flex-col gap-1">
+        <IssueMetadata compact />
+      </dl>
+    );
   }
 
   const chip = layout === "summary";
@@ -379,32 +244,6 @@ export const IssueProperties = ({
           }
         />
       </Row>
-      <Row term="Prioridad" chip={chip}>
-        <Picker
-          label="Cambiar prioridad"
-          {...pickerProps("priority")}
-          options={priorityOptions}
-          selected={[priority]}
-          onSelect={(value) => {
-            const chosen = pickerPriorities.find((entry) => entry === value);
-
-            if (chosen !== undefined) {
-              update.mutate({ id: issue.id, priority: chosen });
-            }
-          }}
-          trigger={
-            <Button
-              variant={variant}
-              className={width}
-              aria-label={`Prioridad: ${priorityLabels[priority]}`}
-            >
-              <PriorityIcon priority={priority} labelled={false} />
-              <span className="truncate">{priorityLabels[priority]}</span>
-              {opens}
-            </Button>
-          }
-        />
-      </Row>
       <Row term="Responsable" chip={chip}>
         <Tooltip>
           <Picker
@@ -442,7 +281,7 @@ export const IssueProperties = ({
           )}
         </Tooltip>
       </Row>
-      {chip ? null : details}
+      {chip ? null : <IssueMetadata compact={false} />}
     </dl>
   );
 };

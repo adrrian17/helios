@@ -1,16 +1,11 @@
 import { Button } from "@helios/ui/components/button";
 import { useQuery } from "@tanstack/react-query";
-import { SignalIcon, TagIcon, UserRoundIcon, XIcon } from "lucide-react";
+import { UserRoundIcon, XIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import {
-  assigneeOptions,
-  labelOptions,
-  priorityOptions,
-} from "@/components/issue-options";
+import { assigneeOptions } from "@/components/issue-options";
 import { Picker } from "@/components/picker";
 import type { PickerOption } from "@/components/picker";
-import { pickerPriorities } from "@/utils/domain";
 import { hasFilters } from "@/utils/filters";
 import type { FilterSearch } from "@/utils/filters";
 import { orpc } from "@/utils/orpc";
@@ -88,7 +83,6 @@ export const FilterBar = ({
   children?: React.ReactNode;
 }) => {
   const members = useQuery(orpc.workspace.members.queryOptions());
-  const labels = useQuery(orpc.labels.list.queryOptions());
 
   return (
     <fieldset className="flex h-11 min-w-0 shrink-0 items-center gap-1 border-b pr-3 max-md:h-14 max-md:pr-2">
@@ -101,31 +95,6 @@ export const FilterBar = ({
           selected={search.assignee ?? []}
           onSelect={(value) => {
             onChange({ ...search, assignee: toggled(search.assignee, value) });
-          }}
-        />
-        <FilterPicker
-          name="Etiqueta"
-          icon={TagIcon}
-          options={labelOptions(labels.data ?? [])}
-          selected={search.label ?? []}
-          onSelect={(value) => {
-            onChange({ ...search, label: toggled(search.label, value) });
-          }}
-        />
-        <FilterPicker
-          name="Prioridad"
-          icon={SignalIcon}
-          options={priorityOptions}
-          selected={search.priority ?? []}
-          onSelect={(value) => {
-            const priority = pickerPriorities.find((entry) => entry === value);
-
-            if (priority !== undefined) {
-              onChange({
-                ...search,
-                priority: toggled(search.priority, priority),
-              });
-            }
           }}
         />
         {hasFilters(search) ? (

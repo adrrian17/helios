@@ -1,4 +1,3 @@
-import { priorities } from "@helios/api/domain";
 import type { IssueFilters } from "@helios/api/domain";
 import { z } from "zod";
 
@@ -13,25 +12,16 @@ const ids = z.array(z.string()).optional().catch(undefined);
  */
 export const filterSearchSchema = z.object({
   assignee: ids,
-  label: ids,
-  priority: z.array(z.enum(priorities)).optional().catch(undefined),
 });
 
 export type FilterSearch = z.infer<typeof filterSearchSchema>;
 
-export const toApiFilters = ({
-  assignee,
-  label,
-  priority,
-}: FilterSearch): IssueFilters => {
+export const toApiFilters = ({ assignee }: FilterSearch): IssueFilters => {
   const members = assignee?.filter((id) => id !== UNASSIGNED) ?? [];
 
   return {
     ...(members.length > 0 && { assigneeIds: members }),
     ...(assignee?.includes(UNASSIGNED) === true && { unassigned: true }),
-    ...(label !== undefined && label.length > 0 && { labelIds: label }),
-    ...(priority !== undefined &&
-      priority.length > 0 && { priorities: priority }),
   };
 };
 
