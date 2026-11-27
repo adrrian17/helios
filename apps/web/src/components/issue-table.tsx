@@ -1,4 +1,4 @@
-import { priorityLabels, sortDirections, sortFields } from "@helios/api/domain";
+import { sortDirections, sortFields } from "@helios/api/domain";
 import type { Sort, SortField } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
@@ -16,18 +16,11 @@ import {
   ArrowDownIcon,
   ArrowUpDownIcon,
   ArrowUpIcon,
-  SignalIcon,
   UserRoundIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-import {
-  LabelDot,
-  MemberAvatar,
-  PriorityIcon,
-  RelativeTime,
-  StateIcon,
-} from "@/components/issue-meta";
+import { MemberAvatar, RelativeTime, StateIcon } from "@/components/issue-meta";
 import type { IssueRow } from "@/utils/domain";
 import { formatDate } from "@/utils/format";
 import { useIssueSequence } from "@/utils/issue-sequence";
@@ -35,7 +28,7 @@ import { nextSort } from "@/utils/list-sort";
 
 /**
  * Each column's header and the breakpoint it appears from. Phones keep
- * Identifier, title, Priority and assignee, the last two as icons.
+ * Identifier, title and assignee, the last as an icon.
  */
 const columns: {
   field: SortField;
@@ -47,12 +40,6 @@ const columns: {
   { field: "identifier", label: "ID", className: "w-20 md:w-24" },
   { field: "title", label: "Título", className: "" },
   { field: "state", label: "Estado", className: "w-32 max-md:hidden" },
-  {
-    field: "priority",
-    label: "Prioridad",
-    icon: SignalIcon,
-    className: "w-11 lg:w-32",
-  },
   {
     field: "assignee",
     label: "Responsable",
@@ -122,7 +109,6 @@ const sortNames: Record<SortField, string> = {
   identifier: "Identificador",
   title: "Título",
   state: "Estado",
-  priority: "Prioridad",
   assignee: "Responsable",
   created: "Creada",
   updated: "Actualizada",
@@ -195,9 +181,6 @@ export const SortMenu = ({
   </DropdownMenu>
 );
 
-// Two chips at most, so the title keeps the room.
-const MAX_LABELS = 2;
-
 const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
   <tr className="hover:bg-muted has-focus-visible:bg-muted dark:hover:bg-muted/50 dark:has-focus-visible:bg-muted/50 relative h-10 border-b transition-colors max-md:h-12">
     <td className={cn(CELL, "text-muted-foreground text-xs tabular-nums")}>
@@ -213,41 +196,12 @@ const IssueTableRow = ({ issue }: { issue: IssueRow }) => (
         >
           {issue.title}
         </Link>
-        <span className="ml-auto flex shrink-0 items-center gap-1 max-2xl:hidden">
-          {issue.labels.slice(0, MAX_LABELS).map((label) => (
-            <span
-              key={label.id}
-              className="text-muted-foreground inline-flex h-5 max-w-32 items-center gap-1 rounded-md border px-1.5 text-xs"
-            >
-              <LabelDot color={label.color} />
-              <span className="truncate">{label.name}</span>
-            </span>
-          ))}
-          {issue.labels.length > MAX_LABELS ? (
-            <span className="text-muted-foreground text-xs">
-              +{issue.labels.length - MAX_LABELS}
-            </span>
-          ) : null}
-        </span>
       </span>
     </td>
     <td className={cn(CELL, "max-md:hidden")}>
       <span className="flex min-w-0 items-center gap-2">
         <StateIcon category={issue.state.category} />
         <span className="truncate">{issue.state.name}</span>
-      </span>
-    </td>
-    <td className={CELL}>
-      <span className="flex min-w-0 items-center gap-2">
-        <PriorityIcon priority={issue.priority} labelled={false} />
-        <span
-          className={cn(
-            "text-muted-foreground truncate max-lg:sr-only",
-            issue.priority === "none" && "sr-only"
-          )}
-        >
-          {priorityLabels[issue.priority]}
-        </span>
       </span>
     </td>
     <td className={cn(CELL, "md:max-xl:pr-4")}>

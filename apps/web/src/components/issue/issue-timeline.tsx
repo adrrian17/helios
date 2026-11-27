@@ -13,8 +13,6 @@ import {
   CirclePlusIcon,
   MoreHorizontalIcon,
   PencilIcon,
-  SignalIcon,
-  TagIcon,
   TrashIcon,
   TypeIcon,
   UserRoundIcon,
@@ -72,14 +70,6 @@ const activityCopy: Record<
       </>
     ),
   },
-  priority_changed: {
-    icon: SignalIcon,
-    describe: (entry) => (
-      <>
-        cambió la prioridad de <Change entry={entry} />
-      </>
-    ),
-  },
   assignee_changed: {
     icon: UserRoundIcon,
     describe: (entry) => {
@@ -101,22 +91,6 @@ const activityCopy: Record<
         </>
       );
     },
-  },
-  label_added: {
-    icon: TagIcon,
-    describe: (entry) => (
-      <>
-        añadió la etiqueta <Value>{entry.newValue}</Value>
-      </>
-    ),
-  },
-  label_removed: {
-    icon: TagIcon,
-    describe: (entry) => (
-      <>
-        quitó la etiqueta <Value>{entry.oldValue}</Value>
-      </>
-    ),
   },
 };
 

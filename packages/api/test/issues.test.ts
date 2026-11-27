@@ -33,7 +33,7 @@ const activityOf = async (client: Client, identifier: string) => {
 };
 
 describe("Identifiers", () => {
-  it("number Issues per Project and never reuse a deleted number", async () => {
+  it("number Issues per Project", async () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const hel = await createProject(admin, "HEL");
@@ -45,15 +45,11 @@ describe("Identifiers", () => {
     const first = await create(hel.id);
     const second = await create(hel.id);
     const otherProject = await create(ops.id);
-    await admin.issues.delete({ id: second.id });
     const third = await create(hel.id);
 
     expect(
       [first, second, otherProject, third].map((i) => i.identifier)
     ).toStrictEqual(["HEL-1", "HEL-2", "OPS-1", "HEL-3"]);
-    await expect(
-      admin.issues.get({ identifier: "HEL-2" })
-    ).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 
   it("open an Issue by Identifier, ignoring case", async () => {
@@ -66,7 +62,6 @@ describe("Identifiers", () => {
       projectId: project.id,
       title: "Ship it",
       description: "**Now**",
-      priority: "high",
     });
 
     await expect(
@@ -76,13 +71,10 @@ describe("Identifiers", () => {
       identifier: "HEL-1",
       title: "Ship it",
       description: "**Now**",
-      priority: "high",
       state: { name: "Pendiente", category: "backlog" },
       project: { prefix: "HEL" },
       creator: { id: creatorId },
       assignee: null,
-      labels: [],
-      checklist: [],
     });
     await expect(
       admin.issues.get({ identifier: "HEL-99" })
@@ -260,7 +252,6 @@ describe("Activity", () => {
     const project = await createProject(admin);
     const ada = await addMember(harness, admin, "ada@helios.test");
     await ada.client.workspace.setDisplayName({ name: "Ada" });
-    const bug = await admin.labels.create({ name: "Bug", color: "#ff0000" });
     const started = stateNamed(project, "En curso");
     const done = stateNamed(project, "Completada");
 
@@ -272,30 +263,20 @@ describe("Activity", () => {
     await admin.issues.update({ id, title: "New title" });
     await admin.issues.update({ id, stateId: started.id });
     await admin.issues.move({ id, stateId: done.id, afterId: null });
-    await admin.issues.update({ id, priority: "urgent" });
     await admin.issues.update({ id, assigneeId: ada.id });
     await admin.issues.update({ id, assigneeId: null });
-    await admin.labels.attach({ issueId: id, labelId: bug.id });
-    await admin.labels.detach({ issueId: id, labelId: bug.id });
 
     await expect(activityOf(admin, identifier)).resolves.toStrictEqual([
       { kind: "created", oldValue: null, newValue: null },
       { kind: "title_changed", oldValue: "Old title", newValue: "New title" },
       { kind: "state_changed", oldValue: "Pendiente", newValue: "En curso" },
       { kind: "state_changed", oldValue: "En curso", newValue: "Completada" },
-      {
-        kind: "priority_changed",
-        oldValue: "Sin prioridad",
-        newValue: "Urgente",
-      },
       { kind: "assignee_changed", oldValue: null, newValue: "Ada" },
       { kind: "assignee_changed", oldValue: "Ada", newValue: null },
-      { kind: "label_added", oldValue: null, newValue: "Bug" },
-      { kind: "label_removed", oldValue: "Bug", newValue: null },
     ]);
   });
 
-  it("records nothing for description, Checklist, same-column moves or unchanged values", async () => {
+  it("records nothing for description, same-column moves or unchanged values", async () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
@@ -307,15 +288,8 @@ describe("Activity", () => {
     });
 
     await admin.issues.update({ id, description: "Now with *Markdown*" });
-    await admin.issues.update({ id, title: "Same", priority: "none" });
+    await admin.issues.update({ id, title: "Same" });
     await admin.issues.move({ id, stateId: backlog.id, afterId: null });
-    const item = await admin.checklist.add({ issueId: id, text: "Step" });
-    await admin.checklist.update({
-      id: item.id,
-      checked: true,
-      text: "Step 1",
-    });
-    await admin.checklist.delete({ id: item.id });
 
     await expect(activityOf(admin, identifier)).resolves.toStrictEqual([
       { kind: "created", oldValue: null, newValue: null },
@@ -333,7 +307,7 @@ describe("Activity", () => {
     });
 
     await admin.comments.add({ issueId: id, body: "First" });
-    await admin.issues.update({ id, priority: "low" });
+    await admin.issues.update({ id, title: "Renamed" });
     await admin.comments.add({ issueId: id, body: "Second" });
 
     const { timeline } = await admin.issues.get({ identifier });
@@ -341,28 +315,22 @@ describe("Activity", () => {
       timeline.map((entry) =>
         entry.type === "comment" ? entry.body : entry.kind
       )
-    ).toStrictEqual(["created", "First", "priority_changed", "Second"]);
+    ).toStrictEqual(["created", "First", "title_changed", "Second"]);
   });
 });
 
 describe("Board and List", () => {
-  it("filter by assignee (including unassigned), Label and Priority", async () => {
+  it("filter by assignee, including unassigned", async () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
     const ada = await addMember(harness, admin, "ada@helios.test");
-    const bug = await admin.labels.create({ name: "Bug", color: "#ff0000" });
 
     const create = async (title: string, fields: CreateFields = {}) =>
       await admin.issues.create({ projectId: project.id, title, ...fields });
 
-    const mine = await create("Ada's", {
-      assigneeId: ada.id,
-      priority: "high",
-    });
-
-    await create("Nobody's", { priority: "low" });
-    await admin.labels.attach({ issueId: mine.id, labelId: bug.id });
+    await create("Ada's", { assigneeId: ada.id });
+    await create("Nobody's");
 
     const titles = async (filters: Filters) => {
       const rows = await admin.issues.list({ projectId: project.id, filters });
@@ -372,7 +340,7 @@ describe("Board and List", () => {
 
     const board = await admin.issues.board({
       projectId: project.id,
-      filters: { priorities: ["low"] },
+      filters: { unassigned: true },
     });
 
     expect({
@@ -382,18 +350,14 @@ describe("Board and List", () => {
         assigneeIds: [ada.id],
         unassigned: true,
       }),
-      bug: await titles({ labelIds: [bug.id] }),
-      low: await titles({ priorities: ["low"] }),
-      lowOnBoard: board.flatMap((column) =>
+      unassignedOnBoard: board.flatMap((column) =>
         column.issues.map((row) => `${column.state.name}: ${row.title}`)
       ),
     }).toStrictEqual({
       ada: ["Ada's"],
       unassigned: ["Nobody's"],
       adaOrUnassigned: ["Ada's", "Nobody's"],
-      bug: ["Ada's"],
-      low: ["Nobody's"],
-      lowOnBoard: ["Pendiente: Nobody's"],
+      unassignedOnBoard: ["Pendiente: Nobody's"],
     });
   });
 
@@ -402,21 +366,16 @@ describe("Board and List", () => {
     const admin = await signInAsAdmin(harness);
     const project = await createProject(admin);
     const done = stateNamed(project, "Completada");
-    await admin.issues.create({
-      projectId: project.id,
-      title: "b",
-      priority: "low",
-    });
+    await admin.issues.create({ projectId: project.id, title: "b" });
     await admin.issues.create({
       projectId: project.id,
       title: "a",
-      priority: "urgent",
       stateId: done.id,
     });
     await admin.issues.create({ projectId: project.id, title: "c" });
 
     const sorted = async (
-      field: "priority" | "title" | "state",
+      field: "title" | "state",
       direction: "asc" | "desc"
     ) => {
       const rows = await admin.issues.list({
@@ -427,11 +386,6 @@ describe("Board and List", () => {
       return rows.map((row) => row.identifier);
     };
 
-    await expect(sorted("priority", "asc")).resolves.toStrictEqual([
-      "HEL-2",
-      "HEL-1",
-      "HEL-3",
-    ]);
     await expect(sorted("title", "desc")).resolves.toStrictEqual([
       "HEL-3",
       "HEL-1",
@@ -443,29 +397,10 @@ describe("Board and List", () => {
       "HEL-2",
     ]);
   });
-
-  it("cards carry Checklist progress", async () => {
-    await using harness = await createHarness();
-    const admin = await signInAsAdmin(harness);
-    const project = await createProject(admin);
-
-    const { id } = await admin.issues.create({
-      projectId: project.id,
-      title: "A",
-    });
-
-    const first = await admin.checklist.add({ issueId: id, text: "One" });
-    await admin.checklist.add({ issueId: id, text: "Two" });
-    await admin.checklist.update({ id: first.id, checked: true });
-
-    const [row] = await admin.issues.list({ projectId: project.id });
-
-    expect(row?.checklist).toStrictEqual({ done: 1, total: 2 });
-  });
 });
 
 describe("My Issues", () => {
-  it("lists my backlog and started Issues in active Projects, grouped by Project and sorted by Priority", async () => {
+  it("lists my backlog and started Issues in active Projects, grouped by Project and sorted by Identifier", async () => {
     await using harness = await createHarness();
     const admin = await signInAsAdmin(harness);
     const me = await addMember(harness, admin, "me@helios.test");
@@ -478,7 +413,6 @@ describe("My Issues", () => {
       title: string,
       fields: {
         state?: string;
-        priority?: "urgent" | "high" | "low";
         assigneeId?: string;
       } = {}
     ) =>
@@ -486,19 +420,15 @@ describe("My Issues", () => {
         projectId: project.id,
         title,
         assigneeId: fields.assigneeId ?? me.id,
-        ...(fields.priority !== undefined && { priority: fields.priority }),
         ...(fields.state !== undefined && {
           stateId: stateNamed(project, fields.state).id,
         }),
       });
 
-    await create(alpha, "low backlog", { priority: "low" });
-    await create(alpha, "urgent started", {
-      priority: "urgent",
-      state: "En curso",
-    });
-    await create(alpha, "no priority");
-    await create(zeta, "zeta high", { priority: "high" });
+    await create(alpha, "backlog");
+    await create(alpha, "started", { state: "En curso" });
+    await create(alpha, "second backlog");
+    await create(zeta, "zeta");
     await create(alpha, "idea", { state: "Ideas" });
     await create(alpha, "done", { state: "Completada" });
     await create(alpha, "cancelled", { state: "Cancelada" });
@@ -515,11 +445,8 @@ describe("My Issues", () => {
         issues: group.issues.map((row) => row.title),
       }))
     ).toStrictEqual([
-      {
-        project: "ALP",
-        issues: ["urgent started", "low backlog", "no priority"],
-      },
-      { project: "ZET", issues: ["zeta high"] },
+      { project: "ALP", issues: ["backlog", "started", "second backlog"] },
+      { project: "ZET", issues: ["zeta"] },
     ]);
   });
 });

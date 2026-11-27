@@ -23,7 +23,7 @@ const newIssueDialog = (page: Page) =>
 
 const MY_ISSUES = "/my-issues";
 const OPEN_PALETTE = "ControlOrMeta+k";
-const GO_TO_LABELS = "Ir a Etiquetas";
+const GO_TO_MY_ISSUES = "Ir a Mis tareas";
 const SEARCH_RPC = `${API_URL}/rpc/issues/search`;
 
 /** Keys go to the window, so wait until the signed-in page has mounted. */
@@ -165,9 +165,9 @@ test.describe("desktop keyboard", () => {
       page.getByRole("link", { name: "Configuración del proyecto" })
     ).toBeVisible();
     await page.keyboard.press(OPEN_PALETTE);
-    await palette(page).getByRole("combobox").fill("ir etiquetas");
+    await palette(page).getByRole("combobox").fill("ir mis tareas");
     await expect(
-      palette(page).getByRole("option", { name: GO_TO_LABELS })
+      palette(page).getByRole("option", { name: GO_TO_MY_ISSUES })
     ).toBeVisible();
 
     await palette(page).getByRole("combobox").fill("nueva tarea");
@@ -196,7 +196,7 @@ test.describe("desktop keyboard", () => {
       await route.abort();
     });
     await page.keyboard.press(OPEN_PALETTE);
-    await palette(page).getByRole("combobox").fill("ir etiquetas");
+    await palette(page).getByRole("combobox").fill("ir mis tareas");
 
     const retry = palette(page).getByRole("option", {
       name: /No se pudieron buscar las tareas/u,
@@ -206,18 +206,18 @@ test.describe("desktop keyboard", () => {
     await expect(retry).toBeVisible({ timeout: 10_000 });
     await expect(palette(page)).not.toContainText("match");
     await expect(
-      palette(page).getByRole("option", { name: GO_TO_LABELS })
+      palette(page).getByRole("option", { name: GO_TO_MY_ISSUES })
     ).toBeVisible();
 
     await page.unroute(SEARCH_RPC);
     await retry.click();
     await expect(retry).toBeHidden();
     await expect(
-      palette(page).getByRole("option", { name: GO_TO_LABELS })
+      palette(page).getByRole("option", { name: GO_TO_MY_ISSUES })
     ).toBeVisible();
   });
 
-  test("S, P and A open the Issue view's pickers; keys typed in a field or over a dialog do nothing", async ({
+  test("S and A open the Issue view's pickers; keys typed in a field or over a dialog do nothing", async ({
     page,
     request,
   }) => {
@@ -241,16 +241,6 @@ test.describe("desktop keyboard", () => {
     await page.keyboard.press("Enter");
     await expect(
       page.getByRole("button", { name: "Estado: En curso" })
-    ).toBeVisible();
-
-    await page.keyboard.press("p");
-    await expect(
-      page.getByRole("combobox", { name: "Cambiar prioridad" })
-    ).toBeFocused();
-    await page.keyboard.type("Urgente");
-    await page.keyboard.press("Enter");
-    await expect(
-      page.getByRole("button", { name: "Prioridad: Urgente" })
     ).toBeVisible();
 
     await page.keyboard.press("a");
@@ -369,7 +359,6 @@ test.describe("phone commands", () => {
       [MY_ISSUES]: "floating",
       [`/projects/${prefix}/settings`]: "header",
       "/members": "header",
-      "/labels": "header",
       "/projects/archived": "header",
       [`/issue/${issue.identifier}`]: "header",
     };
@@ -430,7 +419,6 @@ test.describe("phone commands", () => {
       list: `/projects/${prefix}/list`,
       issue: `/issue/${issue.identifier}`,
       "my issues": MY_ISSUES,
-      labels: "/labels",
       members: "/members",
       settings: `/projects/${prefix}/settings`,
     };

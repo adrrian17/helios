@@ -1,9 +1,8 @@
-import { priorityLabels } from "@helios/api/domain";
 import { Avatar, AvatarFallback } from "@helios/ui/components/avatar";
 import { cn } from "@helios/ui/lib/utils";
 import { UserRoundIcon } from "lucide-react";
 
-import type { MemberSummary, Priority, StateCategory } from "@/utils/domain";
+import type { MemberSummary, StateCategory } from "@/utils/domain";
 import { formatDateTime, formatRelative } from "@/utils/format";
 
 const ICON = "size-3.5 shrink-0";
@@ -69,94 +68,6 @@ export const StateIcon = ({
   </svg>
 );
 
-const BAR_COUNT: Record<Exclude<Priority, "urgent" | "none">, number> = {
-  high: 3,
-  medium: 2,
-  low: 1,
-};
-
-const BARS = [
-  { x: 1, height: 5 },
-  { x: 5.5, height: 8 },
-  { x: 10, height: 11 },
-] as const;
-
-const priorityGlyph = (priority: Priority) => {
-  if (priority === "urgent") {
-    return (
-      <>
-        <rect width="14" height="14" rx="3" fill="currentColor" />
-        <path
-          d="M7 3.5v4.25"
-          stroke="var(--background)"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-        />
-        <circle cx="7" cy="10.4" r="1" fill="var(--background)" />
-      </>
-    );
-  }
-
-  if (priority === "none") {
-    return BARS.map((bar) => (
-      <rect
-        key={bar.x}
-        x={bar.x}
-        y="6.25"
-        width="3"
-        height="1.5"
-        rx="0.75"
-        fill="currentColor"
-        opacity="0.6"
-      />
-    ));
-  }
-
-  return BARS.map((bar, index) => (
-    <rect
-      key={bar.x}
-      x={bar.x}
-      y={12.5 - bar.height}
-      width="3"
-      height={bar.height}
-      rx="1"
-      fill="currentColor"
-      opacity={index < BAR_COUNT[priority] ? 1 : 0.25}
-    />
-  ));
-};
-
-/** Priority glyph with its name for screen readers, since it often stands alone on a card. */
-export const PriorityIcon = ({
-  priority,
-  labelled = true,
-  className,
-}: {
-  priority: Priority;
-  /** False when the caller places the spoken label itself, as cards do to lead with the Identifier. */
-  labelled?: boolean;
-  className?: string;
-}) => (
-  <>
-    <svg
-      viewBox="0 0 14 14"
-      aria-hidden="true"
-      className={cn(
-        ICON,
-        priority === "urgent"
-          ? "text-priority-urgent"
-          : "text-muted-foreground",
-        className
-      )}
-    >
-      {priorityGlyph(priority)}
-    </svg>
-    {labelled ? (
-      <span className="sr-only">Prioridad: {priorityLabels[priority]}</span>
-    ) : null}
-  </>
-);
-
 const HUE_COUNT = 360;
 const HUE_SEED = 31;
 
@@ -206,20 +117,6 @@ export const UnassignedAvatar = ({ className }: { className?: string }) => (
   >
     <UserRoundIcon className="size-3" />
   </span>
-);
-
-export const LabelDot = ({
-  color,
-  className,
-}: {
-  color: string;
-  className?: string;
-}) => (
-  <span
-    aria-hidden="true"
-    className={cn("size-2 shrink-0 rounded-full bg-(--label-color)", className)}
-    style={{ "--label-color": color }}
-  />
 );
 
 export const RelativeTime = ({

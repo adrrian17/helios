@@ -12,8 +12,6 @@ declare module "@tanstack/react-query" {
     mutationMeta: {
       /** The form shows the error itself, so no toast. */
       inlineError?: boolean;
-      /** The caller refreshes data itself, as when a delete leaves the page showing what it deleted. */
-      skipRefetch?: boolean;
     };
   }
 }
@@ -66,10 +64,8 @@ const createQueryClient = (): QueryClient => {
           toast.error(describeError(error));
         }
       },
-      onSuccess: async (_data, _variables, _context, mutation) => {
-        if (mutation.meta?.skipRefetch !== true) {
-          await client.invalidateQueries();
-        }
+      onSuccess: async () => {
+        await client.invalidateQueries();
       },
     }),
     queryCache: new QueryCache({

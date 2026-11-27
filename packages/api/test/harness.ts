@@ -1,56 +1,20 @@
-import { readdir, readFile } from "node:fs/promises";
-import path from "node:path";
-
 import { createAuth } from "@helios/auth";
 import { createCaptureMailer } from "@helios/auth/mailer";
 import { createDb } from "@helios/db";
 import { createRouterClient } from "@orpc/server";
-import { Miniflare } from "miniflare";
 
 import { createContext } from "../src/context";
 import { appRouter } from "../src/routers/index";
+import { applyMigrations, createEmptyD1 } from "./d1";
 
 const SERVER_URL = "https://api.helios.test";
 const WEB_URL = "https://helios.test";
 export const ADMIN_EMAIL = "admin@helios.test";
 
-const migrationsDir = path.join(import.meta.dirname, "../../db/src/migrations");
-
-const applyMigrations = async (d1: D1Database) => {
-  const entries = await readdir(migrationsDir, { withFileTypes: true });
-
-  const folders = entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .toSorted();
-
-  const migrations = await Promise.all(
-    folders.map(
-      async (folder) =>
-        await readFile(
-          path.join(migrationsDir, folder, "migration.sql"),
-          "utf-8"
-        )
-    )
-  );
-
-  const statements = migrations
-    .flatMap((migration) => migration.split("--> statement-breakpoint"))
-    .map((statement) => statement.trim())
-    .filter(Boolean);
-
-  await d1.batch(statements.map((statement) => d1.prepare(statement)));
-};
-
 /** A fresh, empty D1 database with every migration applied; dispose it with `await using`. */
 export const createHarness = async () => {
-  const miniflare = new Miniflare({
-    modules: true,
-    script: "export default {}",
-    d1Databases: ["DB"],
-  });
-
-  const d1 = await miniflare.getD1Database("DB");
+  const empty = await createEmptyD1();
+  const { d1 } = empty;
   await applyMigrations(d1);
 
   const db = createDb({ DB: d1 });
@@ -119,7 +83,7 @@ export const createHarness = async () => {
     requestLink,
     signIn,
     [Symbol.asyncDispose]: async () => {
-      await miniflare.dispose();
+      await empty[Symbol.asyncDispose]();
     },
   };
 };

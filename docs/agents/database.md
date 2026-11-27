@@ -9,6 +9,8 @@
 3. Commit the schema change and the new migration folder together.
 
 - Never edit a committed migration or any `snapshot.json`; generate a new migration instead.
+- D1 ignores `PRAGMA foreign_keys=OFF`, so a generated table recreation that drops a parent table cascades into its children. Put a `DELETE` for the rows you mean to lose at the top of the new migration, before any recreation.
+- A migration that removes or rewrites data needs a case in `packages/api/test/migrations.test.ts`: it applies the old migrations with `applyMigrations(d1, { through })`, inserts old-shaped rows with raw SQL, then applies the rest with `{ after }`.
 - Alchemy applies migrations during deploy. Do not run `db:migrate:deploy` unless asked.
 
 ## Runtime access

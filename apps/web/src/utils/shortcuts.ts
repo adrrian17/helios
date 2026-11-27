@@ -41,7 +41,6 @@ export const shortcuts = {
     scope: ANYWHERE,
   },
   state: { key: "s", label: "Cambiar estado", scope: ISSUE_VIEW },
-  priority: { key: "p", label: "Cambiar prioridad", scope: ISSUE_VIEW },
   assignee: { key: "a", label: "Cambiar responsable", scope: ISSUE_VIEW },
   previousIssue: {
     key: "k",

@@ -1,6 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { priorityLabels } from "@helios/api/domain";
 import { Button } from "@helios/ui/components/button";
 import {
   DropdownMenu,
@@ -10,29 +9,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@helios/ui/components/dropdown-menu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@helios/ui/components/tooltip";
 import { cn } from "@helios/ui/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { ArrowRightLeftIcon, ListChecksIcon } from "lucide-react";
+import { ArrowRightLeftIcon } from "lucide-react";
 
-import {
-  LabelDot,
-  MemberAvatar,
-  PriorityIcon,
-  StateIcon,
-} from "@/components/issue-meta";
+import { MemberAvatar, StateIcon } from "@/components/issue-meta";
 import type { IssueRow, WorkflowState } from "@/utils/domain";
 
 const SORTABLE_MOTION =
   // oxlint-disable-next-line shadcn/no-arbitrary-values -- dnd-kit computes the transition on every drag frame; no token can express it.
   "transform-(--drag-transform) [transition:var(--drag-transition)]";
-
-const CHIP =
-  "inline-flex h-5 items-center gap-1 rounded-md border px-1.5 text-xs leading-none text-muted-foreground";
 
 /** What a card shows; shared by the card in its column and the copy that follows the pointer. */
 export const IssueCardBody = ({
@@ -41,68 +27,33 @@ export const IssueCardBody = ({
 }: {
   issue: IssueRow;
   className?: string;
-}) => {
-  const checklistDone =
-    issue.checklist.total > 0 && issue.checklist.done === issue.checklist.total;
-
-  return (
-    <div
-      className={cn(
-        "bg-card text-card-foreground dark:border-input flex flex-col gap-1.5 rounded-lg border p-2.5 shadow-xs",
-        className
-      )}
-    >
-      <div className="text-muted-foreground flex h-5 items-center gap-1.5 text-xs max-md:pr-10">
-        <Tooltip>
-          <TooltipTrigger render={<span className="flex" />}>
-            <PriorityIcon priority={issue.priority} labelled={false} />
-          </TooltipTrigger>
-          <TooltipContent>
-            Prioridad: {priorityLabels[issue.priority]}
-          </TooltipContent>
-        </Tooltip>
-        <span className="tabular-nums">{issue.identifier}</span>
-        <span className="flex-1" />
-        {issue.assignee === null ? (
-          // No placeholder: a ring on every unassigned card is noise.
-          <span className="sr-only">Sin responsable</span>
-        ) : (
-          <>
-            <MemberAvatar member={issue.assignee} />
-            <span className="sr-only">
-              Asignada a {issue.assignee.displayName}
-            </span>
-          </>
-        )}
-      </div>
-      <p className="line-clamp-3 text-sm leading-snug font-medium break-words">
-        {issue.title}
-      </p>
-      <span className="sr-only">
-        Prioridad: {priorityLabels[issue.priority]}
-      </span>
-      {issue.checklist.total === 0 && issue.labels.length === 0 ? null : (
-        <div className="flex flex-wrap items-center gap-1">
-          {issue.checklist.total > 0 ? (
-            <span className={cn(CHIP, checklistDone && "text-state-completed")}>
-              <ListChecksIcon className="size-3" aria-hidden="true" />
-              <span className="tabular-nums">
-                <span className="sr-only">Checklist </span>
-                {issue.checklist.done}/{issue.checklist.total}
-              </span>
-            </span>
-          ) : null}
-          {issue.labels.map((label) => (
-            <span key={label.id} className={cn(CHIP, "max-w-32")}>
-              <LabelDot color={label.color} />
-              <span className="truncate">{label.name}</span>
-            </span>
-          ))}
-        </div>
+}) => (
+  <div
+    className={cn(
+      "bg-card text-card-foreground dark:border-input flex flex-col gap-1.5 rounded-lg border p-2.5 shadow-xs",
+      className
+    )}
+  >
+    <div className="text-muted-foreground flex h-5 items-center gap-1.5 text-xs max-md:pr-10">
+      <span className="tabular-nums">{issue.identifier}</span>
+      <span className="flex-1" />
+      {issue.assignee === null ? (
+        // No placeholder: a ring on every unassigned card is noise.
+        <span className="sr-only">Sin responsable</span>
+      ) : (
+        <>
+          <MemberAvatar member={issue.assignee} />
+          <span className="sr-only">
+            Asignada a {issue.assignee.displayName}
+          </span>
+        </>
       )}
     </div>
-  );
-};
+    <p className="line-clamp-3 text-sm leading-snug font-medium break-words">
+      {issue.title}
+    </p>
+  </div>
+);
 
 /** The phone's alternative to dragging across columns. */
 const MoveToMenu = ({

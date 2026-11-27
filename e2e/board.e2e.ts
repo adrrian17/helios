@@ -165,7 +165,7 @@ test.describe("board composer", () => {
     await createProject(page, false, `Filtered ${prefix}`, prefix);
 
     await page.goto(
-      `/projects/${prefix}/board?priority=${encodeURIComponent(JSON.stringify(["urgent"]))}`
+      `/projects/${prefix}/board?assignee=${encodeURIComponent(JSON.stringify(["nobody"]))}`
     );
     const backlog = column(page, "Pendiente");
 

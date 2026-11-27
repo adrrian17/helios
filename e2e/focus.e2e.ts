@@ -7,7 +7,6 @@ import {
   archiveProject,
   seedProject,
   signIn,
-  uniqueId,
   uniquePrefix,
 } from "./helpers";
 
@@ -38,7 +37,6 @@ test.describe("focus after closing an editor", () => {
       title: "Focus check",
     });
 
-    await api.checklist.add({ issueId: issue.id, text: "Step one" });
     await api.comments.add({ issueId: issue.id, body: "First Comment" });
 
     await page.goto(`/issue/${issue.identifier}`);
@@ -51,26 +49,6 @@ test.describe("focus after closing an editor", () => {
       await addDescription.click();
     });
 
-    const step = page.getByRole("button", { name: "Step one", exact: true });
-    await escapeReturnsFocus(page, step, async () => {
-      await step.click();
-    });
-
-    // The Checklist edit saves on blur; focus must stay where the user moved it.
-    const comment = page.getByRole("textbox", {
-      name: "Comentario",
-      exact: true,
-    });
-
-    await step.click();
-    await comment.click();
-    await expect(comment).toBeFocused();
-    await step.click();
-    await page.keyboard.press("Tab");
-    await expect(
-      page.getByRole("button", { name: "Eliminar Step one" })
-    ).toBeFocused();
-
     const commentActions = page.getByRole("button", {
       name: /^Acciones del comentario de/u,
     });
@@ -81,10 +59,8 @@ test.describe("focus after closing an editor", () => {
     });
 
     // An earlier popover must not take focus from an editor opened through a menu.
-    await page
-      .getByRole("button", { name: "Prioridad: Sin prioridad" })
-      .click();
-    await page.getByRole("option", { name: "Alta" }).click();
+    await page.getByRole("button", { name: "Estado: Pendiente" }).click();
+    await page.getByRole("option", { name: "En curso" }).click();
     await commentActions.click();
     await page.getByRole("menuitem", { name: "Editar" }).click();
 
@@ -141,26 +117,6 @@ test.describe("focus after closing an editor", () => {
       await addState.click();
     });
 
-    const name = `Label ${uniqueId()}`;
-    await page.goto("/labels");
-    await page.getByLabel("Nombre").fill(name);
-    await page.getByRole("button", { name: "Crear etiqueta" }).click();
-
-    const labelActions = page.getByRole("button", {
-      name: `Acciones para ${name}`,
-    });
-
-    await escapeReturnsFocus(page, labelActions, async () => {
-      await labelActions.click();
-      await page.getByRole("menuitem", { name: "Renombrar" }).click();
-    });
-
-    await labelActions.click();
-    await page.getByRole("menuitem", { name: "Eliminar…" }).click();
-    await page
-      .getByRole("alertdialog")
-      .getByRole("button", { name: "Eliminar etiqueta" })
-      .click();
     await archiveProject(page, prefix);
   });
 });

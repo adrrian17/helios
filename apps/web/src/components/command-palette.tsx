@@ -18,7 +18,6 @@ import {
   CircleUserRoundIcon,
   KeyboardIcon,
   PlusIcon,
-  TagIcon,
   UsersIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -97,16 +96,6 @@ const PaletteBody = ({
       run: () => {
         go(async () => {
           await navigate({ to: "/my-issues" });
-        });
-      },
-    },
-    {
-      id: "labels",
-      label: "Ir a Etiquetas",
-      icon: TagIcon,
-      run: () => {
-        go(async () => {
-          await navigate({ to: "/labels" });
         });
       },
     },

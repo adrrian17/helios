@@ -4,16 +4,11 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@helios/ui/components/dropdown-menu";
 import { Skeleton } from "@helios/ui/components/skeleton";
 import { ORPCError } from "@orpc/client";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   Link,
   createFileRoute,
@@ -29,19 +24,15 @@ import {
   MoreHorizontalIcon,
   PanelRightCloseIcon,
   PanelRightOpenIcon,
-  TrashIcon,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { ConfirmDialog } from "@/components/confirm-dialog";
-import type { ConfirmRequest } from "@/components/confirm-dialog";
 import { IssueDescription, IssueTitle } from "@/components/issue/issue-body";
-import { IssueChecklist } from "@/components/issue/issue-checklist";
 import { IssueProperties } from "@/components/issue/issue-properties";
 import type { IssuePicker } from "@/components/issue/issue-properties";
 import { IssueTimeline } from "@/components/issue/issue-timeline";
-import { useIssue, useIssueOptions } from "@/components/issue/use-issue";
+import { useIssue } from "@/components/issue/use-issue";
 import { PageHeader } from "@/components/page-header";
 import { NotFound } from "@/components/route-states";
 import { neighboursOf } from "@/utils/issue-sequence";
@@ -68,106 +59,51 @@ const rememberRailOpen = (open: boolean) => {
   }
 };
 
-const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => {
-  const issue = useIssue();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const { queryKey: issueKey } = useIssueOptions();
-  const [confirm, setConfirm] = useState<ConfirmRequest | null>(null);
-
-  const remove = useMutation({
-    ...orpc.issues.delete.mutationOptions(),
-    meta: { skipRefetch: true },
-  });
-
-  // Leave first, then refresh, so the deleted Issue is never refetched into an error.
-  const deleteIssue = async () => {
-    await remove.mutateAsync({ id: issue.id });
-    await navigate({
-      to: "/projects/$prefix",
-      params: { prefix: issue.project.prefix },
-    });
-    queryClient.removeQueries({ queryKey: issueKey });
-    toast.success(`${issue.identifier} eliminada.`);
-    await queryClient.invalidateQueries();
-  };
-
-  return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Acciones de la tarea"
-            />
-          }
+const IssueActions = ({ onMoveTo }: { onMoveTo: () => void }) => (
+  <DropdownMenu>
+    <DropdownMenuTrigger
+      render={
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Acciones de la tarea"
+        />
+      }
+    >
+      <MoreHorizontalIcon />
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="min-w-48">
+      <DropdownMenuGroup>
+        <DropdownMenuItem onClick={onMoveTo}>
+          <ArrowRightLeftIcon />
+          Mover a…
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            void navigator.clipboard
+              .writeText(window.location.href)
+              .then(() => toast.success("Enlace copiado."))
+              .catch(() => toast.error("No se pudo copiar el enlace."));
+          }}
         >
-          <MoreHorizontalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-48">
-          <DropdownMenuGroup>
-            <DropdownMenuItem onClick={onMoveTo}>
-              <ArrowRightLeftIcon />
-              Mover a…
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                void navigator.clipboard
-                  .writeText(window.location.href)
-                  .then(() => toast.success("Enlace copiado."))
-                  .catch(() => toast.error("No se pudo copiar el enlace."));
-              }}
-            >
-              <LinkIcon />
-              Copiar enlace
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => {
-                setConfirm({
-                  title: `¿Eliminar ${issue.identifier}?`,
-                  description:
-                    "Su checklist, sus comentarios y su actividad se eliminan con ella, y su número no se vuelve a usar. Para conservar un registro, muévela a un estado de categoría Cancelada.",
-                  confirmLabel: "Eliminar tarea",
-                  destructive: true,
-                  onConfirm: deleteIssue,
-                });
-              }}
-            >
-              <TrashIcon />
-              Eliminar tarea…
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <ConfirmDialog
-        request={confirm}
-        onClose={() => {
-          setConfirm(null);
-        }}
-      />
-    </>
-  );
-};
+          <LinkIcon />
+          Copiar enlace
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>
+);
 
 const IssuePage = () => {
   const issue = useIssue();
   const wide = useMediaQuery("(min-width: 64rem)");
   const [railOpen, setRailOpen] = useState(rememberedRailOpen);
   const showRail = wide && railOpen;
-  // Which picker is open; kept here so S, P and A can open one by name.
+  // Which picker is open; kept here so S and A can open one by name.
   const [openPicker, setOpenPicker] = useState<IssuePicker | null>(null);
 
   useShortcut("state", () => {
     setOpenPicker("state");
-  });
-  useShortcut("priority", () => {
-    setOpenPicker("priority");
   });
   useShortcut("assignee", () => {
     setOpenPicker("assignee");
@@ -295,14 +231,13 @@ const IssuePage = () => {
           >
             <IssueTitle />
             {showRail ? null : (
-              // Every property sits under the title, so none waits past the checklist.
+              // Every property sits under the title, so none waits past the description.
               <section aria-label="Propiedades" className="flex flex-col gap-2">
                 {properties("summary")}
                 {properties("details")}
               </section>
             )}
             <IssueDescription />
-            <IssueChecklist />
             <IssueTimeline />
           </div>
         </main>
@@ -357,7 +292,6 @@ export const Route = createFileRoute("/_app/issue/$identifier")({
       void queryClient
         .query(api.workspace.members.queryOptions())
         .catch(() => null);
-      void queryClient.query(api.labels.list.queryOptions()).catch(() => null);
 
       await queryClient.query({
         ...api.projects.get.queryOptions({

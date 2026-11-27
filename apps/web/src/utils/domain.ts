@@ -1,4 +1,4 @@
-import { priorities, stateCategories } from "@helios/api/domain";
+import { stateCategories } from "@helios/api/domain";
 import type { AppRouterClient } from "@helios/api/routers/index";
 import type { InferClientOutputs } from "@orpc/client";
 
@@ -17,15 +17,11 @@ export type IssueRow = BoardColumn["issues"][number];
 
 export type StateCategory = WorkflowState["category"];
 
-export type Priority = IssueRow["priority"];
-
 export type MemberSummary = NonNullable<IssueRow["assignee"]>;
 
-export type IssueDetail = Outputs["issues"]["get"];
+type IssueDetail = Outputs["issues"]["get"];
 
 export type TimelineEntry = IssueDetail["timeline"][number];
-
-export type Label = Outputs["labels"]["list"][number];
 
 export type Member = Outputs["workspace"]["members"][number];
 
@@ -48,12 +44,6 @@ export const categories = stateCategories.map((value) => ({
   label: categoryLabels[value],
 }));
 
-/** The order pickers offer Priorities in, as Linear does: no priority first, then most to least urgent. */
-export const pickerPriorities: Priority[] = [
-  "none",
-  ...priorities.filter((priority) => priority !== "none"),
-];
-
 export const suggestPrefix = (name: string) => {
   const words = name
     .toUpperCase()
@@ -67,20 +57,3 @@ export const suggestPrefix = (name: string) => {
     words.length > 1 ? words.map((word) => word[0]).join("") : (words[0] ?? "")
   ).slice(0, MAX);
 };
-
-/** The preset Label colours, so Labels stay readable in both themes. */
-export const labelColors = [
-  { value: "#94a3b8", name: "Gris" },
-  { value: "#ef4444", name: "Rojo" },
-  { value: "#f97316", name: "Naranja" },
-  { value: "#eab308", name: "Amarillo" },
-  { value: "#22c55e", name: "Verde" },
-  { value: "#14b8a6", name: "Turquesa" },
-  { value: "#3b82f6", name: "Azul" },
-  { value: "#6366f1", name: "Índigo" },
-  { value: "#a855f7", name: "Morado" },
-  { value: "#ec4899", name: "Rosa" },
-] as const;
-
-export const nextLabelColor = (labelCount: number) =>
-  (labelColors[labelCount % labelColors.length] ?? labelColors[0]).value;

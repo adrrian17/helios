@@ -1,8 +1,7 @@
 import { expect, test } from "@playwright/test";
-import type { Page, Route } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 import {
-  API_URL,
   adminEmail,
   apiAs,
   assignToAdmin,
@@ -11,11 +10,16 @@ import {
   column,
   seedProject,
   signIn,
-  uniqueId,
   uniquePrefix,
 } from "./helpers";
 
 const rows = (page: Page) => page.getByRole("table").locator("tbody tr");
+
+const filterUnassigned = async (page: Page) => {
+  await page.getByRole("button", { name: "Filtro de responsable" }).click();
+  await page.getByRole("option", { name: "Sin responsable" }).click();
+  await page.keyboard.press("Escape");
+};
 
 const titles = (...names: string[]) =>
   names.map((name) => new RegExp(name, "u"));
@@ -38,7 +42,6 @@ test.describe("desktop list", () => {
     const alpha = await apiAs(page).issues.create({
       projectId: project.id,
       title: "Alpha",
-      priority: "urgent",
     });
 
     await assignToAdmin(page, alpha.identifier);
@@ -46,7 +49,6 @@ test.describe("desktop list", () => {
     await apiAs(page).issues.create({
       projectId: project.id,
       title: "Bravo",
-      priority: "low",
     });
 
     await page.goto(`/projects/${prefix}/list`);
@@ -61,26 +63,26 @@ test.describe("desktop list", () => {
     await page.getByRole("button", { name: "Título", exact: true }).click();
     await expect(rows(page)).toHaveText(titles("Charlie", "Bravo", "Alpha"));
 
-    await page.getByRole("button", { name: "Prioridad", exact: true }).click();
-    await expect(rows(page)).toHaveText(titles("Alpha", "Bravo", "Charlie"));
+    await page
+      .getByRole("button", { name: "Responsable", exact: true })
+      .click();
+    await expect(rows(page)).toHaveText(titles("Alpha", "Charlie", "Bravo"));
 
-    await page.getByRole("button", { name: "Filtro de prioridad" }).click();
-    await page.getByRole("option", { name: "Urgente" }).click();
-    await page.keyboard.press("Escape");
-    await expect(page).toHaveURL(/priority=/u);
-    await expect(rows(page)).toHaveText(titles("Alpha"));
+    await filterUnassigned(page);
+    await expect(page).toHaveURL(/assignee=/u);
+    await expect(rows(page)).toHaveText(titles("Charlie", "Bravo"));
 
     await page.reload();
-    await expect(rows(page)).toHaveText(titles("Alpha"));
+    await expect(rows(page)).toHaveText(titles("Charlie", "Bravo"));
 
     await page.getByRole("link", { name: "Tablero" }).click();
-    await expect(page).toHaveURL(/\/board\?.*priority=/u);
+    await expect(page).toHaveURL(/\/board\?.*assignee=/u);
     await expect(column(page, "Pendiente").getByRole("link")).toHaveText(
-      titles("Alpha")
+      titles("Charlie", "Bravo")
     );
 
     await page.getByRole("button", { name: "Quitar filtros" }).click();
-    await expect(page).not.toHaveURL(/priority=/u);
+    await expect(page).not.toHaveURL(/assignee=/u);
     // Sorting the List never moved anything: the Board keeps creation order.
     await expect(column(page, "Pendiente").getByRole("link")).toHaveText(
       titles("Charlie", "Alpha", "Bravo")
@@ -89,9 +91,7 @@ test.describe("desktop list", () => {
     await page.getByRole("link", { name: "Lista" }).click();
     // The Board's own filter bar stays up until the List has loaded; wait for the List's.
     await expect(rows(page)).toHaveText(titles("Charlie", "Alpha", "Bravo"));
-    await page.getByRole("button", { name: "Filtro de responsable" }).click();
-    await page.getByRole("option", { name: "Sin responsable" }).click();
-    await page.keyboard.press("Escape");
+    await filterUnassigned(page);
     await expect(rows(page)).toHaveText(titles("Charlie", "Bravo"));
 
     await page.goto(`/projects/${prefix}`);
@@ -100,7 +100,7 @@ test.describe("desktop list", () => {
     await archiveProject(page, prefix);
   });
 
-  test("My Issues shows my backlog and started Issues by Project, most urgent first", async ({
+  test("My Issues shows my backlog and started Issues by Project, in Identifier order", async ({
     page,
     request,
   }) => {
@@ -115,11 +115,8 @@ test.describe("desktop list", () => {
     ) => await api.issues.create({ projectId: project.id, title, ...rest });
 
     const mine = [
-      await create("Low backlog", { priority: "low" }),
-      await create("Urgent started", {
-        priority: "urgent",
-        stateId: project.stateId("En curso"),
-      }),
+      await create("Backlog"),
+      await create("Started", { stateId: project.stateId("En curso") }),
       await create("Already done", { stateId: project.stateId("Completada") }),
       await create("Just an idea", { stateId: project.stateId("Ideas") }),
     ];
@@ -138,7 +135,7 @@ test.describe("desktop list", () => {
     });
 
     await expect(group.getByRole("listitem")).toHaveText(
-      titles("Urgent started", "Low backlog")
+      titles("Backlog", "Started")
     );
 
     await archiveProject(page, prefix);
@@ -189,13 +186,12 @@ test.describe("phone list", () => {
       projectId: project.id,
       title:
         "A deliberately long title that would push a wide table past the edge of a phone",
-      priority: "high",
     });
 
     await page.goto(`/projects/${prefix}/list`);
 
     await Promise.all(
-      ["ID", "Título", "Prioridad", "Responsable"].map(async (name) => {
+      ["ID", "Título", "Responsable"].map(async (name) => {
         await expect(
           page.getByRole("columnheader", { name, exact: true })
         ).toBeVisible();
@@ -227,12 +223,7 @@ test.describe("phone list", () => {
     await page.setViewportSize({ width: 360, height: 740 });
 
     await page.goto(`/projects/${prefix}/list`);
-    await page.getByRole("button", { name: "Filtro de responsable" }).click();
-    await page.getByRole("option", { name: "Sin responsable" }).click();
-    await page.keyboard.press("Escape");
-    await page.getByRole("button", { name: "Filtro de prioridad" }).click();
-    await page.getByRole("option", { name: "Urgente" }).click();
-    await page.keyboard.press("Escape");
+    await filterUnassigned(page);
 
     await expect(
       page.getByRole("button", { name: /^Orden: /u })
@@ -314,72 +305,4 @@ test.describe("issue neighbours", () => {
 
     await archiveProject(page, prefix);
   });
-
-  for (const rail of [true, false]) {
-    test(`a Label still being created lands on the Issue it was created from after stepping to the next (${rail ? "rail" : "no rail"})`, async ({
-      page,
-      request,
-    }) => {
-      const prefix = uniquePrefix();
-      await signIn(page, request, adminEmail);
-      const project = await seedProject(page, prefix);
-      const api = apiAs(page);
-
-      const [first, second] = await Promise.all(
-        ["Alpha", "Bravo"].map(
-          async (title) =>
-            await api.issues.create({ projectId: project.id, title })
-        )
-      );
-
-      const name = `Label ${uniqueId()}`;
-      const label = page.getByText(name, { exact: true });
-
-      await page.goto(`/projects/${prefix}/list?sort=title&dir=asc`);
-      await page.getByRole("link", { name: "Alpha" }).click();
-      await expect(page.getByText("1 / 2")).toBeVisible();
-
-      if (!rail) {
-        // Without the rail the properties sit in the per-Issue column, which navigation unmounts.
-        await page.getByRole("button", { name: "Ocultar propiedades" }).click();
-      }
-
-      // Both writes are held: the create so the view moves on first, the attach to catch an early patch.
-      const held: Route[] = [];
-      await page.route(`${API_URL}/rpc/labels/{create,attach}`, (route) => {
-        held.push(route);
-      });
-      await page.getByRole("button", { name: "Añadir etiqueta" }).click();
-      await page
-        .getByRole("combobox", { name: "Cambiar etiquetas" })
-        .fill(name);
-      await page
-        .getByRole("option", { name: `Crear etiqueta “${name}”` })
-        .click();
-      await expect.poll(() => held.length).toBe(1);
-      await page.keyboard.press("Escape");
-      await page.keyboard.press("j");
-      await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
-
-      await held[0]?.continue();
-      await expect.poll(() => held.length).toBe(2);
-      await expect(label, "Bravo never shows it").toHaveCount(0);
-      const attached = page.waitForResponse(`${API_URL}/rpc/labels/attach`);
-      await held[1]?.continue();
-      await attached;
-      await page.unroute(`${API_URL}/rpc/labels/{create,attach}`);
-
-      await page.goto(`/issue/${first?.identifier}`);
-      await expect(label.first()).toBeVisible();
-      await page.goto(`/issue/${second?.identifier}`);
-      await expect(page.getByRole("heading", { name: "Bravo" })).toBeVisible();
-      await expect(label).toHaveCount(0);
-
-      const all = await api.labels.list();
-      const created = all.find((entry) => entry.name === name);
-
-      await api.labels.delete({ id: created?.id ?? "" });
-      await archiveProject(page, prefix);
-    });
-  }
 });

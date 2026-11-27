@@ -29,7 +29,6 @@ import {
   PlusIcon,
   SearchIcon,
   SquarePenIcon,
-  TagIcon,
   UsersIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -216,12 +215,6 @@ export const AppSidebar = () => {
                     activePath="/my-issues"
                     icon={<CircleUserRoundIcon />}
                     label="Mis tareas"
-                  />
-                  <NavLink
-                    to="/labels"
-                    activePath="/labels"
-                    icon={<TagIcon />}
-                    label="Etiquetas"
                   />
                 </SidebarMenu>
               </SidebarGroupContent>
