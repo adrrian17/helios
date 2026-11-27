@@ -4,7 +4,6 @@ import {
   check,
   index,
   integer,
-  primaryKey,
   sqliteTable,
   text,
   uniqueIndex,
@@ -16,7 +15,6 @@ import {
   invitationStatuses,
   memberRoles,
   prefixLength,
-  priorities,
   stateCategories,
 } from "../enums";
 import { user } from "./auth";
@@ -137,7 +135,6 @@ export const issue = sqliteTable(
     number: integer("number").notNull(),
     title: text("title").notNull(),
     description: text("description").notNull().default(""),
-    priority: text("priority", { enum: priorities }).notNull().default("none"),
     assigneeId: text("assignee_id").references(() => member.userId, {
       onDelete: "set null",
     }),
@@ -155,56 +152,12 @@ export const issue = sqliteTable(
       .notNull(),
   },
   (table) => [
-    check("issue_priority", oneOf(table.priority, priorities)),
     uniqueIndex("issue_project_number_unique").on(
       table.projectId,
       table.number
     ),
     index("issue_state_position_idx").on(table.stateId, table.position),
     index("issue_assignee_idx").on(table.assigneeId),
-  ]
-);
-
-export const label = sqliteTable(
-  "label",
-  {
-    id: id(),
-    name: text("name").notNull(),
-    color: text("color").notNull(),
-    createdAt: createdAt(),
-  },
-  (table) => [uniqueIndex("label_name_unique").on(sql`lower(${table.name})`)]
-);
-
-export const issueLabel = sqliteTable(
-  "issue_label",
-  {
-    issueId: text("issue_id")
-      .notNull()
-      .references(() => issue.id, { onDelete: "cascade" }),
-    labelId: text("label_id")
-      .notNull()
-      .references(() => label.id, { onDelete: "cascade" }),
-  },
-  (table) => [
-    primaryKey({ columns: [table.issueId, table.labelId] }),
-    index("issue_label_label_idx").on(table.labelId),
-  ]
-);
-
-export const checklistItem = sqliteTable(
-  "checklist_item",
-  {
-    id: id(),
-    issueId: text("issue_id")
-      .notNull()
-      .references(() => issue.id, { onDelete: "cascade" }),
-    text: text("text").notNull(),
-    checked: integer("checked", { mode: "boolean" }).notNull().default(false),
-    position: position(),
-  },
-  (table) => [
-    index("checklist_item_issue_idx").on(table.issueId, table.position),
   ]
 );
 
@@ -256,9 +209,6 @@ export const trackerRelations = defineRelationsPart(
     project,
     workflowState,
     issue,
-    label,
-    issueLabel,
-    checklistItem,
     comment,
     activityEntry,
   },
@@ -311,20 +261,8 @@ export const trackerRelations = defineRelationsPart(
         optional: false,
         alias: "creator",
       }),
-      labels: r.many.label({
-        from: r.issue.id.through(r.issueLabel.issueId),
-        to: r.label.id.through(r.issueLabel.labelId),
-      }),
-      checklistItems: r.many.checklistItem(),
       comments: r.many.comment(),
       activityEntries: r.many.activityEntry(),
-    },
-    checklistItem: {
-      issue: r.one.issue({
-        from: r.checklistItem.issueId,
-        to: r.issue.id,
-        optional: false,
-      }),
     },
     comment: {
       issue: r.one.issue({
