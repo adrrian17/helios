@@ -1,5 +1,4 @@
 import type { Database } from "@helios/db";
-import { priorities } from "@helios/db/enums";
 import { activityEntry, issue, project } from "@helios/db/schema/tracker";
 import { ORPCError } from "@orpc/server";
 import { eq, sql } from "drizzle-orm";
@@ -10,7 +9,6 @@ import {
   filtersSchema,
   formatIdentifier,
   parseIdentifier,
-  priorityLabels,
   sortSchema,
   titleSchema,
 } from "../domain";
@@ -36,8 +34,6 @@ const rowWith = {
   project: { columns: { id: true, name: true, prefix: true } },
   state: { columns: { id: true, name: true, category: true, position: true } },
   assignee: memberWith,
-  labels: { columns: { id: true, name: true, color: true } },
-  checklistItems: { columns: { checked: true } },
 } as const;
 
 type RowFilter = NonNullable<
@@ -52,16 +48,10 @@ const loadRows = async (db: Database, where: RowFilter) => {
     identifier: formatIdentifier(row.project.prefix, row.number),
     number: row.number,
     title: row.title,
-    priority: row.priority,
     position: row.position,
     project: row.project,
     state: row.state,
     assignee: row.assignee ? toMemberSummary(row.assignee) : null,
-    labels: row.labels.toSorted((a, b) => a.name.localeCompare(b.name)),
-    checklist: {
-      done: row.checklistItems.filter((item) => item.checked).length,
-      total: row.checklistItems.length,
-    },
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   }));
@@ -69,14 +59,10 @@ const loadRows = async (db: Database, where: RowFilter) => {
 
 type IssueRow = Awaited<ReturnType<typeof loadRows>>[number];
 
-const byPriority = (a: IssueRow, b: IssueRow) =>
-  priorities.indexOf(a.priority) - priorities.indexOf(b.priority);
-
 const sorters: Record<SortField, (a: IssueRow, b: IssueRow) => number> = {
   identifier: (a, b) => a.number - b.number,
   title: (a, b) => a.title.localeCompare(b.title),
   state: (a, b) => compareStates(a.state, b.state),
-  priority: byPriority,
   // Unassigned sorts after every Member.
   assignee: (a, b) =>
     a.assignee === null || b.assignee === null
@@ -102,12 +88,6 @@ const projectIssuesWhere = (
   return {
     projectId,
     ...(assigneeMatches.length > 0 && { OR: assigneeMatches }),
-    ...(filters.priorities !== undefined && {
-      priority: { in: filters.priorities },
-    }),
-    ...(filters.labelIds !== undefined && {
-      labels: { id: { in: filters.labelIds } },
-    }),
   };
 };
 
@@ -175,7 +155,6 @@ export const issuesRouter = {
         projectId: z.string(),
         title: titleSchema,
         description: descriptionSchema.optional(),
-        priority: z.enum(priorities).optional(),
         assigneeId: z.string().nullable().optional(),
         stateId: z.string().optional(),
       })
@@ -243,8 +222,8 @@ export const issuesRouter = {
     ),
 
   /**
-   * Changes any of the Issue's fields. Title, Workflow State, Priority and
-   * assignee changes each record Activity; description changes do not. A new
+   * Changes any of the Issue's fields. Title, Workflow State and assignee
+   * changes each record Activity; description changes do not. A new
    * Workflow State puts the Issue at the bottom of that column.
    */
   update: memberProcedure
@@ -252,7 +231,6 @@ export const issuesRouter = {
       idInput.extend({
         title: titleSchema.optional(),
         description: descriptionSchema.optional(),
-        priority: z.enum(priorities).optional(),
         assigneeId: z.string().nullable().optional(),
         stateId: z.string().optional(),
       })
@@ -280,15 +258,6 @@ export const issuesRouter = {
         input.description !== current.description
       ) {
         changes.description = input.description;
-      }
-
-      if (input.priority !== undefined && input.priority !== current.priority) {
-        changes.priority = input.priority;
-        activity.push({
-          kind: "priority_changed",
-          oldValue: priorityLabels[current.priority],
-          newValue: priorityLabels[input.priority],
-        });
       }
 
       if (
@@ -389,18 +358,6 @@ export const issuesRouter = {
       }
     ),
 
-  /** Deletes the Issue with its Checklist, Comments, Label links and Activity. Its number is not reused. */
-  delete: memberProcedure
-    .input(idInput)
-    .handler(async ({ context: { db }, input: { id } }) => {
-      const [deleted] = await db
-        .delete(issue)
-        .where(eq(issue.id, id))
-        .returning({ id: issue.id });
-
-      found(deleted, "la tarea");
-    }),
-
   get: memberProcedure
     .input(z.object({ identifier: z.string() }))
     .handler(async ({ context: { db }, input }) => {
@@ -417,11 +374,6 @@ export const issuesRouter = {
             state: { columns: { id: true, name: true, category: true } },
             assignee: memberWith,
             creator: memberWith,
-            labels: { columns: { id: true, name: true, color: true } },
-            checklistItems: {
-              columns: { id: true, text: true, checked: true },
-              orderBy: { position: "asc" },
-            },
             comments: { with: { author: memberWith } },
             activityEntries: { with: { actor: memberWith } },
           },
@@ -455,13 +407,10 @@ export const issuesRouter = {
         number: detail.number,
         title: detail.title,
         description: detail.description,
-        priority: detail.priority,
         project: detail.project,
         state: detail.state,
         assignee: detail.assignee ? toMemberSummary(detail.assignee) : null,
         creator: toMemberSummary(detail.creator),
-        labels: detail.labels.toSorted((a, b) => a.name.localeCompare(b.name)),
-        checklist: detail.checklistItems,
         timeline,
         createdAt: detail.createdAt,
         updatedAt: detail.updatedAt,
@@ -510,7 +459,7 @@ export const issuesRouter = {
 
   /**
    * My Issues: assigned to the signed-in Member, in active Projects, in
-   * `backlog` or `started` states; grouped by Project, sorted by Priority.
+   * `backlog` or `started` states; grouped by Project, sorted by Identifier.
    */
   mine: memberProcedure.handler(async ({ context: { db, member: self } }) => {
     const rows = await loadRows(db, {
@@ -522,9 +471,7 @@ export const issuesRouter = {
     return Map.groupBy(
       rows.toSorted(
         (a, b) =>
-          a.project.name.localeCompare(b.project.name) ||
-          byPriority(a, b) ||
-          a.number - b.number
+          a.project.name.localeCompare(b.project.name) || a.number - b.number
       ),
       (row) => row.project.id
     )

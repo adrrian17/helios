@@ -1,8 +1,8 @@
-import { prefixLength, priorities } from "@helios/db/enums";
-import type { Priority, StateCategory } from "@helios/db/enums";
+import { prefixLength } from "@helios/db/enums";
+import type { StateCategory } from "@helios/db/enums";
 import { z } from "zod";
 
-export { priorities, stateCategories } from "@helios/db/enums";
+export { stateCategories } from "@helios/db/enums";
 
 /** Longest accepted values; the web app sets its field limits from these. */
 export const limits = {
@@ -10,7 +10,6 @@ export const limits = {
   description: 100_000,
   name: 120,
   displayName: 80,
-  checklistItem: 1000,
   comment: 50_000,
 } as const;
 
@@ -25,7 +24,6 @@ export const titleSchema = required(limits.title);
 export const descriptionSchema = z.string().max(limits.description);
 export const nameSchema = required(limits.name);
 export const displayNameSchema = required(limits.displayName);
-export const checklistItemSchema = required(limits.checklistItem);
 export const commentSchema = required(limits.comment);
 
 export const prefixSchema = z
@@ -53,15 +51,6 @@ export const parseIdentifier = (identifier: string) => {
     : { prefix: prefix.toUpperCase(), number: Number(number) };
 };
 
-/** The words for each Priority. Activity stores them, so history keeps the words used at the time. */
-export const priorityLabels: Record<Priority, string> = {
-  none: "Sin prioridad",
-  urgent: "Urgente",
-  high: "Alta",
-  medium: "Media",
-  low: "Baja",
-};
-
 /** One Workflow State per State Category, so a new Project is usable at once. */
 export const defaultStates: { name: string; category: StateCategory }[] = [
   { name: "Ideas", category: "ideas" },
@@ -76,8 +65,6 @@ export const filtersSchema = z
   .object({
     assigneeIds: z.array(z.string()).optional(),
     unassigned: z.boolean().optional(),
-    labelIds: z.array(z.string()).optional(),
-    priorities: z.array(z.enum(priorities)).optional(),
   })
   .default({});
 
@@ -87,7 +74,6 @@ export const sortFields = [
   "identifier",
   "title",
   "state",
-  "priority",
   "assignee",
   "created",
   "updated",
