@@ -9,7 +9,7 @@
 
 ## Shared vocabulary
 
-- Field limits, enums, Priority labels, List sort fields and Identifier helpers come from `@helios/api/domain`. Use `limits.*` for `maxLength`; never copy a server rule into the web app.
+- Field limits, enums, List sort fields and Identifier helpers come from `@helios/api/domain`. Use `limits.*` for `maxLength`; never copy a server rule into the web app.
 
 ## UI components
 

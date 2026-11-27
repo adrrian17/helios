@@ -13,7 +13,6 @@ import {
   uniquePrefix,
 } from "./helpers";
 
-const WRITE_TESTS = "Write tests";
 const IN_PROGRESS_STATE = "Estado: En curso";
 const ACTIVITY = "Actividad y comentarios";
 const SEND = "ControlOrMeta+Enter";
@@ -21,7 +20,7 @@ const SEND = "ControlOrMeta+Enter";
 test.describe("issue view", () => {
   test.skip(({ isMobile }) => isMobile, "Desktop Issue view.");
 
-  test("state, Priority, a Comment and the Checklist persist after reload", async ({
+  test("state and a Comment persist after reload", async ({
     page,
     request,
   }) => {
@@ -42,26 +41,6 @@ test.describe("issue view", () => {
       page.getByRole("button", { name: IN_PROGRESS_STATE })
     ).toBeVisible();
 
-    await page
-      .getByRole("button", { name: "Prioridad: Sin prioridad" })
-      .click();
-    await page.getByRole("option", { name: "Alta" }).click();
-    await expect(
-      page.getByRole("button", { name: "Prioridad: Alta" })
-    ).toBeVisible();
-
-    const newItem = page.getByLabel("Nuevo elemento del checklist");
-    await newItem.fill(WRITE_TESTS);
-    await newItem.press("Enter");
-    await expect(
-      page.getByRole("checkbox", { name: WRITE_TESTS })
-    ).toBeVisible();
-    await newItem.fill("Ship it");
-    await newItem.press("Enter");
-    await expect(page.getByRole("checkbox", { name: "Ship it" })).toBeVisible();
-    await page.getByRole("checkbox", { name: WRITE_TESTS }).click();
-    await expect(page.getByText("1/2")).toBeVisible();
-
     const comment = `Looks good ${uniqueId()}`;
     await page
       .getByRole("textbox", { name: "Comentario", exact: true })
@@ -75,24 +54,11 @@ test.describe("issue view", () => {
       page.getByRole("button", { name: IN_PROGRESS_STATE })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Prioridad: Alta" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("checkbox", { name: WRITE_TESTS })
-    ).toBeChecked();
-    await expect(
-      page.getByRole("checkbox", { name: "Ship it" })
-    ).not.toBeChecked();
-    await expect(page.getByText("1/2")).toBeVisible();
-    await expect(
       page.getByRole("article", { name: /Comentario de/u })
     ).toContainText(comment);
 
     const activity = page.getByRole("list", { name: ACTIVITY });
     await expect(activity).toContainText("la movió de Pendiente a En curso");
-    await expect(activity).toContainText(
-      "cambió la prioridad de Sin prioridad a Alta"
-    );
 
     await archiveProject(page, prefix);
   });
@@ -242,22 +208,6 @@ test.describe("issue view", () => {
       "renombró la tarea de Slow network a Typed offline"
     );
 
-    const newItem = page.getByLabel("Nuevo elemento del checklist");
-    await newItem.fill("Step one");
-    await newItem.press("Enter");
-    await expect(
-      page.getByRole("checkbox", { name: "Step one" })
-    ).toBeVisible();
-    await page.route(`${API_URL}/rpc/checklist/update`, async (route) => {
-      await route.abort();
-    });
-    const editStep = page.getByLabel("Editar Step one");
-    await page.getByRole("button", { name: "Step one", exact: true }).click();
-    await editStep.fill("Renamed offline");
-    await editStep.press("Enter");
-    await expect(editStep).toHaveValue("Renamed offline");
-    await page.unroute(`${API_URL}/rpc/checklist/update`);
-
     await archiveProject(page, prefix);
   });
 
@@ -315,39 +265,6 @@ test.describe("issue view", () => {
   });
 });
 
-test.describe("labels", () => {
-  test.skip(({ isMobile }) => isMobile, "Desktop Labels page.");
-
-  test("a Label is created, refused when the name differs only in case, and deleted", async ({
-    page,
-    request,
-  }) => {
-    const name = `Label ${uniqueId()}`;
-    await signIn(page, request, adminEmail);
-    await page.goto("/labels");
-
-    await page.getByLabel("Nombre").fill(name);
-    await page.getByRole("button", { name: "Crear etiqueta" }).click();
-    await expect(page.getByRole("list", { name: "Etiquetas" })).toContainText(
-      name
-    );
-
-    await page.getByLabel("Nombre").fill(name.toUpperCase());
-    await page.getByRole("button", { name: "Crear etiqueta" }).click();
-    await expect(page.getByText("Ya existe una etiqueta")).toBeVisible();
-
-    await page.getByRole("button", { name: `Acciones para ${name}` }).click();
-    await page.getByRole("menuitem", { name: "Eliminar…" }).click();
-    await page
-      .getByRole("alertdialog")
-      .getByRole("button", { name: "Eliminar etiqueta" })
-      .click();
-    await expect(
-      page.getByRole("list", { name: "Etiquetas" })
-    ).not.toContainText(name);
-  });
-});
-
 test.describe("phone issue view", () => {
   test.skip(({ isMobile }) => !isMobile, "Phone layout.");
 
@@ -384,7 +301,7 @@ test.describe("phone issue view", () => {
     await archiveProject(page, prefix);
   });
 
-  test("a 120-character Workflow State name leaves Priority and assignee on screen and tappable at 360px", async ({
+  test("a 120-character Workflow State name leaves the state and assignee on screen and tappable at 360px", async ({
     page,
     request,
   }) => {
@@ -409,7 +326,7 @@ test.describe("phone issue view", () => {
     await page.goto(`/issue/${issue.identifier}`);
 
     await Promise.all(
-      [/^Prioridad:/u, /^Responsable:/u].map(async (name) => {
+      [/^Estado:/u, /^Responsable:/u].map(async (name) => {
         const chip = page.getByRole("button", { name });
         await expect(chip, `${String(name)} is on screen`).toBeInViewport({
           ratio: 1,

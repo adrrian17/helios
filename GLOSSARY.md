@@ -36,7 +36,7 @@ _Spanish UI_: Proyecto
 
 ## Issue
 
-The unit of work. Belongs to exactly one Project, sits in exactly one Workflow State, and carries an Identifier, a title, a description, a Priority, an optional assignee, Labels, a Checklist, Comments and Activity.
+The unit of work. Belongs to exactly one Project, sits in exactly one Workflow State, and carries an Identifier, a title, a description, an optional assignee, Comments and Activity.
 
 _Avoid_: Card, Task, Ticket.
 
@@ -67,24 +67,6 @@ The fixed meaning behind a Workflow State: `ideas`, `backlog`, `started`, `compl
 - `cancelled`: will not be done.
 
 _Spanish UI_: Categoría de estado (`ideas` = Ideas, `backlog` = Pendiente, `started` = En curso, `completed` = Completada, `cancelled` = Cancelada)
-
-## Priority
-
-How urgent an Issue is: No priority, Urgent, High, Medium or Low.
-
-_Spanish UI_: Prioridad (No priority = Sin prioridad, Urgent = Urgente, High = Alta, Medium = Media, Low = Baja)
-
-## Label
-
-A coloured tag shared across the whole Workspace and attached to Issues in any Project.
-
-_Spanish UI_: Etiqueta
-
-## Checklist
-
-An ordered list of items on an Issue, each either checked or unchecked.
-
-_Spanish UI_: Checklist
 
 ## Comment
 
